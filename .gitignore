@@ -1,0 +1,10 @@
+/config/config.php
+/storage/private/*
+!/storage/private/.htaccess
+!/storage/private/.gitkeep
+/.idea/
+/.vscode/
+/vendor/
+/node_modules/
+*.log
+.DS_Store
