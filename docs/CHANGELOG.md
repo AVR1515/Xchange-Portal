@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-10 — Demo visual interactiva sin XAMPP (main)
+- Incorporado `demo/index.html`: prototipo HTML independiente, CSS y JS incluidos localmente, con siete solicitudes ilustrativas, métricas, filtros, detalle, comentarios, actividad, equipos y creación de requests en memoria del navegador.
+- Simulación de adjuntos: se conserva únicamente el nombre del archivo, **no sus bytes**; no usar para documentos sensibles.
+- Capturas reales realizadas en Chromium: dashboard, drawer de solicitud y nueva solicitud; compartidas como archivos en la conversación.
+- Pruebas en navegador local con Playwright: listado de 7 registros, búsqueda reducida a 1, apertura de detalle y creación aumentando el total a 8 (**pasaron**).
+- Esta demo no utiliza PHP/SQL; la integración y las pruebas completas con XAMPP siguen pendientes.
+
 ## 2026-11-10 — Roadmap interactivo (main)
 - Incorporado `docs/roadmap.html` con una vista interactiva de fases, tarjetas, drawer, indicadores y progreso.
 - Estilos CSS nativos en `docs/roadmap.css`; lógica local en `docs/roadmap.js` sin dependencias externas.
