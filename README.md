@@ -21,6 +21,14 @@ Plataforma de colaboración para solicitudes de auditoría e intercambio de docu
 
 **Capturas de avance:** se generaron tres capturas de navegador (dashboard, solicitud y formulario de nueva solicitud) para la revisión visual en la conversación.
 
+## Diseño visual actualizado (referencia PlannerDome)
+
+- Modo oscuro más profundo, superficies en gris azulado casi negro y **un solo acento azul**; sin gradientes llamativos.
+- Tipografía geométrica: se prioriza **Poppins si está instalada localmente** y se usan alternativas locales (Century Gothic, Avenir Next, Lato, Trebuchet MS y system-ui). **No se descargan ni distribuyen fuentes de terceros**; la captura no contiene los archivos originales de la tipografía y no se puede garantizar una copia exacta.
+- `demo/theme.css` aplica el diseño a la demo HTML. `public/assets/theme.css` aplica la misma dirección visual al PHP.
+- `demo/enhancements.js` añade filtro por vencimiento, orden por fecha/prioridad/título, exportación CSV y reinicio de registros de demostración.
+- Las tareas de la demo **no se sincronizan** con SQL, GitHub ni otros navegadores.
+
 ## Demostración visual sin XAMPP
 
 **[Abrir la demostración de Document Requests](demo/index.html)**. Este archivo HTML independiente contiene CSS y JS locales y se puede abrir desde el disco sin configurar PHP, Apache o SQL. Incluye navegación por solicitudes/equipo/actividad, búsqueda, filtros, alta de solicitudes, panel de detalle, archivos simulados, comentarios y revisión. Los datos son ilustrativos y las acciones de la demo se guardan en `localStorage` de tu navegador. **No almacena el contenido de archivos ni sustituye al backend seguro en PHP.**
