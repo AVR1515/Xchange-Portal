@@ -21,6 +21,12 @@ Plataforma de colaboración para solicitudes de auditoría e intercambio de docu
 
 **Capturas de avance:** se generaron tres capturas de navegador (dashboard, solicitud y formulario de nueva solicitud) para la revisión visual en la conversación.
 
+## Demostración visual sin XAMPP
+
+**[Abrir la demostración de Document Requests](demo/index.html)**. Este archivo HTML independiente contiene CSS y JS locales y se puede abrir desde el disco sin configurar PHP, Apache o SQL. Incluye navegación por solicitudes/equipo/actividad, búsqueda, filtros, alta de solicitudes, panel de detalle, archivos simulados, comentarios y revisión. Los datos son ilustrativos y las acciones de la demo se guardan en `localStorage` de tu navegador. **No almacena el contenido de archivos ni sustituye al backend seguro en PHP.**
+
+Se verificó en Chromium la apertura del tablero, la búsqueda, el panel lateral y la creación de solicitudes de la demo. La ejecución de la aplicación PHP sobre XAMPP continúa pendiente.
+
 ## Roadmap interactivo (HTML, CSS y JS)
 
 **[Abrir el roadmap interactivo](docs/roadmap.html)** — panel visual con fases, progreso, filtros, buscador, detalle y anotaciones de las 11 issues. Se ejecuta directamente desde disco en un navegador o en XAMPP, sin CDN ni recursos externos.
