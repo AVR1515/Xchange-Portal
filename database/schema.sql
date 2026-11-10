@@ -1,0 +1,66 @@
+CREATE DATABASE IF NOT EXISTS xchange_portal CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE xchange_portal;
+CREATE TABLE IF NOT EXISTS users (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ name VARCHAR(150) NOT NULL, email VARCHAR(190) NOT NULL UNIQUE,
+ password_hash VARCHAR(255) NOT NULL, is_active TINYINT(1) NOT NULL DEFAULT 1,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS projects (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ name VARCHAR(200) NOT NULL, description TEXT NULL,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS project_members (
+ project_id BIGINT UNSIGNED NOT NULL, user_id BIGINT UNSIGNED NOT NULL,
+ role ENUM('admin','auditor','client') NOT NULL,
+ PRIMARY KEY (project_id,user_id),
+ FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+ FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS requests (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, project_id BIGINT UNSIGNED NOT NULL,
+ title VARCHAR(240) NOT NULL, description TEXT NULL,
+ priority ENUM('normal','high','critical') NOT NULL DEFAULT 'normal',
+ status ENUM('open','submitted','returned','accepted') NOT NULL DEFAULT 'open',
+ due_date DATE NULL, created_by BIGINT UNSIGNED NOT NULL,
+ assigned_to BIGINT UNSIGNED NULL,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+ FOREIGN KEY (created_by) REFERENCES users(id),
+ FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
+ INDEX idx_request_project_status (project_id,status),
+ INDEX idx_request_due (project_id,due_date),
+ INDEX idx_request_assigned (assigned_to)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS documents (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ request_id BIGINT UNSIGNED NOT NULL, uploaded_by BIGINT UNSIGNED NOT NULL,
+ original_name VARCHAR(255) NOT NULL,
+ storage_name VARCHAR(120) NOT NULL UNIQUE,
+ mime_type VARCHAR(120) NOT NULL, byte_size BIGINT UNSIGNED NOT NULL,
+ sha256 CHAR(64) NOT NULL,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY (request_id) REFERENCES requests(id) ON DELETE CASCADE,
+ FOREIGN KEY (uploaded_by) REFERENCES users(id),
+ INDEX idx_document_request (request_id)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS request_comments (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, request_id BIGINT UNSIGNED NOT NULL,
+ user_id BIGINT UNSIGNED NOT NULL, body TEXT NOT NULL,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY (request_id) REFERENCES requests(id) ON DELETE CASCADE,
+ FOREIGN KEY (user_id) REFERENCES users(id),
+ INDEX idx_comment_request (request_id)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS audit_events (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, project_id BIGINT UNSIGNED NOT NULL,
+ request_id BIGINT UNSIGNED NULL, user_id BIGINT UNSIGNED NOT NULL,
+ action VARCHAR(80) NOT NULL, details TEXT NULL,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+ FOREIGN KEY (request_id) REFERENCES requests(id) ON DELETE SET NULL,
+ FOREIGN KEY (user_id) REFERENCES users(id),
+ INDEX idx_audit_request (request_id,created_at)
+) ENGINE=InnoDB;
