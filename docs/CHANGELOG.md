@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-10 — Roadmap interactivo (main)
+- Incorporado `docs/roadmap.html` con una vista interactiva de fases, tarjetas, drawer, indicadores y progreso.
+- Estilos CSS nativos en `docs/roadmap.css`; lógica local en `docs/roadmap.js` sin dependencias externas.
+- Soporta búsqueda, filtro por fase/estado/prioridad, edición de notas y estados, localStorage, exportación/importación JSON y reinicio.
+- Estados iniciales son informativos: implementación parcial en progreso; completadas 0 hasta probar en XAMPP.
+- **Alcance:** el estado interactivo es local al navegador; no sincroniza automáticamente con GitHub Issues, SQL ni otros usuarios.
+- **Pruebas:** código publicado en `main`; validación visual/manual en navegador y XAMPP todavía pendiente.
+
 ## 2026-11-10 — MVP inicial codificado (main)
 - Implementado `public/index.php`: formulario de acceso y salida, lista de solicitudes, creación con autorización, vista de detalle, comentarios, carga/descarga de archivos, aceptación/devolución e historial.
 - Añadidos `app/bootstrap.php` (sesión, PDO, escaping, CSRF y autorización), `database/schema.sql`, `scripts/seed.php` y `config/config.example.php`.
