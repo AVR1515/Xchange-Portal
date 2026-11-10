@@ -24,6 +24,12 @@
 | 2 | P1 | UI dashboard, equipos, métricas, CSV | #7 #8 #9 | ⬜ Pendiente |
 | 3 | P2 | Versiones, avisos y QA integral | #10 #11 | ⬜ Pendiente |
 
+## Demo sin XAMPP
+- Vista preliminar interactiva publicada en [`demo/index.html`](../demo/index.html), independiente de PHP y SQL.
+- La demo permite previsualizar y simular interacciones sin prometer almacenamiento real de documentos.
+- Pruebas UI realizadas en Chromium local sobre listado, filtro, drawer y creación.
+- Esta demo no equivale a cerrar issues de backend; la validación de XAMPP, SQL y políticas de seguridad sigue abierta.
+
 ## Corte de implementación 2026-11-10
 - Ya presentes en `main`: estructura SQL, acceso, membresía por proyecto, solicitudes nuevas, subida/descarga privada, comentarios, eventos, aceptación y devolución, CSS responsive y filtro de texto local.
 - **No completado:** CRUD pleno (editar/eliminar), administración desde UI, filtros avanzados/paginación, versionado y notificaciones.
