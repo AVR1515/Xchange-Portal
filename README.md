@@ -13,6 +13,14 @@ Plataforma de colaboración para solicitudes de auditoría e intercambio de docu
 - Almacén privado de documentos fuera de `public/`; descarga controlada por PHP y permisos.
 - Zona horaria y fechas configurables; UTF-8; UI inicialmente en español.
 
+## Demo visual sin XAMPP
+
+**[Abrir demo HTML interactiva](demo/index.html)** — se puede descargar y abrir con doble clic, sin PHP, SQL ni conexión a Internet. Implementa una vista funcional en el navegador con dashboard de solicitudes, búsqueda y filtros, detalle lateral, comentarios, vista de equipo, actividad, creación de solicitudes y simulación de adjuntos/revisión.
+
+**Importante:** la demo utiliza datos ilustrativos y guarda cambios de solicitudes mediante `localStorage`. Los documentos simulados **no se suben**: solo se almacena el nombre del archivo; para almacenamiento seguro real, autenticación y descarga autorizada se necesita el backend PHP/SQL incluido en `public/`. La demo **no equivale a una implementación de seguridad** y no debe recibir datos confidenciales.
+
+**Capturas de avance:** se generaron tres capturas de navegador (dashboard, solicitud y formulario de nueva solicitud) para la revisión visual en la conversación.
+
 ## Roadmap interactivo (HTML, CSS y JS)
 
 **[Abrir el roadmap interactivo](docs/roadmap.html)** — panel visual con fases, progreso, filtros, buscador, detalle y anotaciones de las 11 issues. Se ejecuta directamente desde disco en un navegador o en XAMPP, sin CDN ni recursos externos.
