@@ -7,6 +7,13 @@
 - Pruebas en navegador local con Playwright: listado de 7 registros, búsqueda reducida a 1, apertura de detalle y creación aumentando el total a 8 (**pasaron**).
 - Esta demo no utiliza PHP/SQL; la integración y las pruebas completas con XAMPP siguen pendientes.
 
+## 2026-11-10 — Demo navegable de intercambio documental (main)
+- Publicado `demo/index.html` (HTML+CSS+JS incluidos localmente) para evaluar la interfaz sin instalar XAMPP.
+- Vista de solicitudes, resumen, filtros, detalle lateral, crear solicitud, comentar, carga de archivos **solo simulada por nombre**, aceptar/devolver y vista de miembros/actividad.
+- Los datos de muestra y modificaciones de la demo permanecen únicamente en `localStorage` del navegador. Ningún archivo es enviado a un servidor ni conservado como documento descargable.
+- Capturas obtenidas mediante Chromium local. **Pruebas UI aprobadas**: listado de 7 registros, filtro de búsqueda, apertura de detalle y creación de una nueva solicitud (8 registros).
+- **No probado**: almacenamiento real, permisos por usuario, conexión a SQL o funcionamiento de PHP en XAMPP.
+
 ## 2026-11-10 — Roadmap interactivo (main)
 - Incorporado `docs/roadmap.html` con una vista interactiva de fases, tarjetas, drawer, indicadores y progreso.
 - Estilos CSS nativos en `docs/roadmap.css`; lógica local en `docs/roadmap.js` sin dependencias externas.
