@@ -17,12 +17,17 @@
 
 | Fase | Prioridad | Entregable | Issues | Estado |
 |---|---|---|---|---|
-| 0 | P0 | Instalación local, SQL, sesiones, roles | #1 #2 | 🟡 En proceso |
-| 1A | P0 | Crear/listar/filtrar solicitudes, detalle | #3 | ⬜ Pendiente |
-| 1B | P0 | Subir, descargar y compartir documentos protegidos | #4 | ⬜ Pendiente |
-| 1C | P0 | Workflow de revisión, comentarios, historia | #5 #6 | ⬜ Pendiente |
+| 0 | P0 | Instalación local, SQL, sesiones, roles | #1 #2 | 🟡 Código inicial, sin pruebas XAMPP |
+| 1A | P0 | Crear/listar/filtrar solicitudes, detalle | #3 | 🟡 CRUD parcial y búsqueda local, sin pruebas |
+| 1B | P0 | Subir, descargar y compartir documentos protegidos | #4 | 🟡 Código inicial, sin pruebas |
+| 1C | P0 | Workflow de revisión, comentarios, historia | #5 #6 | 🟡 Código inicial, sin pruebas |
 | 2 | P1 | UI dashboard, equipos, métricas, CSV | #7 #8 #9 | ⬜ Pendiente |
 | 3 | P2 | Versiones, avisos y QA integral | #10 #11 | ⬜ Pendiente |
+
+## Corte de implementación 2026-11-10
+- Ya presentes en `main`: estructura SQL, acceso, membresía por proyecto, solicitudes nuevas, subida/descarga privada, comentarios, eventos, aceptación y devolución, CSS responsive y filtro de texto local.
+- **No completado:** CRUD pleno (editar/eliminar), administración desde UI, filtros avanzados/paginación, versionado y notificaciones.
+- **No verificado:** ejecución PHP en Windows/XAMPP y pruebas de seguridad end-to-end. Issues abiertas hasta verificar aceptación.
 
 ## Definition of Done
 - Código en `main`, sin ramas ni PR.
