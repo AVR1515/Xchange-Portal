@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a1120">
+  <title>Roadmap Vivo · Xchange Portal</title>
+  <meta name="description" content="Roadmap interactivo y local para desarrollar Xchange Portal con PHP, SQL y XAMPP.">
+  <link rel="stylesheet" href="roadmap.css">
+  <script src="roadmap.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="../README.md"><span class="brand-mark">X</span><span>Xchange <b>Portal</b><small>Product workspace</small></span></a>
+      <p class="nav-label">NAVEGACIÓN</p>
+      <nav class="nav" aria-label="Navegación principal">
+        <a class="active" href="#roadmap"><span aria-hidden="true">◫</span> Roadmap vivo</a>
+        <a href="../public/" title="Aplicación PHP en XAMPP"><span aria-hidden="true">▣</span> Abrir portal PHP</a>
+        <a href="ROADMAP.md"><span aria-hidden="true">≡</span> Plan técnico</a>
+        <a href="ARCHITECTURE.md"><span aria-hidden="true">⬡</span> Arquitectura</a>
+        <a href="XAMPP.md"><span aria-hidden="true">⌘</span> Guía XAMPP</a>
+        <a href="CHANGELOG.md"><span aria-hidden="true">↺</span> Changelog</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="connection"><span class="offline-dot"></span> Funciona sin Internet</div>
+        <p>Estado guardado en este navegador.<br>Sin sincronización automática con GitHub.</p>
+        <a href="https://github.com/AVR1515/Xchange-Portal" target="_blank" rel="noopener noreferrer">Repositorio GitHub ↗</a>
+      </div>
+    </aside>
+
+    <main class="main" id="roadmap">
+      <header class="page-header">
+        <div><div class="kicker"><span class="kicker-dot"></span> PRODUCT DEVELOPMENT / 2026</div><h1>Roadmap <em>en vivo</em></h1><p>De una idea a un portal de auditorías. Prioridad absoluta: <strong>Document Requests &amp; Sharing.</strong></p></div>
+        <div class="header-actions"><span class="branch-chip"><span class="branch-dot"></span> branch: main</span><button class="button ghost" id="export-btn" type="button">↓ Exportar JSON</button><button class="button ghost" id="import-btn" type="button">↑ Importar</button><input id="import-input" type="file" accept="application/json,.json" hidden></div>
+      </header>
+
+      <section class="hero" aria-labelledby="overview-title">
+        <div class="hero-copy"><div class="hero-label">PROJECT OVERVIEW</div><h2 id="overview-title">Construyendo una mejor forma de colaborar.</h2><p>Solicitar evidencia, compartir documentos, revisar entregables y seguir cada avance desde una sola experiencia, construida con PHP, SQL, CSS y JavaScript locales.</p><div class="hero-tags"><span>PHP 8.2+</span><span>MariaDB / MySQL</span><span>XAMPP</span><span>CSS nativo</span><span>JS offline</span></div></div>
+        <div class="hero-progress"><div class="ring" id="progress-ring" role="img" aria-label="Progreso de tareas completadas: 0 por ciento"><div class="ring-inner"><strong id="progress-value">0%</strong><span>Completado</span></div></div><span class="progress-caption" id="progress-caption">0 de 11 tareas completadas</span></div>
+      </section>
+
+      <section class="stats" aria-label="Indicadores">
+        <div class="stat"><span>Total tareas</span><strong id="stat-total">11</strong><small>4 fases de trabajo</small></div>
+        <div class="stat"><span>En progreso</span><strong id="stat-progress">0</strong><small>Implementaciones activas</small></div>
+        <div class="stat"><span>Completadas</span><strong id="stat-done">0</strong><small>Verificadas y aprobadas</small></div>
+        <div class="stat"><span>Prioridad P0</span><strong id="stat-p0">6</strong><small>MVP documental</small></div>
+      </section>
+
+      <section class="work-section" aria-labelledby="work-title">
+        <div class="section-top"><div><div class="eyebrow">PLAN DE EJECUCIÓN</div><h2 id="work-title">Fases de desarrollo</h2><p>Selecciona una fase, abre una tarea y registra su avance.</p></div><div class="toolbar-note">Los cambios se guardan automáticamente en este dispositivo.</div></div>
+        <div class="phase-strip" id="phase-strip" role="group" aria-label="Filtrar por fase"></div>
+        <div class="toolbar">
+          <label class="search-wrap"><span aria-hidden="true">⌕</span><span class="sr-only">Buscar tareas</span><input id="search" type="search" placeholder="Buscar tarea, funcionalidad o tecnología…"></label>
+          <label class="select-wrap"><span class="sr-only">Filtrar por estado</span><select id="status-filter"><option value="all">Todos los estados</option><option value="pending">Pendiente</option><option value="progress">En progreso</option><option value="done">Completada</option><option value="blocked">Bloqueada</option></select></label>
+          <label class="select-wrap"><span class="sr-only">Filtrar por prioridad</span><select id="priority-filter"><option value="all">Todas las prioridades</option><option value="P0">Prioridad P0</option><option value="P1">Prioridad P1</option><option value="P2">Prioridad P2</option></select></label>
+          <button id="reset-filters" class="button text-btn" type="button">Limpiar filtros</button>
+        </div>
+        <div class="tasks-header"><span id="result-count" aria-live="polite">11 tareas</span><div class="legend"><span><i class="legend-dot pending"></i>Pendiente</span><span><i class="legend-dot progress"></i>En progreso</span><span><i class="legend-dot done"></i>Completada</span></div></div>
+        <div id="task-list" class="task-list" aria-live="polite"></div>
+        <div id="empty-state" class="empty-state" hidden>Sin resultados. Ajusta los filtros o la búsqueda.</div>
+      </section>
+
+      <section class="lower-grid">
+        <div class="info-card"><div class="eyebrow">CRITERIO DE ENTREGA</div><h2>¿Qué significa “completada”?</h2><p>Una tarea solo debe marcarse como completa cuando funcione en XAMPP, tenga permisos comprobados y se haya documentado en el changelog. El código publicado por sí solo no es una prueba.</p><a href="SECURITY.md">Ver controles de seguridad ↗</a></div>
+        <div class="info-card"><div class="eyebrow">TU CONTROL</div><h2>Tu progreso, tus decisiones.</h2><p>Los cambios y notas del tablero se guardan localmente. Exporta un JSON para respaldo o para mover el estado a otro navegador. Importarlo restaura estados y notas.</p><button class="button ghost danger" id="restore-btn" type="button">Restablecer tablero</button></div>
+      </section>
+      <footer>© 2026 Xchange Portal · Proyecto independiente · UI local sin frameworks CSS ni CDN · <a href="https://github.com/AVR1515/Xchange-Portal/issues" target="_blank" rel="noopener noreferrer">Ver issues ↗</a></footer>
+    </main>
+  </div>
+
+  <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+  <aside class="drawer" id="drawer" aria-labelledby="drawer-title" aria-modal="true" role="dialog" hidden>
+    <div class="drawer-top"><span id="drawer-phase" class="eyebrow"></span><button class="close" id="drawer-close" type="button" aria-label="Cerrar detalle">×</button></div>
+    <div class="drawer-content">
+      <div class="drawer-chips"><span id="drawer-priority" class="priority-chip"></span><span id="drawer-status-label" class="status-chip"></span></div>
+      <h2 id="drawer-title"></h2><p id="drawer-summary" class="drawer-summary"></p>
+      <a id="drawer-issue" href="#" target="_blank" rel="noopener noreferrer" class="issue-link">Ver tarea en GitHub ↗</a>
+      <hr><h3>Entregables y criterios</h3><ul id="drawer-checklist" class="criteria"></ul>
+      <div class="field"><label for="drawer-status">Estado de la tarea</label><select id="drawer-status"><option value="pending">Pendiente</option><option value="progress">En progreso</option><option value="blocked">Bloqueada</option><option value="done">Completada</option></select></div>
+      <div class="field"><label for="drawer-notes">Notas de avance</label><textarea id="drawer-notes" rows="6" placeholder="Qué se implementó, qué falta, resultados de las pruebas…"></textarea><small>Autoguardado local. No modifica GitHub ni archivos del servidor.</small></div>
+      <div class="drawer-footer"><button id="drawer-save" class="button primary" type="button">Guardar cambios</button><span id="save-feedback" role="status" aria-live="polite"></span></div>
+    </div>
+  </aside>
+</body>
+</html>
