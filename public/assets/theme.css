@@ -1,0 +1,15 @@
+/* PHP portal visual refresh · local native CSS only */
+:root{color-scheme:dark;--bg:#0b111b;--panel:#141c28;--panel2:#192431;--line:#2a3646;--txt:#edf2fa;--muted:#98a5b9;--accent:#3465c9;--blue:#7b9be9;--red:#cf8d98;--yellow:#c2b8a5}
+body{background:#0b111b;color:var(--txt);font-family:Poppins,"Century Gothic","Avenir Next",Lato,"Trebuchet MS",system-ui,sans-serif;letter-spacing:-.01em}
+.app{grid-template-columns:206px minmax(0,1fr);background:radial-gradient(circle at 80% 60%,#0c1b2b 0,transparent 68%),#0b1420}
+.side{background:#111925;border-color:#253040}.brand{font-size:18px;letter-spacing:-.04em}.brand b{color:#79a0ff}
+.side nav a{color:#9aa8b9;border-radius:8px;font-size:13px}.side nav a.active,.side nav a:hover{background:#1d3050;color:#eaf1ff}
+.main{padding:35px clamp(18px,3.5vw,55px)}h1{font-size:28px;letter-spacing:-.06em}h2{letter-spacing:-.04em}
+.panel{background:#141c28;border:1px solid #2b3747;box-shadow:0 6px 22px #00000012;border-radius:13px}
+.grid{gap:12px}.metric{font-size:30px}.metric-caption{color:#9caabd}
+button,.btn{background:#3465c9;color:#f3f7ff;border-radius:8px;font-weight:750}button:hover,.btn:hover{filter:brightness(1.15)}button.secondary,.btn.secondary{background:#202d3e;color:#e0e8f4}
+input,select,textarea{background:#101722;border-color:#303b4b;border-radius:8px;color:var(--txt)}
+td,th{border-color:#283545}th{color:#9cabba}tr:hover td{background:#1e2b3c}
+.pill{background:#293748;color:#c9d3e2}.pill.accepted{background:#234139;color:#c1e9d6}.pill.returned{background:#45353c;color:#eec0cb}.pill.submitted{background:#263e61;color:#c2d5ff}
+.login{background:#0b111b}.login .panel{background:#141c28}.eyebrow{color:#96ace0}
+@media(max-width:680px){.app{display:block}.main{padding:17px 12px}.side{padding:13px}.grid{gap:8px}}
