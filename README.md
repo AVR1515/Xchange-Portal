@@ -26,10 +26,19 @@ Plataforma de colaboración para solicitudes de auditoría e intercambio de docu
 4. Notificaciones locales, versiones, exportaciones, pruebas y endurecimiento.
 
 ### Seguimiento
-Las **GitHub Issues** actúan como unidades de trabajo y fuente del progreso real. Marcar una issue como cerrada solo después de cumplir sus criterios de aceptación. Este README y el roadmap describen planificación, **no** funcionalidad ya implementada.
+Las **GitHub Issues** actúan como unidades de trabajo y fuente del progreso real. Marcar una issue como cerrada solo después de cumplir sus criterios de aceptación. El roadmap separa explícitamente código implementado de pruebas aún no ejecutadas.
 
 ## Referencia visual
 Capturas aportadas por el solicitante: dashboard, request list, detalle, team members y menú. Se adopta una experiencia comparable, no el logo, el branding ni assets propietarios de EY.
 
 ## Estado
-🟡 Planificación inicial. No hay aplicación ejecutable aún.
+🟡 **MVP inicial codificado, pendiente de pruebas en XAMPP.** Incluye login, sesiones, miembros por proyecto, solicitudes, archivos privados, comentarios, historial, revisión y métricas básicas. No está listo para producción.
+
+### Probar localmente
+1. Importar `database/schema.sql` en MariaDB/MySQL de XAMPP.
+2. Copiar `config/config.example.php` a `config/config.php` (ignorado por Git), y ajustar el acceso SQL.
+3. Ejecutar `C:\\xampp\\php\\php.exe scripts\\seed.php` desde la raíz. El comando genera una contraseña temporal aleatoria y muestra las 3 cuentas de demo.
+4. Abrir `http://localhost/Xchange-Portal/public/`.
+5. Seguir `docs/XAMPP.md`, `docs/SECURITY.md` y `docs/ROADMAP.md`.
+
+**Limitaciones actuales:** sin pruebas en XAMPP todavía; sin creación de proyectos/usuarios desde UI, sin paginación real, sin versionado, sin notificaciones y sin suite automatizada. Solo PHP, SQL, CSS y JavaScript locales.
