@@ -13,6 +13,14 @@ Plataforma de colaboración para solicitudes de auditoría e intercambio de docu
 - Almacén privado de documentos fuera de `public/`; descarga controlada por PHP y permisos.
 - Zona horaria y fechas configurables; UTF-8; UI inicialmente en español.
 
+## Roadmap interactivo (HTML, CSS y JS)
+
+**[Abrir el roadmap interactivo](docs/roadmap.html)** — panel visual con fases, progreso, filtros, buscador, detalle y anotaciones de las 11 issues. Se ejecuta directamente desde disco en un navegador o en XAMPP, sin CDN ni recursos externos.
+
+En XAMPP: **`http://localhost/Xchange-Portal/docs/roadmap.html`**. Los estados y notas modificados en el dashboard se guardan en `localStorage` **solo en ese navegador**; no se sincronizan con la base SQL ni con GitHub. Usar «Exportar JSON» para respaldo y «Importar» para recuperar seguimiento. Las GitHub Issues siguen siendo el registro colaborativo oficial. La edición local no crea commits ni cierra issues.
+
+Archivos: [`docs/roadmap.html`](docs/roadmap.html), [`docs/roadmap.css`](docs/roadmap.css), [`docs/roadmap.js`](docs/roadmap.js).
+
 ## Entregables
 - [Roadmap vivo y criterios de aceptación](docs/ROADMAP.md)
 - [Arquitectura y modelo de datos](docs/ARCHITECTURE.md)
