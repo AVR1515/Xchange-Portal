@@ -24,6 +24,12 @@
 | 2 | P1 | UI dashboard, equipos, métricas, CSV | #7 #8 #9 | ⬜ Pendiente |
 | 3 | P2 | Versiones, avisos y QA integral | #10 #11 | ⬜ Pendiente |
 
+## Actualización visual y controles de demo
+- Diseño oscuro de bajo contraste cromático aplicado a demo y frontend PHP mediante hojas CSS locales.
+- Incorporados en la demo filtros por vencimiento, ordenamiento, exportación CSV y restauración.
+- Fuentes: pila local con preferencia por Poppins instalada, no se descargan ni copian archivos de fuentes.
+- Las pruebas del backend PHP y la integración de estos controles con SQL siguen pendientes.
+
 ## Demo sin XAMPP
 - Vista preliminar interactiva publicada en [`demo/index.html`](../demo/index.html), independiente de PHP y SQL.
 - La demo permite previsualizar y simular interacciones sin prometer almacenamiento real de documentos.
