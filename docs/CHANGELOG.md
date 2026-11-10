@@ -7,6 +7,14 @@
 - Pruebas en navegador local con Playwright: listado de 7 registros, búsqueda reducida a 1, apertura de detalle y creación aumentando el total a 8 (**pasaron**).
 - Esta demo no utiliza PHP/SQL; la integración y las pruebas completas con XAMPP siguen pendientes.
 
+## 2026-11-10 — Ajuste dark mode y controles de solicitudes (main)
+- Rediseño inspiracional según nueva captura PlannerDome: colores desaturados, fondos casi negros, azul como acento y tipografía geométrica con fallbacks locales.
+- Añadidos `demo/theme.css` y `public/assets/theme.css`; PHP carga su hoja adicional.
+- Añadido `demo/enhancements.js` con filtros de vencimientos, ordenamiento, CSV local y botón de restablecimiento; `demo/index.html` carga ambos archivos nuevos.
+- Las capturas de revisión se produjeron en Chromium con el tema actualizado. La previsualización visual de capturas no sustituye pruebas E2E de las nuevas acciones JS.
+- No se copió ni redistribuyó ningún archivo de fuente del ejemplo; se usan fuentes instaladas localmente.
+- Riesgos pendientes: QA de flujo completo PHP/XAMPP, permisos y persistencia SQL.
+
 ## 2026-11-10 — Demo navegable de intercambio documental (main)
 - Publicado `demo/index.html` (HTML+CSS+JS incluidos localmente) para evaluar la interfaz sin instalar XAMPP.
 - Vista de solicitudes, resumen, filtros, detalle lateral, crear solicitud, comentar, carga de archivos **solo simulada por nombre**, aceptar/devolver y vista de miembros/actividad.
