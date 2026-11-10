@@ -142,7 +142,7 @@ if ($me) {
 }
 ?><!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Xchange Portal</title><link rel="stylesheet" href="assets/app.css"><script src="assets/app.js" defer></script></head><body>
+<title>Xchange Portal</title><link rel="stylesheet" href="assets/app.css"><link rel="stylesheet" href="assets/theme.css"><script src="assets/app.js" defer></script></head><body>
 <?php if (!$me): ?>
 <main class="login"><form class="panel" method="post"><div class="brand"><b>✦</b> Xchange Portal</div><h1>Bienvenido</h1><p class="muted">Centro de colaboración para auditorías y documentos.</p>
 <?php if($error):?><p class="message"><?=h($error)?></p><?php endif;?>
