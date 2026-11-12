@@ -16,9 +16,9 @@ const TASKS = [
  {id:6,phase:1,priority:'P0',status:'progress',icon:'◷',title:'Comentarios e historial de auditoría',summary:'Mensajes vinculados a solicitudes, eventos y trazabilidad de acciones.',criteria:['Publicar y mostrar comentarios','Historial de cambios por usuario','Escapar texto potencialmente malicioso','Auditar acciones sensibles']},
  {id:7,phase:2,priority:'P1',status:'progress',icon:'◫',title:'Interfaz moderna y responsive',summary:'Dashboard, tabla de solicitudes, navegación y detalle inspirados funcionalmente en las referencias.',criteria:['Interfaz responsive en CSS nativo','Construir drawer de detalle','Teclado, foco y estados vacíos','Validar experiencia en móvil y escritorio']},
  {id:8,phase:2,priority:'P0',status:'progress',icon:'♙',title:'Gestión de proyectos, clientes y miembros',summary:'Administrar varios proyectos desde el portal y controlar quién puede participar en cada uno.',criteria:['Crear y editar proyectos desde la interfaz','Crear cuentas o asociar usuarios existentes del cliente y de la compañía','Asignar miembros y roles por proyecto','Navegar entre proyectos con acceso autorizado','Verificar aislamiento con dos proyectos y clientes distintos']},
- {id:9,phase:2,priority:'P1',status:'pending',icon:'▥',title:'Dashboard, métricas y exportaciones',summary:'Indicadores calculados desde SQL, vencimientos, gráficos locales y CSV.',criteria:['Comprobar métricas contra SQL','Gráficos sin conexión a Internet','Filtros de dashboard','Exportaciones CSV autorizadas']},
- {id:10,phase:3,priority:'P2',status:'pending',icon:'▤',title:'Versionado y notificaciones internas',summary:'Versiones de documentos, hashes, alertas locales de cambios y fechas.',criteria:['Preservar versiones anteriores','Descargar versiones con autorización','Crear avisos internos','Verificar integridad por SHA-256']},
- {id:11,phase:3,priority:'P2',status:'pending',icon:'⚙',title:'Pruebas, seguridad y entrega XAMPP',summary:'QA funcional, documentación y validación de seguridad antes de producción.',criteria:['Ejecución reproducible en Windows XAMPP','Pruebas de autorización y subida','Checklist de seguridad documentado','Backups y restauración probados']}
+ {id:9,phase:2,priority:'P1',status:'progress',icon:'▥',title:'Dashboard, métricas y exportaciones',summary:'Indicadores calculados desde SQL, vencimientos, gráficos locales y CSV.',criteria:['Comprobar métricas contra SQL','Gráficos sin conexión a Internet','Filtros de dashboard','Exportaciones CSV autorizadas']},
+ {id:10,phase:3,priority:'P2',status:'progress',icon:'▤',title:'Versionado y notificaciones internas',summary:'Versiones de documentos, hashes, alertas locales de cambios y fechas.',criteria:['Preservar versiones anteriores','Descargar versiones con autorización','Crear avisos internos','Verificar integridad por SHA-256']},
+ {id:11,phase:3,priority:'P2',status:'progress',icon:'⚙',title:'Pruebas, seguridad y entrega XAMPP',summary:'QA funcional, documentación y validación de seguridad antes de producción.',criteria:['Ejecución reproducible en Windows XAMPP','Pruebas de autorización y subida','Checklist de seguridad documentado','Backups y restauración probados']}
 ];
 const VERIFIED = {
  1: 'En XAMPP se verificaron el inicio y cierre de sesión y el aislamiento de proyectos, solicitudes y descargas. Queda validar CSRF y sesiones en mayor profundidad.',
@@ -27,8 +27,9 @@ const VERIFIED = {
  4: 'Se verificaron la carga de TXT, la descarga íntegra y el bloqueo de acceso a archivos desde otro proyecto. Quedan más tipos y tamaños.',
  5: 'Se verificaron la devolución, el reenvío y la aceptación, así como el bloqueo de la revisión para clientes. Quedan las pruebas concurrentes.',
  6: 'Se verificó la publicación de comentarios y la aparición de los cambios de estado en el historial.',
- 8: 'Se verificó la creación y edición de un proyecto, el alta de una cuenta cliente y el aislamiento entre dos proyectos. Queda probar la asociación de cuentas existentes y completar la administración de roles.',
+ 8: 'Se verificó la creación y edición de un proyecto, el alta de una cuenta cliente y el aislamiento entre dos proyectos. También se verificó asociar una cuenta existente y actualizar el rol de un miembro.',
  9: 'Se verificaron el CSV filtrado, el bloqueo de exportación desde otro proyecto y el tratamiento de títulos que podrían interpretarse como fórmulas.',
+ 10: 'Se comprobaron dos versiones del mismo nombre y avisos por solicitudes y comentarios. Queda probar una descarga con integridad fallida y avisos de vencimiento.',
  11: 'La URL base redirige al formulario de acceso y sus recursos cargan en XAMPP. Queda ejecutar la validación integral y comprobar la restauración de datos.'
 };
 const PHASES = [

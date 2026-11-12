@@ -20,6 +20,26 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             $_SESSION=[]; session_regenerate_id(true); go();
         }
         $actor=requireUser(); $uid=(int)$actor['id'];
+        if ($postAction==='edit_member_role') {
+            $project=(int)($_POST['project_id']??0);
+            $member=(int)($_POST['member_id']??0);
+            $memberRole=(string)($_POST['member_role']??'');
+            if ((membership($project,$uid)['role']??null)!=='admin') {
+                throw new RuntimeException('Sin permisos para administrar miembros');
+            }
+            if (!in_array($memberRole,['auditor','client'],true)) {
+                throw new RuntimeException('Rol inválido');
+            }
+            $projectTransaction=db();
+            $projectTransaction->beginTransaction();
+            $update=db()->prepare("UPDATE project_members SET role=? WHERE project_id=? AND user_id=? AND role IN ('auditor','client') AND role<>?");
+            $update->execute([$memberRole,$project,$member,$memberRole]);
+            if ($update->rowCount()===1) {
+                recordEvent($project,null,$uid,'project_member_role_changed',$member.' → '.$memberRole);
+            }
+            $projectTransaction->commit();
+            go('?project='.$project.'#team');
+        }
         if ($postAction==='add_member') {
             $project=(int)($_POST['project_id']??0);
             if ((membership($project,$uid)['role']??null)!=='admin') {
@@ -179,6 +199,10 @@ if ($action==='download') {
     if (!$file) { http_response_code(404); exit('Documento no encontrado'); }
     $storage=$config['storage_path'].'/'.$file['storage_name'];
     if (!is_file($storage)) { http_response_code(404); exit('Archivo no disponible'); }
+    if (!hash_equals($file['sha256'],hash_file('sha256',$storage) ?: '')) {
+        http_response_code(409);
+        exit('El archivo no supera la verificación de integridad');
+    }
     recordEvent((int)$file['project_id'],(int)$file['request_id'],(int)$user['id'],'document_downloaded',(string)$file['original_name']);
     header('Content-Type: application/octet-stream');
     header('Content-Disposition: attachment; filename="download"; filename*=UTF-8\'\''.rawurlencode($file['original_name']));
@@ -203,11 +227,20 @@ if ($me) {
         }
     }
     $canCreateProject=canCreateProject($uid);
+    $q=db()->prepare("SELECT a.action,a.created_at,r.id,r.title FROM audit_events a JOIN requests r ON r.id=a.request_id AND r.project_id=a.project_id WHERE a.project_id=? AND a.user_id<>? AND a.action IN ('request_created','request_updated','document_uploaded','status_changed','comment_added') ORDER BY a.id DESC LIMIT 15");
+    $q->execute([$projectId,$uid]);
+    $updates=$q->fetchAll();
     $q=db()->prepare('SELECT r.*,u.name AS assigned_name FROM requests r JOIN project_members pm ON pm.project_id=r.project_id AND pm.user_id=? LEFT JOIN users u ON u.id=r.assigned_to WHERE r.project_id=? ORDER BY r.created_at DESC,r.id DESC');
     $q->execute([$uid,$projectId]); $requests=$q->fetchAll();
     if ($selected) {
         $q=db()->prepare('SELECT d.*,u.name AS author_name FROM documents d JOIN users u ON u.id=d.uploaded_by WHERE d.request_id=? ORDER BY d.id DESC');
         $q->execute([$selected['id']]);$documents=$q->fetchAll();
+        $versionCounts=[];
+        foreach (array_reverse(array_keys($documents)) as $index) {
+            $name=$documents[$index]['original_name'];
+            $versionCounts[$name]=($versionCounts[$name]??0)+1;
+            $documents[$index]['version']=$versionCounts[$name];
+        }
         $q=db()->prepare('SELECT c.*,u.name AS author_name FROM request_comments c JOIN users u ON u.id=c.user_id WHERE c.request_id=? ORDER BY c.id');
         $q->execute([$selected['id']]);$comments=$q->fetchAll();
         $q=db()->prepare('SELECT a.*,u.name AS author_name FROM audit_events a JOIN users u ON u.id=a.user_id WHERE a.request_id=? ORDER BY a.id DESC LIMIT 100');
@@ -265,7 +298,7 @@ if ($me) {
 <div class="field"><label for="password">Contraseña</label><input id="password" name="password" type="password" required autocomplete="current-password"></div>
 <button type="submit">Iniciar sesión</button><p class="small muted" style="margin-top:20px">Entorno local · PHP / SQL · sin dependencias externas</p></form></main>
 <?php else: ?>
-<div class="app"><aside class="side"><div class="brand"><b>✦</b> Xchange</div><nav><a href="?project=<?=$projectId?>#projects">Proyectos</a><a href="?project=<?=$projectId?>" class="active">◫ &nbsp; Solicitudes</a><a href="?project=<?=$projectId?>#new-request">＋ &nbsp; Nueva solicitud</a><a href="?project=<?=$projectId?>#team">♙ &nbsp; Equipo</a></nav><p class="small muted" style="margin-top:35px">Portal seguro de intercambio de archivos</p></aside>
+<div class="app"><aside class="side"><div class="brand"><b>✦</b> Xchange</div><nav><a href="?project=<?=$projectId?>#projects">Proyectos</a><a href="?project=<?=$projectId?>" class="active">◫ &nbsp; Solicitudes</a><a href="?project=<?=$projectId?>#new-request">＋ &nbsp; Nueva solicitud</a><a href="?project=<?=$projectId?>#updates">Avisos</a><a href="?project=<?=$projectId?>#team">♙ &nbsp; Equipo</a></nav><p class="small muted" style="margin-top:35px">Portal seguro de intercambio de archivos</p></aside>
 <main class="main"><header class="top"><div><p class="eyebrow">PROYECTOS / DOCUMENTOS</p><h1><?=h($selected?$selected['title']:'Centro de solicitudes')?></h1><p class="muted"><?=h($selected?$selected['project_name']:($activeProject['name']??'Sin proyectos asignados'))?></p></div><div class="topuser"><?=h($me['name'])?> <form method="post" style="display:inline-block;margin-left:12px"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="secondary">Salir</button></form></div></header>
 <?php if($error):?><p class="message"><?=h($error)?></p><?php endif;?>
 <?php if($selected):?>
@@ -274,7 +307,7 @@ if ($me) {
 <?php if($selected['status']==='submitted' && in_array($role,['auditor','admin'],true)):?>
 <form method="post" class="actions" data-confirm="¿Registrar revisión de esta solicitud?"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="status"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><button name="status" value="accepted">Aceptar</button><button class="secondary" name="status" value="returned">Devolver</button></form><?php endif;?></div>
 <?php if (in_array($role,['admin','auditor'],true)): ?><details class="panel"><summary>Editar solicitud</summary><?php require dirname(__DIR__).'/app/request-form.php'; ?></details><?php endif; ?><div class="panel"><h2>Documentos compartidos</h2><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="upload"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="document">Subir PDF, Office, imágenes, ZIP, TXT o CSV (máx. 20MB)</label><input id="document" name="document" type="file" required></div><button>Subir documento</button></form>
-<?php foreach($documents as $d):?><div class="file"><div><strong><?=h($d['original_name'])?></strong><div class="small muted"><?=h($d['author_name'])?> · <?=h($d['created_at'])?> · <?=number_format((int)$d['byte_size']/1024,1)?> KB</div></div><a href="?action=download&amp;file=<?=$d['id']?>">Descargar</a></div><?php endforeach;?>
+<?php foreach($documents as $d):?><div class="file"><div><strong><?=h($d['original_name'])?></strong><div class="small muted">Versión <?=$d['version']?> · <?=h($d['author_name'])?> · <?=h($d['created_at'])?> · <?=number_format((int)$d['byte_size']/1024,1)?> KB</div></div><a href="?action=download&amp;file=<?=$d['id']?>">Descargar</a></div><?php endforeach;?>
 <?php if(!$documents):?><p class="muted" style="margin-top:18px">No hay documentos compartidos todavía.</p><?php endif;?></div></section>
 <section class="stack"><div class="panel"><h2>Comentarios</h2><?php foreach($comments as $c):?><div class="file"><div><strong><?=h($c['author_name'])?></strong> <span class="small muted"><?=h($c['created_at'])?></span><p><?=nl2br(h($c['body']))?></p></div></div><?php endforeach;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="comment"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="body">Nuevo comentario</label><textarea id="body" name="body" maxlength="5000" required></textarea></div><button>Publicar comentario</button></form></div><div class="panel"><h2>Actividad reciente</h2><?php foreach($events as $e):?><p class="small"><b><?=h($e['author_name'])?></b> · <?=h($e['action'])?><br><span class="muted"><?=h($e['created_at'])?> <?=h($e['details'])?></span></p><?php endforeach;?></div></section></div>
 <?php else:?>
@@ -319,10 +352,32 @@ if ($me) {
   </nav>
 <?php endif; ?></section>
 <?php if(in_array($role,['auditor','admin'],true)):?><section class="panel" id="new-request" style="margin-top:20px"><h2>Nueva solicitud</h2><?php require dirname(__DIR__).'/app/request-form.php'; ?></section><?php endif;?>
+<section class="panel" id="updates">
+  <h2>Avisos del proyecto</h2>
+  <?php $updateLabels=['request_created'=>'Nueva solicitud','request_updated'=>'Solicitud editada','document_uploaded'=>'Documento recibido','status_changed'=>'Estado actualizado','comment_added'=>'Nuevo comentario']; ?>
+  <?php if (!$updates): ?><p class="muted">Todavía no hay avisos de otros miembros.</p><?php endif; ?>
+  <?php foreach ($updates as $update): ?>
+    <p><?=h($updateLabels[$update['action']])?> · <a href="?request=<?=$update['id']?>"><?=h($update['title'])?></a> <small class="muted"><?=h($update['created_at'])?></small></p>
+  <?php endforeach; ?>
+</section>
 <section class="panel" id="team">
   <h2>Miembros del proyecto</h2>
   <?php $roleLabels=['admin'=>'Administrador','auditor'=>'Equipo de la compañía','client'=>'Cliente']; ?>
-  <?php foreach ($members as $member): ?><p><?=h($member['name'])?> · <?=h($roleLabels[$member['role']])?></p><?php endforeach; ?>
+  <?php foreach ($members as $member): ?>
+    <p><?=h($member['name'])?> · <?=h($roleLabels[$member['role']])?></p>
+    <?php if ($role==='admin' && $member['role']!=='admin'): ?>
+      <form method="post" class="actions">
+        <input type="hidden" name="csrf" value="<?=h(csrf())?>">
+        <input type="hidden" name="action" value="edit_member_role">
+        <input type="hidden" name="project_id" value="<?=$projectId?>">
+        <input type="hidden" name="member_id" value="<?=$member['id']?>">
+        <select name="member_role" aria-label="Rol de <?=h($member['name'])?>">
+          <?php foreach (['client','auditor'] as $value): ?><option value="<?=$value?>" <?php if ($member['role']===$value): ?>selected<?php endif; ?>><?=h($roleLabels[$value])?></option><?php endforeach; ?>
+        </select>
+        <button>Actualizar rol</button>
+      </form>
+    <?php endif; ?>
+  <?php endforeach; ?>
   <?php if ($role==='admin'): ?>
     <details>
       <summary>Añadir miembro</summary>
