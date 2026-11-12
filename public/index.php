@@ -119,7 +119,7 @@ if ($me) {
     $projectId=(int)($_GET['project']??($projects[0]['id']??0));
     if ($projectId && !membership($projectId,$uid)) { http_response_code(403); exit('No autorizado'); }
     $role=membership($projectId,$uid)['role']??'client';
-    $q=db()->prepare('SELECT r.*,u.name AS assigned_name FROM requests r JOIN project_members pm ON pm.project_id=r.project_id AND pm.user_id=? WHERE r.project_id=? ORDER BY r.created_at DESC,r.id DESC');
+    $q=db()->prepare('SELECT r.*,u.name AS assigned_name FROM requests r JOIN project_members pm ON pm.project_id=r.project_id AND pm.user_id=? LEFT JOIN users u ON u.id=r.assigned_to WHERE r.project_id=? ORDER BY r.created_at DESC,r.id DESC');
     $q->execute([$uid,$projectId]); $requests=$q->fetchAll();
     $selected=isset($_GET['request'])?getRequest((int)$_GET['request'],$uid):null;
     if ($selected) {

@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-12 — Carga del tablero al iniciar sesión
+- Corregida la consulta de solicitudes para mostrar el responsable cuando está asignado y conservar las solicitudes sin asignar.
+
 ## 2026-11-12 — Colaboración por proyecto entre compañía y cliente
 - Actualizado el alcance del producto, la interfaz y el roadmap para centrar el portal en la gestión de solicitudes y documentos por proyecto. La demo muestra un proyecto de auditoría como ejemplo.
 
