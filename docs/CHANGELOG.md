@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-12 — Vencimientos y métricas
+- El tablero cuenta las solicitudes aceptadas y muestra las vencidas o con fecha límite en los próximos siete días.
+
 ## 2026-11-12 — Roles, avisos y versiones
 - Los administradores pueden cambiar entre cliente y equipo de la compañía el rol de un miembro de su proyecto.
 - El tablero muestra avisos sobre la actividad de otros miembros. Los adjuntos con el mismo nombre en una solicitud se muestran como versiones independientes y las descargas comprueban su SHA-256.

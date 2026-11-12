@@ -35,7 +35,7 @@ El equipo de la compañía crea una solicitud en un proyecto, el cliente adjunta
 
 **[Abrir la demostración de Document Requests](demo/index.html)**. Este archivo HTML independiente contiene CSS y JS locales y se puede abrir desde el disco sin configurar PHP, Apache o SQL. Incluye navegación por solicitudes/equipo/actividad, búsqueda, filtros, alta de solicitudes, panel de detalle, archivos simulados, comentarios y revisión. Los datos son ilustrativos y las acciones de la demo se guardan en `localStorage` de tu navegador. **No almacena el contenido de archivos ni sustituye al backend seguro en PHP.**
 
-Se verificó en Chromium la apertura del tablero, la búsqueda, el panel lateral y la creación de solicitudes de la demo. La ejecución de la aplicación PHP sobre XAMPP continúa pendiente.
+Se verificó en Chromium la apertura del tablero, la búsqueda, el panel lateral y la creación de solicitudes de la demo.
 
 ## Roadmap interactivo (HTML, CSS y JS)
 
@@ -64,7 +64,7 @@ Las **GitHub Issues** actúan como unidades de trabajo y fuente del progreso rea
 Capturas aportadas por el solicitante: dashboard, request list, detalle, team members y menú. Se adopta una experiencia comparable, no el logo, el branding ni assets propietarios de EY.
 
 ## Estado
-🟡 **MVP inicial codificado, pendiente de pruebas en XAMPP.** Incluye login, sesiones, miembros por proyecto, solicitudes, archivos privados, comentarios, historial, revisión y métricas básicas. No está listo para producción.
+**MVP en validación en XAMPP.** Incluye acceso, administración de proyectos y miembros, solicitudes, archivos privados, comentarios, revisión, historial, avisos y exportación CSV.
 
 ### Probar localmente
 1. Importar `database/schema.sql` en MariaDB/MySQL de XAMPP.
@@ -73,4 +73,4 @@ Capturas aportadas por el solicitante: dashboard, request list, detalle, team me
 4. Abrir `http://localhost/Xchange-Portal/`. Apache redirige a `public/`, que también se puede abrir directamente.
 5. Seguir `docs/XAMPP.md`, `docs/SECURITY.md` y `docs/ROADMAP.md`.
 
-**Limitaciones actuales:** sin pruebas en XAMPP todavía; sin creación de proyectos/usuarios desde UI, sin paginación real, sin versionado, sin notificaciones y sin suite automatizada. Solo PHP, SQL, CSS y JavaScript locales.
+**Pendiente de validación:** más formatos y tamaños de archivos, revisiones concurrentes, experiencia móvil y restauración de respaldos. Los documentos se agrupan como versiones por nombre dentro de una misma solicitud.

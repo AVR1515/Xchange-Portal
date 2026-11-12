@@ -23,13 +23,13 @@ const TASKS = [
 const VERIFIED = {
  1: 'En XAMPP se verificaron el inicio y cierre de sesión y el aislamiento de proyectos, solicitudes y descargas. Queda validar CSRF y sesiones en mayor profundidad.',
  2: 'El esquema se importó en MariaDB y se creó un proyecto demo con tres miembros. Queda verificar claves, índices y aislamiento con varios proyectos.',
- 3: 'Se verificaron creación, edición, filtros combinados y permisos de acceso. Queda validar la asignación y la paginación con más solicitudes.',
+ 3: 'Se verificaron creación, edición, filtros combinados y permisos de acceso. También se verificó la paginación con 26 solicitudes. Queda validar la asignación.',
  4: 'Se verificaron la carga de TXT, la descarga íntegra y el bloqueo de acceso a archivos desde otro proyecto. Quedan más tipos y tamaños.',
  5: 'Se verificaron la devolución, el reenvío y la aceptación, así como el bloqueo de la revisión para clientes. Quedan las pruebas concurrentes.',
  6: 'Se verificó la publicación de comentarios y la aparición de los cambios de estado en el historial.',
  8: 'Se verificó la creación y edición de un proyecto, el alta de una cuenta cliente y el aislamiento entre dos proyectos. También se verificó asociar una cuenta existente y actualizar el rol de un miembro.',
  9: 'Se verificaron el CSV filtrado, el bloqueo de exportación desde otro proyecto y el tratamiento de títulos que podrían interpretarse como fórmulas.',
- 10: 'Se comprobaron dos versiones del mismo nombre y avisos por solicitudes y comentarios. Queda probar una descarga con integridad fallida y avisos de vencimiento.',
+ 10: 'Se comprobaron dos versiones del mismo nombre y avisos por solicitudes y comentarios. Se comprobó el aviso de vencimiento. Queda probar una descarga con integridad fallida.',
  11: 'La URL base redirige al formulario de acceso y sus recursos cargan en XAMPP. Queda ejecutar la validación integral y comprobar la restauración de datos.'
 };
 const PHASES = [

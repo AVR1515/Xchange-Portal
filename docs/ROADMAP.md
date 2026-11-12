@@ -38,10 +38,10 @@
 - Pruebas UI realizadas en Chromium local sobre listado, filtro, drawer y creación.
 - Esta demo no equivale a cerrar issues de backend; la validación de XAMPP, SQL y políticas de seguridad sigue abierta.
 
-## Corte de implementación 2026-11-10
-- Ya presentes en `main`: estructura SQL, acceso, membresía por proyecto, solicitudes nuevas, subida/descarga privada, comentarios, eventos, aceptación y devolución, CSS responsive y filtro de texto local.
-- **No completado:** CRUD pleno (editar/eliminar), administración desde UI, filtros avanzados/paginación, versionado y notificaciones.
-- **No verificado:** ejecución PHP en Windows/XAMPP y pruebas de seguridad end-to-end. Issues abiertas hasta verificar aceptación.
+## Corte de implementación 2026-11-12
+- El portal incluye administración de proyectos y miembros, edición y filtros de solicitudes, paginación, CSV, avisos y versiones por nombre.
+- El flujo documental básico y el aislamiento de proyectos, solicitudes y descargas se probaron en XAMPP con cuentas distintas.
+- Quedan pruebas de concurrencia, formatos y tamaños de archivos, uso en móvil y restauración de respaldos.
 
 ## Definition of Done
 - Código en `main`, sin ramas ni PR.

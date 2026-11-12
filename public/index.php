@@ -251,10 +251,17 @@ if ($me) {
     $statusLabels=['open'=>'Pendiente','submitted'=>'Recibida','returned'=>'Devuelta','accepted'=>'Aceptada'];
     $priorityLabels=['normal'=>'Normal','high'=>'Alta','critical'=>'Crítica'];
     $counts=['total'=>count($requests),'open'=>0,'submitted'=>0,'accepted'=>0,'overdue'=>0];
+    $today=date('Y-m-d');
+    $nextWeek=date('Y-m-d',strtotime('+7 days'));
+    $deadlines=[];
     foreach($requests as $r) {
         if (isset($counts[$r['status']])) $counts[$r['status']]++;
-        if ($r['due_date'] && $r['due_date']<date('Y-m-d') && $r['status']!=='accepted') $counts['overdue']++;
+        if ($r['due_date'] && $r['status']!=='accepted') {
+            if ($r['due_date']<$today) $counts['overdue']++;
+            if ($r['due_date']<=$nextWeek) $deadlines[]=$r;
+        }
     }
+    usort($deadlines,static fn(array $left,array $right): int => $left['due_date']<=>$right['due_date']);
     $filters=[
         'q'=>trim((string)($_GET['q']??'')),
         'status'=>(string)($_GET['status']??''),
@@ -334,7 +341,7 @@ if ($me) {
     </details>
   <?php endforeach; ?>
 </section>
-<div class="grid"><div class="panel"><div class="metric"><?=$counts['total']?></div><div class="metric-caption">Solicitudes totales</div></div><div class="panel"><div class="metric"><?=$counts['open']?></div><div class="metric-caption">Pendientes</div></div><div class="panel"><div class="metric"><?=$counts['submitted']?></div><div class="metric-caption">Recibidas</div></div><div class="panel"><div class="metric"><?=$counts['overdue']?></div><div class="metric-caption danger">Vencidas</div></div></div>
+<div class="grid"><div class="panel"><div class="metric"><?=$counts['total']?></div><div class="metric-caption">Solicitudes totales</div></div><div class="panel"><div class="metric"><?=$counts['open']?></div><div class="metric-caption">Pendientes</div></div><div class="panel"><div class="metric"><?=$counts['submitted']?></div><div class="metric-caption">Recibidas</div></div><div class="panel"><div class="metric"><?=$counts['overdue']?></div><div class="metric-caption danger">Vencidas</div></div><div class="panel"><div class="metric"><?=$counts['accepted']?></div><div class="metric-caption">Aceptadas</div></div></div>
 <section class="panel"><div class="toolbar"><div><h2>Solicitudes de documentos</h2><p class="muted">Intercambio, seguimiento y revisión de evidencia.</p></div><form method="get" class="actions">
   <input type="hidden" name="project" value="<?=$projectId?>">
   <input name="q" type="search" value="<?=h($filters['q'])?>" placeholder="Buscar solicitudes…" aria-label="Buscar solicitudes">
@@ -354,6 +361,12 @@ if ($me) {
 <?php if(in_array($role,['auditor','admin'],true)):?><section class="panel" id="new-request" style="margin-top:20px"><h2>Nueva solicitud</h2><?php require dirname(__DIR__).'/app/request-form.php'; ?></section><?php endif;?>
 <section class="panel" id="updates">
   <h2>Avisos del proyecto</h2>
+  <h3>Vencidas o por vencer en los próximos 7 días</h3>
+  <?php if (!$deadlines): ?><p class="muted">No hay solicitudes con vencimiento en ese período.</p><?php endif; ?>
+  <?php foreach (array_slice($deadlines,0,10) as $deadline): ?>
+    <p><a href="?request=<?=$deadline['id']?>"><?=h($deadline['title'])?></a> · <?=h($deadline['due_date'])?><?php if ($deadline['due_date']<$today): ?> · Vencida<?php endif; ?></p>
+  <?php endforeach; ?>
+  <h3>Actividad de otros miembros</h3>
   <?php $updateLabels=['request_created'=>'Nueva solicitud','request_updated'=>'Solicitud editada','document_uploaded'=>'Documento recibido','status_changed'=>'Estado actualizado','comment_added'=>'Nuevo comentario']; ?>
   <?php if (!$updates): ?><p class="muted">Todavía no hay avisos de otros miembros.</p><?php endif; ?>
   <?php foreach ($updates as $update): ?>
