@@ -3,7 +3,7 @@
 /**
  * Xchange Portal – Roadmap Vivo
  * Sin framework, CDN ni conexión externa para funcionar.
- * Los estados iniciales representan trabajo codificado, NO pruebas completadas.
+ * Los estados iniciales reflejan el avance publicado del proyecto.
  * LocalStorage contiene datos de seguimiento del navegador solamente.
  * GitHub issues mantienen el seguimiento oficial del proyecto.
  */
@@ -15,11 +15,18 @@ const TASKS = [
  {id:5,phase:1,priority:'P0',status:'progress',icon:'✓',title:'Flujo de revisión y aceptación',summary:'Enviar, aceptar, devolver y reenviar evidencia con control de roles.',criteria:['Ejecutar open → submitted → accepted','Ejecutar submitted → returned → submitted','Prohibir aceptación por clientes','Verificar transiciones concurrentes']},
  {id:6,phase:1,priority:'P0',status:'progress',icon:'◷',title:'Comentarios e historial de auditoría',summary:'Mensajes vinculados a solicitudes, eventos y trazabilidad de acciones.',criteria:['Publicar y mostrar comentarios','Historial de cambios por usuario','Escapar texto potencialmente malicioso','Auditar acciones sensibles']},
  {id:7,phase:2,priority:'P1',status:'progress',icon:'◫',title:'Interfaz moderna y responsive',summary:'Dashboard, tabla de solicitudes, navegación y detalle inspirados funcionalmente en las referencias.',criteria:['Interfaz responsive en CSS nativo','Construir drawer de detalle','Teclado, foco y estados vacíos','Validar experiencia en móvil y escritorio']},
- {id:8,phase:2,priority:'P1',status:'pending',icon:'♙',title:'Gestión de miembros y equipos',summary:'Directorio, proyectos, grupos y permisos de usuarios en la interfaz.',criteria:['Crear e invitar usuarios localmente','Asignar miembros a proyectos','Editar grupos y roles','Validar permisos de administración']},
+ {id:8,phase:2,priority:'P0',status:'pending',icon:'♙',title:'Gestión de proyectos, clientes y miembros',summary:'Administrar varios proyectos desde el portal y controlar quién puede participar en cada uno.',criteria:['Crear y editar proyectos desde la interfaz','Crear o invitar usuarios del cliente y de la compañía','Asignar miembros y roles por proyecto','Navegar entre proyectos con acceso autorizado','Verificar aislamiento con dos proyectos y clientes distintos']},
  {id:9,phase:2,priority:'P1',status:'pending',icon:'▥',title:'Dashboard, métricas y exportaciones',summary:'Indicadores calculados desde SQL, vencimientos, gráficos locales y CSV.',criteria:['Comprobar métricas contra SQL','Gráficos sin conexión a Internet','Filtros de dashboard','Exportaciones CSV autorizadas']},
  {id:10,phase:3,priority:'P2',status:'pending',icon:'▤',title:'Versionado y notificaciones internas',summary:'Versiones de documentos, hashes, alertas locales de cambios y fechas.',criteria:['Preservar versiones anteriores','Descargar versiones con autorización','Crear avisos internos','Verificar integridad por SHA-256']},
  {id:11,phase:3,priority:'P2',status:'pending',icon:'⚙',title:'Pruebas, seguridad y entrega XAMPP',summary:'QA funcional, documentación y validación de seguridad antes de producción.',criteria:['Ejecución reproducible en Windows XAMPP','Pruebas de autorización y subida','Checklist de seguridad documentado','Backups y restauración probados']}
 ];
+const VERIFIED = {
+ 1: 'Las tres cuentas demo iniciaron sesión y abrieron el tablero en XAMPP. Queda probar el cierre de sesión, el aislamiento por proyecto y CSRF.',
+ 2: 'El esquema se importó en MariaDB y se creó un proyecto demo con tres miembros. Queda verificar claves, índices y aislamiento con varios proyectos.',
+ 3: 'El tablero de solicitudes abrió con los tres roles tras corregir la consulta del responsable. Queda probar creación, edición, asignación y filtros.',
+ 4: 'Apache denegó el acceso directo al directorio de almacenamiento. Queda probar el ciclo de carga y descarga con permisos, tipos y tamaños reales.',
+ 11: 'La URL base redirige al formulario de acceso y sus recursos cargan en XAMPP. Queda ejecutar la validación integral y comprobar la restauración de datos.'
+};
 const PHASES = [
  {id:0,name:'Fundamentos',subtitle:'Arquitectura y seguridad',label:'FASE 00'},
  {id:1,name:'Core documental',subtitle:'Solicitudes y archivos',label:'FASE 01'},
@@ -91,6 +98,8 @@ function openTask(id){
  selectedId=id;const t=state(id);priorFocus=document.activeElement;
  $('drawer-phase').textContent=PHASES[t.phase].label+' / ISSUE #'+t.id;
  $('drawer-title').textContent=t.title;$('drawer-summary').textContent=t.summary;
+ $('drawer-verification').hidden=!VERIFIED[id];
+ $('drawer-evidence').textContent=VERIFIED[id]||'';
  const pr=$('drawer-priority');pr.className='priority-chip '+t.priority.toLowerCase();pr.textContent=t.priority;
  const st=$('drawer-status-label');st.className='status-chip '+t.status;st.textContent=STATES[t.status];
  $('drawer-status').value=t.status;$('drawer-notes').value=cleanText(t.notes||'');

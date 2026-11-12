@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-12 — Roadmap de implementación actualizado
+- Registradas las verificaciones de XAMPP en el tablero interactivo y priorizada la administración de proyectos, clientes y miembros para el MVP.
+
 ## 2026-11-12 — Carga del tablero al iniciar sesión
 - Corregida la consulta de solicitudes para mostrar el responsable cuando está asignado y conservar las solicitudes sin asignar.
 

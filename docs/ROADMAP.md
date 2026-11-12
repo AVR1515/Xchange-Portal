@@ -1,6 +1,7 @@
 # Roadmap vivo · Xchange Portal
 
-**Actualización:** 2026-11-10  
+**Actualización:** 2026-11-12
+
 **Repositorio:** https://github.com/AVR1515/Xchange-Portal  
 **Branch única de trabajo:** `main`. Prohibido crear ramas alternativas. Todos los commits van directamente a main.  
 **Seguimiento:** https://github.com/AVR1515/Xchange-Portal/issues
@@ -17,11 +18,12 @@
 
 | Fase | Prioridad | Entregable | Issues | Estado |
 |---|---|---|---|---|
-| 0 | P0 | Instalación local, SQL, sesiones, roles | #1 #2 | 🟡 Código inicial, sin pruebas XAMPP |
-| 1A | P0 | Crear/listar/filtrar solicitudes, detalle | #3 | 🟡 CRUD parcial y búsqueda local, sin pruebas |
-| 1B | P0 | Subir, descargar y compartir documentos protegidos | #4 | 🟡 Código inicial, sin pruebas |
+| 0 | P0 | Instalación local, SQL, sesiones, roles | #1 #2 | 🟡 Esquema importado y acceso al tablero con tres roles verificado en XAMPP |
+| 1A | P0 | Crear/listar/filtrar solicitudes, detalle | #3 | 🟡 Tablero verificado. Creación, edición y filtros por validar |
+| 1B | P0 | Subir, descargar y compartir documentos protegidos | #4 | 🟡 Acceso directo al almacenamiento bloqueado. Carga y descarga por validar |
 | 1C | P0 | Workflow de revisión, comentarios, historia | #5 #6 | 🟡 Código inicial, sin pruebas |
-| 2 | P1 | UI dashboard, equipos, métricas, CSV | #7 #8 #9 | ⬜ Pendiente |
+| 2 | P0 | Administrar proyectos, clientes y miembros | #8 | ⬜ Pendiente |
+| 2 | P1 | UI dashboard, métricas, CSV | #7 #9 | 🟡 Interfaz inicial disponible. Métricas y exportaciones por validar |
 | 3 | P2 | Versiones, avisos y QA integral | #10 #11 | ⬜ Pendiente |
 
 ## Actualización visual y controles de demo
@@ -68,7 +70,7 @@
 - Equipo: directorio, pertenencia por grupos/proyectos, permisos.
 
 ## Orden recomendado de ejecución
-`#2 → #1 → #3 → #4 → #5 → #6 → #7 → #8 → #9 → #10 → #11`.
+`#2 → #1 → #3 → #4 → #5 → #6 → #8 → #7 → #9 → #10 → #11`.
 
 ## Riesgos y decisiones pendientes
 - Límite por archivo por defecto 20 MB; ajustar `upload_max_filesize` y `post_max_size` en XAMPP.

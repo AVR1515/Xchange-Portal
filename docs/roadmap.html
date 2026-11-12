@@ -36,7 +36,7 @@
       </header>
 
       <section class="hero" aria-labelledby="overview-title">
-        <div class="hero-copy"><div class="hero-label">PROJECT OVERVIEW</div><h2 id="overview-title">Construyendo una mejor forma de colaborar.</h2><p>Solicitar evidencia, compartir documentos, revisar entregables y seguir cada avance desde una sola experiencia, construida con PHP, SQL, CSS y JavaScript locales.</p><div class="hero-tags"><span>PHP 8.2+</span><span>MariaDB / MySQL</span><span>XAMPP</span><span>CSS nativo</span><span>JS offline</span></div></div>
+        <div class="hero-copy"><div class="hero-label">ACTUALIZADO EL 12 DE NOVIEMBRE DE 2026</div><h2 id="overview-title">Del acceso local al flujo documental</h2><p>La base local y el acceso con los tres roles ya se verificaron en XAMPP. El siguiente hito es completar el flujo de solicitudes, entregas y revisión, y habilitar la administración de proyectos y miembros desde el portal.</p></div>
         <div class="hero-progress"><div class="ring" id="progress-ring" role="img" aria-label="Progreso de tareas completadas: 0 por ciento"><div class="ring-inner"><strong id="progress-value">0%</strong><span>Completado</span></div></div><span class="progress-caption" id="progress-caption">0 de 11 tareas completadas</span></div>
       </section>
 
@@ -44,11 +44,11 @@
         <div class="stat"><span>Total tareas</span><strong id="stat-total">11</strong><small>4 fases de trabajo</small></div>
         <div class="stat"><span>En progreso</span><strong id="stat-progress">0</strong><small>Implementaciones activas</small></div>
         <div class="stat"><span>Completadas</span><strong id="stat-done">0</strong><small>Verificadas y aprobadas</small></div>
-        <div class="stat"><span>Prioridad P0</span><strong id="stat-p0">6</strong><small>MVP documental</small></div>
+        <div class="stat"><span>Prioridad P0</span><strong id="stat-p0">7</strong><small>MVP documental</small></div>
       </section>
 
       <section class="work-section" aria-labelledby="work-title">
-        <div class="section-top"><div><div class="eyebrow">PLAN DE EJECUCIÓN</div><h2 id="work-title">Fases de desarrollo</h2><p>Selecciona una fase, abre una tarea y registra su avance.</p></div><div class="toolbar-note">Los cambios se guardan automáticamente en este dispositivo.</div></div>
+        <div class="section-top"><div><div class="eyebrow">PLAN DE EJECUCIÓN</div><h2 id="work-title">Fases de desarrollo</h2><p>Selecciona una fase y abre una tarea para consultar sus criterios y registrar avances.</p></div><div class="toolbar-note">Usa «Guardar cambios» para conservar tus notas en este navegador.</div></div>
         <div class="phase-strip" id="phase-strip" role="group" aria-label="Filtrar por fase"></div>
         <div class="toolbar">
           <label class="search-wrap"><span aria-hidden="true">⌕</span><span class="sr-only">Buscar tareas</span><input id="search" type="search" placeholder="Buscar tarea, funcionalidad o tecnología…"></label>
@@ -76,9 +76,10 @@
       <div class="drawer-chips"><span id="drawer-priority" class="priority-chip"></span><span id="drawer-status-label" class="status-chip"></span></div>
       <h2 id="drawer-title"></h2><p id="drawer-summary" class="drawer-summary"></p>
       <a id="drawer-issue" href="#" target="_blank" rel="noopener noreferrer" class="issue-link">Ver tarea en GitHub ↗</a>
+      <section id="drawer-verification" hidden><h3>Avance verificado</h3><p id="drawer-evidence"></p></section>
       <hr><h3>Entregables y criterios</h3><ul id="drawer-checklist" class="criteria"></ul>
       <div class="field"><label for="drawer-status">Estado de la tarea</label><select id="drawer-status"><option value="pending">Pendiente</option><option value="progress">En progreso</option><option value="blocked">Bloqueada</option><option value="done">Completada</option></select></div>
-      <div class="field"><label for="drawer-notes">Notas de avance</label><textarea id="drawer-notes" rows="6" placeholder="Qué se implementó, qué falta, resultados de las pruebas…"></textarea><small>Autoguardado local. No modifica GitHub ni archivos del servidor.</small></div>
+      <div class="field"><label for="drawer-notes">Notas de avance</label><textarea id="drawer-notes" rows="6" placeholder="Qué se implementó, qué falta, resultados de las pruebas…"></textarea><small>Las notas se guardan en este navegador.</small></div>
       <div class="drawer-footer"><button id="drawer-save" class="button primary" type="button">Guardar cambios</button><span id="save-feedback" role="status" aria-live="polite"></span></div>
     </div>
   </aside>
