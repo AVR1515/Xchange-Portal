@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-12 — Administración de proyectos y miembros
+- Los administradores pueden crear y editar proyectos, asociar cuentas existentes y crear cuentas de cliente o de equipo desde el portal. Cada usuario navega por los proyectos en los que tiene membresía.
+- Verificado en XAMPP el flujo de creación de proyecto y solicitud, carga y descarga íntegra, devolución, reenvío, aceptación, comentarios, cierre de sesión y aislamiento entre proyectos.
+
 ## 2026-11-12 — Roadmap de implementación actualizado
 - Registradas las verificaciones de XAMPP en el tablero interactivo y priorizada la administración de proyectos, clientes y miembros para el MVP.
 

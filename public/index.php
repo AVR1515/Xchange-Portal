@@ -20,6 +20,63 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             $_SESSION=[]; session_regenerate_id(true); go();
         }
         $actor=requireUser(); $uid=(int)$actor['id'];
+        if ($postAction==='add_member') {
+            $project=(int)($_POST['project_id']??0);
+            if ((membership($project,$uid)['role']??null)!=='admin') {
+                throw new RuntimeException('Sin permisos para administrar miembros');
+            }
+            $email=trim((string)($_POST['email']??''));
+            $name=trim((string)($_POST['name']??''));
+            $password=(string)($_POST['password']??'');
+            $memberRole=(string)($_POST['member_role']??'');
+            if (!filter_var($email,FILTER_VALIDATE_EMAIL) || strlen($email)>190 || !in_array($memberRole,['auditor','client'],true)) {
+                throw new RuntimeException('Correo o rol inválido');
+            }
+            $projectTransaction=db();
+            $projectTransaction->beginTransaction();
+            $query=db()->prepare('SELECT id FROM users WHERE email=? AND is_active=1');
+            $query->execute([$email]);
+            $memberId=$query->fetchColumn();
+            if (!$memberId) {
+                if ($name==='' || mb_strlen($name)>150 || strlen($password)<12 || strlen($password)>72 || str_contains($password,chr(0))) {
+                    throw new RuntimeException('Para una cuenta nueva indica el nombre y una contraseña de 12 a 72 bytes');
+                }
+                db()->prepare('INSERT INTO users(name,email,password_hash) VALUES(?,?,?)')
+                    ->execute([$name,$email,password_hash($password,PASSWORD_DEFAULT)]);
+                $memberId=db()->lastInsertId();
+            }
+            if (membership($project,(int)$memberId)) {
+                throw new RuntimeException('Esta cuenta ya pertenece al proyecto');
+            }
+            db()->prepare('INSERT INTO project_members(project_id,user_id,role) VALUES(?,?,?)')->execute([$project,$memberId,$memberRole]);
+            recordEvent($project,null,$uid,'project_member_added',(string)$memberId);
+            $projectTransaction->commit();
+            go('?project='.$project.'#team');
+        }
+        if ($postAction==='create_project' || $postAction==='edit_project') {
+            $project=(int)($_POST['project_id']??0);
+            $creating=$postAction==='create_project';
+            if ($creating ? !canCreateProject($uid) : (membership($project,$uid)['role']??null)!=='admin') {
+                throw new RuntimeException('Sin permisos para administrar este proyecto');
+            }
+            $name=trim((string)($_POST['name']??''));
+            $description=trim((string)($_POST['description']??''));
+            if ($name==='' || mb_strlen($name)>200 || strlen($description)>65535) {
+                throw new RuntimeException('Nombre o descripción del proyecto inválidos');
+            }
+            $projectTransaction=db();
+            $projectTransaction->beginTransaction();
+            if ($creating) {
+                db()->prepare('INSERT INTO projects(name,description) VALUES(?,?)')->execute([$name,$description]);
+                $project=(int)db()->lastInsertId();
+                db()->prepare("INSERT INTO project_members(project_id,user_id,role) VALUES(?,?,'admin')")->execute([$project,$uid]);
+            } else {
+                db()->prepare('UPDATE projects SET name=?,description=? WHERE id=?')->execute([$name,$description,$project]);
+            }
+            recordEvent($project,null,$uid,$creating?'project_created':'project_updated',$name);
+            db()->commit();
+            go('?project='.$project.'#projects');
+        }
         if ($postAction==='create') {
             $project=(int)($_POST['project_id']??0);
             $role=membership($project,$uid)['role']??null;
@@ -94,6 +151,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
         }
         throw new RuntimeException('Acción desconocida');
     } catch (Throwable $ex) {
+        if (isset($projectTransaction) && $projectTransaction->inTransaction()) $projectTransaction->rollBack();
         $error=$ex instanceof PDOException ? 'Error de base de datos. Revisa configuración.' : $ex->getMessage();
     }
 }
@@ -116,15 +174,21 @@ if ($me) {
     $uid=(int)$me['id'];
     $q=db()->prepare('SELECT p.*,pm.role FROM projects p JOIN project_members pm ON pm.project_id=p.id WHERE pm.user_id=? ORDER BY p.name');
     $q->execute([$uid]); $projects=$q->fetchAll();
-    $projectId=(int)($_GET['project']??($projects[0]['id']??0));
+    $selected=isset($_GET['request'])?getRequest((int)$_GET['request'],$uid):null;
+    $projectId=(int)($selected['project_id']??$_GET['project']??($projects[0]['id']??0));
     if ($projectId && !membership($projectId,$uid)) { http_response_code(403); exit('No autorizado'); }
     $role=membership($projectId,$uid)['role']??'client';
+    $activeProject=null;
+    foreach ($projects as $availableProject) {
+        if ((int)$availableProject['id']===$projectId) {
+            $activeProject=$availableProject;
+            break;
+        }
+    }
+    $canCreateProject=canCreateProject($uid);
     $q=db()->prepare('SELECT r.*,u.name AS assigned_name FROM requests r JOIN project_members pm ON pm.project_id=r.project_id AND pm.user_id=? LEFT JOIN users u ON u.id=r.assigned_to WHERE r.project_id=? ORDER BY r.created_at DESC,r.id DESC');
     $q->execute([$uid,$projectId]); $requests=$q->fetchAll();
-    $selected=isset($_GET['request'])?getRequest((int)$_GET['request'],$uid):null;
     if ($selected) {
-        $projectId=(int)$selected['project_id'];
-        $role=membership($projectId,$uid)['role'];
         $q=db()->prepare('SELECT d.*,u.name AS author_name FROM documents d JOIN users u ON u.id=d.uploaded_by WHERE d.request_id=? ORDER BY d.id DESC');
         $q->execute([$selected['id']]);$documents=$q->fetchAll();
         $q=db()->prepare('SELECT c.*,u.name AS author_name FROM request_comments c JOIN users u ON u.id=c.user_id WHERE c.request_id=? ORDER BY c.id');
@@ -132,7 +196,7 @@ if ($me) {
         $q=db()->prepare('SELECT a.*,u.name AS author_name FROM audit_events a JOIN users u ON u.id=a.user_id WHERE a.request_id=? ORDER BY a.id DESC LIMIT 100');
         $q->execute([$selected['id']]);$events=$q->fetchAll();
     }
-    $q=db()->prepare('SELECT u.id,u.name FROM users u JOIN project_members pm ON pm.user_id=u.id WHERE pm.project_id=? ORDER BY u.name');
+    $q=db()->prepare('SELECT u.id,u.name,pm.role FROM users u JOIN project_members pm ON pm.user_id=u.id WHERE pm.project_id=? ORDER BY u.name');
     $q->execute([$projectId]);$members=$q->fetchAll();
     $counts=['total'=>count($requests),'open'=>0,'submitted'=>0,'accepted'=>0,'overdue'=>0];
     foreach($requests as $r) {
@@ -151,8 +215,8 @@ if ($me) {
 <div class="field"><label for="password">Contraseña</label><input id="password" name="password" type="password" required autocomplete="current-password"></div>
 <button type="submit">Iniciar sesión</button><p class="small muted" style="margin-top:20px">Entorno local · PHP / SQL · sin dependencias externas</p></form></main>
 <?php else: ?>
-<div class="app"><aside class="side"><div class="brand"><b>✦</b> Xchange</div><nav><a href="index.php" class="active">◫ &nbsp; Solicitudes</a><a href="index.php#new-request">＋ &nbsp; Nueva solicitud</a><a href="index.php#team">♙ &nbsp; Equipo</a></nav><p class="small muted" style="margin-top:35px">Portal seguro de intercambio de archivos</p></aside>
-<main class="main"><header class="top"><div><p class="eyebrow">PROYECTOS / DOCUMENTOS</p><h1><?=h($selected?$selected['title']:'Centro de solicitudes')?></h1><p class="muted"><?=h($selected?$selected['project_name']:($projects[0]['name']??'Sin proyectos asignados'))?></p></div><div class="topuser"><?=h($me['name'])?> <form method="post" style="display:inline-block;margin-left:12px"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="secondary">Salir</button></form></div></header>
+<div class="app"><aside class="side"><div class="brand"><b>✦</b> Xchange</div><nav><a href="?project=<?=$projectId?>#projects">Proyectos</a><a href="?project=<?=$projectId?>" class="active">◫ &nbsp; Solicitudes</a><a href="?project=<?=$projectId?>#new-request">＋ &nbsp; Nueva solicitud</a><a href="?project=<?=$projectId?>#team">♙ &nbsp; Equipo</a></nav><p class="small muted" style="margin-top:35px">Portal seguro de intercambio de archivos</p></aside>
+<main class="main"><header class="top"><div><p class="eyebrow">PROYECTOS / DOCUMENTOS</p><h1><?=h($selected?$selected['title']:'Centro de solicitudes')?></h1><p class="muted"><?=h($selected?$selected['project_name']:($activeProject['name']??'Sin proyectos asignados'))?></p></div><div class="topuser"><?=h($me['name'])?> <form method="post" style="display:inline-block;margin-left:12px"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="secondary">Salir</button></form></div></header>
 <?php if($error):?><p class="message"><?=h($error)?></p><?php endif;?>
 <?php if($selected):?>
 <p><a href="index.php?project=<?=$projectId?>">← Volver a solicitudes</a></p>
@@ -164,9 +228,52 @@ if ($me) {
 <?php if(!$documents):?><p class="muted" style="margin-top:18px">No hay documentos compartidos todavía.</p><?php endif;?></div></section>
 <section class="stack"><div class="panel"><h2>Comentarios</h2><?php foreach($comments as $c):?><div class="file"><div><strong><?=h($c['author_name'])?></strong> <span class="small muted"><?=h($c['created_at'])?></span><p><?=nl2br(h($c['body']))?></p></div></div><?php endforeach;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="comment"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="body">Nuevo comentario</label><textarea id="body" name="body" maxlength="5000" required></textarea></div><button>Publicar comentario</button></form></div><div class="panel"><h2>Actividad reciente</h2><?php foreach($events as $e):?><p class="small"><b><?=h($e['author_name'])?></b> · <?=h($e['action'])?><br><span class="muted"><?=h($e['created_at'])?> <?=h($e['details'])?></span></p><?php endforeach;?></div></section></div>
 <?php else:?>
+<section class="panel" id="projects">
+  <h2>Proyectos</h2>
+  <?php if (!$projects): ?><p class="muted">No tienes proyectos asignados.</p><?php endif; ?>
+  <?php foreach ($projects as $availableProject): ?>
+    <p><a href="?project=<?=$availableProject['id']?>" <?php if ((int)$availableProject['id']===$projectId): ?>aria-current="page"<?php endif; ?>><?=h($availableProject['name'])?></a></p>
+  <?php endforeach; ?>
+  <?php if ($activeProject && $activeProject['description']): ?><p><?=nl2br(h($activeProject['description']))?></p><?php endif; ?>
+  <?php foreach (['create_project'=>'Nuevo proyecto','edit_project'=>'Editar proyecto'] as $projectAction=>$label): ?>
+    <?php if ($projectAction==='create_project' ? !$canCreateProject : $role!=='admin') continue; ?>
+    <?php $editing=$projectAction==='edit_project'; ?>
+    <details>
+      <summary><?=h($label)?></summary>
+      <form method="post">
+        <input type="hidden" name="csrf" value="<?=h(csrf())?>">
+        <input type="hidden" name="action" value="<?=h($projectAction)?>">
+        <?php if ($editing): ?><input type="hidden" name="project_id" value="<?=$projectId?>"><?php endif; ?>
+        <div class="field"><label>Nombre <input name="name" maxlength="200" value="<?=h($editing?$activeProject['name']:'')?>" required></label></div>
+        <div class="field"><label>Descripción <textarea name="description"><?=h($editing?$activeProject['description']:'')?></textarea></label></div>
+        <button>Guardar proyecto</button>
+      </form>
+    </details>
+  <?php endforeach; ?>
+</section>
 <div class="grid"><div class="panel"><div class="metric"><?=$counts['total']?></div><div class="metric-caption">Solicitudes totales</div></div><div class="panel"><div class="metric"><?=$counts['open']?></div><div class="metric-caption">Pendientes</div></div><div class="panel"><div class="metric"><?=$counts['submitted']?></div><div class="metric-caption">Recibidas</div></div><div class="panel"><div class="metric"><?=$counts['overdue']?></div><div class="metric-caption danger">Vencidas</div></div></div>
 <section class="panel"><div class="toolbar"><div><h2>Document requests</h2><p class="muted">Intercambio, seguimiento y revisión de evidencia.</p></div><input id="filter-text" type="search" placeholder="Buscar solicitudes…" aria-label="Buscar solicitudes"></div>
 <div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th></tr></thead><tbody><?php foreach($requests as $r):?><tr data-request-row><td><?=h((string)$r['id'])?></td><td><a href="?request=<?=$r['id']?>"><?=h($r['title'])?></a></td><td><?=h($r['assigned_name']??'—')?></td><td><span class="pill <?=h($r['status'])?>"><?=h($r['status'])?></span></td><td><?=h($r['priority'])?></td><td><?=h($r['due_date']??'—')?></td></tr><?php endforeach;?></tbody></table><?php if(!$requests):?><p class="muted">Todavía no hay solicitudes en este proyecto.</p><?php endif;?></div></section>
 <?php if(in_array($role,['auditor','admin'],true)):?><section class="panel" id="new-request" style="margin-top:20px"><h2>Nueva solicitud</h2><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="create"><input type="hidden" name="project_id" value="<?=$projectId?>"><div class="detail"><div><div class="field"><label>Título</label><input name="title" maxlength="240" required></div><div class="field"><label>Descripción</label><textarea name="description"></textarea></div></div><div><div class="field"><label>Responsable</label><select name="assigned_to"><option value="">Sin asignar</option><?php foreach($members as $m):?><option value="<?=$m['id']?>"><?=h($m['name'])?></option><?php endforeach;?></select></div><div class="field"><label>Prioridad</label><select name="priority"><option value="normal">Normal</option><option value="high">Alta</option><option value="critical">Crítica</option></select></div><div class="field"><label>Fecha límite</label><input name="due_date" type="date"></div></div></div><button>Crear solicitud</button></form></section><?php endif;?>
-<section class="panel" id="team" style="margin-top:20px"><h2>Miembros del proyecto</h2><?php foreach($members as $m):?><p><?=h($m['name'])?></p><?php endforeach;?></section>
+<section class="panel" id="team">
+  <h2>Miembros del proyecto</h2>
+  <?php $roleLabels=['admin'=>'Administrador','auditor'=>'Equipo de la compañía','client'=>'Cliente']; ?>
+  <?php foreach ($members as $member): ?><p><?=h($member['name'])?> · <?=h($roleLabels[$member['role']])?></p><?php endforeach; ?>
+  <?php if ($role==='admin'): ?>
+    <details>
+      <summary>Añadir miembro</summary>
+      <p class="muted">Si la cuenta existe, indica su correo y el rol en este proyecto. Para crearla, completa también el nombre y la contraseña.</p>
+      <form method="post">
+        <input type="hidden" name="csrf" value="<?=h(csrf())?>">
+        <input type="hidden" name="action" value="add_member">
+        <input type="hidden" name="project_id" value="<?=$projectId?>">
+        <div class="field"><label>Correo <input name="email" type="email" maxlength="190" required></label></div>
+        <div class="field"><label>Rol <select name="member_role"><option value="client">Cliente</option><option value="auditor">Equipo de la compañía</option></select></label></div>
+        <div class="field"><label>Nombre de la cuenta nueva <input name="name" maxlength="150"></label></div>
+        <div class="field"><label>Contraseña de la cuenta nueva <input type="password" name="password" autocomplete="new-password" minlength="12" maxlength="72"></label></div>
+        <button>Añadir miembro</button>
+      </form>
+    </details>
+  <?php endif; ?>
+</section>
 <?php endif;?></main></div><?php endif;?></body></html>

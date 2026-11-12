@@ -15,16 +15,19 @@ const TASKS = [
  {id:5,phase:1,priority:'P0',status:'progress',icon:'✓',title:'Flujo de revisión y aceptación',summary:'Enviar, aceptar, devolver y reenviar evidencia con control de roles.',criteria:['Ejecutar open → submitted → accepted','Ejecutar submitted → returned → submitted','Prohibir aceptación por clientes','Verificar transiciones concurrentes']},
  {id:6,phase:1,priority:'P0',status:'progress',icon:'◷',title:'Comentarios e historial de auditoría',summary:'Mensajes vinculados a solicitudes, eventos y trazabilidad de acciones.',criteria:['Publicar y mostrar comentarios','Historial de cambios por usuario','Escapar texto potencialmente malicioso','Auditar acciones sensibles']},
  {id:7,phase:2,priority:'P1',status:'progress',icon:'◫',title:'Interfaz moderna y responsive',summary:'Dashboard, tabla de solicitudes, navegación y detalle inspirados funcionalmente en las referencias.',criteria:['Interfaz responsive en CSS nativo','Construir drawer de detalle','Teclado, foco y estados vacíos','Validar experiencia en móvil y escritorio']},
- {id:8,phase:2,priority:'P0',status:'pending',icon:'♙',title:'Gestión de proyectos, clientes y miembros',summary:'Administrar varios proyectos desde el portal y controlar quién puede participar en cada uno.',criteria:['Crear y editar proyectos desde la interfaz','Crear o invitar usuarios del cliente y de la compañía','Asignar miembros y roles por proyecto','Navegar entre proyectos con acceso autorizado','Verificar aislamiento con dos proyectos y clientes distintos']},
+ {id:8,phase:2,priority:'P0',status:'progress',icon:'♙',title:'Gestión de proyectos, clientes y miembros',summary:'Administrar varios proyectos desde el portal y controlar quién puede participar en cada uno.',criteria:['Crear y editar proyectos desde la interfaz','Crear cuentas o asociar usuarios existentes del cliente y de la compañía','Asignar miembros y roles por proyecto','Navegar entre proyectos con acceso autorizado','Verificar aislamiento con dos proyectos y clientes distintos']},
  {id:9,phase:2,priority:'P1',status:'pending',icon:'▥',title:'Dashboard, métricas y exportaciones',summary:'Indicadores calculados desde SQL, vencimientos, gráficos locales y CSV.',criteria:['Comprobar métricas contra SQL','Gráficos sin conexión a Internet','Filtros de dashboard','Exportaciones CSV autorizadas']},
  {id:10,phase:3,priority:'P2',status:'pending',icon:'▤',title:'Versionado y notificaciones internas',summary:'Versiones de documentos, hashes, alertas locales de cambios y fechas.',criteria:['Preservar versiones anteriores','Descargar versiones con autorización','Crear avisos internos','Verificar integridad por SHA-256']},
  {id:11,phase:3,priority:'P2',status:'pending',icon:'⚙',title:'Pruebas, seguridad y entrega XAMPP',summary:'QA funcional, documentación y validación de seguridad antes de producción.',criteria:['Ejecución reproducible en Windows XAMPP','Pruebas de autorización y subida','Checklist de seguridad documentado','Backups y restauración probados']}
 ];
 const VERIFIED = {
- 1: 'Las tres cuentas demo iniciaron sesión y abrieron el tablero en XAMPP. Queda probar el cierre de sesión, el aislamiento por proyecto y CSRF.',
+ 1: 'En XAMPP se verificaron el inicio y cierre de sesión y el aislamiento de proyectos, solicitudes y descargas. Queda validar CSRF y sesiones en mayor profundidad.',
  2: 'El esquema se importó en MariaDB y se creó un proyecto demo con tres miembros. Queda verificar claves, índices y aislamiento con varios proyectos.',
- 3: 'El tablero de solicitudes abrió con los tres roles tras corregir la consulta del responsable. Queda probar creación, edición, asignación y filtros.',
- 4: 'Apache denegó el acceso directo al directorio de almacenamiento. Queda probar el ciclo de carga y descarga con permisos, tipos y tamaños reales.',
+ 3: 'Se creó una solicitud como administrador y se comprobó su visibilidad para el cliente asignado al proyecto. Quedan edición, asignación y filtros avanzados.',
+ 4: 'Se verificaron la carga de TXT, la descarga íntegra y el bloqueo de acceso a archivos desde otro proyecto. Quedan más tipos y tamaños.',
+ 5: 'Se verificaron la devolución, el reenvío y la aceptación, así como el bloqueo de la revisión para clientes. Quedan las pruebas concurrentes.',
+ 6: 'Se verificó la publicación de comentarios y la aparición de los cambios de estado en el historial.',
+ 8: 'Se verificó la creación y edición de un proyecto, el alta de una cuenta cliente y el aislamiento entre dos proyectos. Queda probar la asociación de cuentas existentes y completar la administración de roles.',
  11: 'La URL base redirige al formulario de acceso y sus recursos cargan en XAMPP. Queda ejecutar la validación integral y comprobar la restauración de datos.'
 };
 const PHASES = [

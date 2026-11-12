@@ -44,6 +44,11 @@ function membership(int $projectId, int $userId): ?array {
     $s=db()->prepare('SELECT role FROM project_members WHERE project_id=? AND user_id=?');
     $s->execute([$projectId,$userId]); return $s->fetch() ?: null;
 }
+function canCreateProject(int $userId): bool {
+    $s=db()->prepare("SELECT 1 FROM project_members WHERE user_id=? AND role='admin' LIMIT 1");
+    $s->execute([$userId]);
+    return (bool)$s->fetchColumn();
+}
 function getRequest(int $requestId, int $uid): array {
     $s=db()->prepare('SELECT r.*,p.name AS project_name,u.name AS assigned_name FROM requests r JOIN project_members pm ON pm.project_id=r.project_id AND pm.user_id=? JOIN projects p ON p.id=r.project_id LEFT JOIN users u ON u.id=r.assigned_to WHERE r.id=?');
     $s->execute([$uid,$requestId]);
