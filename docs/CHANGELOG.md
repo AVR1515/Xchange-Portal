@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-12 — Acceso desde la raíz en XAMPP
+- Apache redirige la URL base a `public/`, desactiva el listado de carpetas y deniega el acceso web a directorios internos.
+
 ## 2026-11-10 — Demo visual interactiva sin XAMPP (main)
 - Incorporado `demo/index.html`: prototipo HTML independiente, CSS y JS incluidos localmente, con siete solicitudes ilustrativas, métricas, filtros, detalle, comentarios, actividad, equipos y creación de requests en memoria del navegador.
 - Simulación de adjuntos: se conserva únicamente el nombre del archivo, **no sus bytes**; no usar para documentos sensibles.

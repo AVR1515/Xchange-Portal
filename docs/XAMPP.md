@@ -11,7 +11,7 @@
 3. Abrir phpMyAdmin y ejecutar `database/schema.sql`, o importar por consola usando `mysql -u root < database/schema.sql`.
 4. Copiar `config/config.example.php` a `config/config.php`; ajustar credenciales locales (por defecto XAMPP: `root` sin contraseña, solo para desarrollo).
 5. Ejecutar `php scripts/seed.php` desde raíz del proyecto para generar cuentas demo; **solo en entorno local**.
-6. Abrir `http://localhost/Xchange-Portal/public/`.
+6. Abrir `http://localhost/Xchange-Portal/`. La redirección a `public/` usa el archivo `.htaccess` de la raíz y requiere `mod_rewrite` y `AllowOverride All` en Apache. También se puede abrir `http://localhost/Xchange-Portal/public/` directamente.
 7. Para subir archivos de hasta 20MB, configurar `upload_max_filesize=20M`, `post_max_size=24M` y reiniciar Apache.
 
 ## Si PHP no está en PATH

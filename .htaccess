@@ -1,0 +1,6 @@
+Options -Indexes
+
+RewriteEngine On
+RewriteRule ^(?:\.git|app|config|database|scripts|storage)(?:/|$) - [F,NC]
+RewriteCond %{REQUEST_URI} /$
+RewriteRule ^$ %{REQUEST_URI}public/ [R=302,L]

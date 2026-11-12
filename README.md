@@ -68,7 +68,7 @@ Capturas aportadas por el solicitante: dashboard, request list, detalle, team me
 1. Importar `database/schema.sql` en MariaDB/MySQL de XAMPP.
 2. Copiar `config/config.example.php` a `config/config.php` (ignorado por Git), y ajustar el acceso SQL.
 3. Ejecutar `C:\\xampp\\php\\php.exe scripts\\seed.php` desde la raíz. El comando genera una contraseña temporal aleatoria y muestra las 3 cuentas de demo.
-4. Abrir `http://localhost/Xchange-Portal/public/`.
+4. Abrir `http://localhost/Xchange-Portal/`. Apache redirige a `public/`, que también se puede abrir directamente.
 5. Seguir `docs/XAMPP.md`, `docs/SECURITY.md` y `docs/ROADMAP.md`.
 
 **Limitaciones actuales:** sin pruebas en XAMPP todavía; sin creación de proyectos/usuarios desde UI, sin paginación real, sin versionado, sin notificaciones y sin suite automatizada. Solo PHP, SQL, CSS y JavaScript locales.
