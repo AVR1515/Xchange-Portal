@@ -77,8 +77,10 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             db()->commit();
             go('?project='.$project.'#projects');
         }
-        if ($postAction==='create') {
-            $project=(int)($_POST['project_id']??0);
+        if ($postAction==='create' || $postAction==='edit_request') {
+            $editing=$postAction==='edit_request';
+            $existing=$editing?getRequest((int)($_POST['request_id']??0),$uid):null;
+            $project=(int)($existing['project_id']??$_POST['project_id']??0);
             $role=membership($project,$uid)['role']??null;
             if (!in_array($role,['auditor','admin'],true)) throw new RuntimeException('No autorizado');
             $title=trim((string)($_POST['title']??''));
@@ -89,10 +91,20 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             if ($due!=='' && (!DateTimeImmutable::createFromFormat('!Y-m-d',$due) || DateTimeImmutable::createFromFormat('!Y-m-d',$due)->format('Y-m-d')!==$due)) throw new RuntimeException('Fecha inválida');
             $assigned=(int)($_POST['assigned_to']??0);
             if ($assigned && !membership($project,$assigned)) throw new RuntimeException('Asignado no pertenece al proyecto');
-            $q=db()->prepare('INSERT INTO requests(project_id,title,description,priority,due_date,created_by,assigned_to) VALUES(?,?,?,?,?,?,?)');
-            $q->execute([$project,$title,trim((string)($_POST['description']??'')),$priority,$due?:null,$uid,$assigned?:null]);
-            $rid=(int)db()->lastInsertId();
-            recordEvent($project,$rid,$uid,'request_created',$title);
+            $description=trim((string)($_POST['description']??''));
+            $projectTransaction=db();
+            $projectTransaction->beginTransaction();
+            if ($editing) {
+                $rid=(int)$existing['id'];
+                $q=db()->prepare('UPDATE requests SET title=?,description=?,priority=?,due_date=?,assigned_to=? WHERE id=?');
+                $q->execute([$title,$description,$priority,$due?:null,$assigned?:null,$rid]);
+            } else {
+                $q=db()->prepare('INSERT INTO requests(project_id,title,description,priority,due_date,created_by,assigned_to) VALUES(?,?,?,?,?,?,?)');
+                $q->execute([$project,$title,$description,$priority,$due?:null,$uid,$assigned?:null]);
+                $rid=(int)db()->lastInsertId();
+            }
+            recordEvent($project,$rid,$uid,$editing?'request_updated':'request_created',$title);
+            $projectTransaction->commit();
             go('?request='.$rid);
         }
         $rid=(int)($_POST['request_id']??0);
@@ -110,8 +122,13 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             $status=(string)($_POST['status']??'');
             $allowed=['submitted'=>['accepted','returned'],'returned'=>[],'open'=>[],'accepted'=>[]];
             if (!in_array($status,$allowed[$req['status']]??[],true)) throw new RuntimeException('Transición de estado inválida');
-            db()->prepare('UPDATE requests SET status=? WHERE id=?')->execute([$status,$rid]);
+            $projectTransaction=db();
+            $projectTransaction->beginTransaction();
+            $update=db()->prepare('UPDATE requests SET status=? WHERE id=? AND status=?');
+            $update->execute([$status,$rid,$req['status']]);
+            if ($update->rowCount()!==1) throw new RuntimeException('El estado cambió. Actualiza la página y vuelve a revisar la solicitud.');
             recordEvent((int)$req['project_id'],$rid,$uid,'status_changed',$req['status'].' → '.$status);
+            $projectTransaction->commit();
             go('?request='.$rid);
         }
         if ($postAction==='upload') {
@@ -143,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
                 db()->beginTransaction();
                 db()->prepare('INSERT INTO documents(request_id,uploaded_by,original_name,storage_name,mime_type,byte_size,sha256) VALUES(?,?,?,?,?,?,?)')
                   ->execute([$rid,$uid,$original,$name,$mime,(int)$f['size'],hash_file('sha256',$target)]);
-                if (in_array($req['status'],['open','returned'],true)) db()->prepare("UPDATE requests SET status='submitted' WHERE id=?")->execute([$rid]);
+                db()->prepare("UPDATE requests SET status='submitted' WHERE id=? AND status IN ('open','returned')")->execute([$rid]);
                 recordEvent((int)$req['project_id'],$rid,$uid,'document_uploaded',$original);
                 db()->commit();
             } catch (Throwable $ex) { if (db()->inTransaction()) db()->rollBack(); @unlink($target); throw $ex; }
@@ -198,11 +215,44 @@ if ($me) {
     }
     $q=db()->prepare('SELECT u.id,u.name,pm.role FROM users u JOIN project_members pm ON pm.user_id=u.id WHERE pm.project_id=? ORDER BY u.name');
     $q->execute([$projectId]);$members=$q->fetchAll();
+    $statusLabels=['open'=>'Pendiente','submitted'=>'Recibida','returned'=>'Devuelta','accepted'=>'Aceptada'];
+    $priorityLabels=['normal'=>'Normal','high'=>'Alta','critical'=>'Crítica'];
     $counts=['total'=>count($requests),'open'=>0,'submitted'=>0,'accepted'=>0,'overdue'=>0];
     foreach($requests as $r) {
         if (isset($counts[$r['status']])) $counts[$r['status']]++;
         if ($r['due_date'] && $r['due_date']<date('Y-m-d') && $r['status']!=='accepted') $counts['overdue']++;
     }
+    $filters=[
+        'q'=>trim((string)($_GET['q']??'')),
+        'status'=>(string)($_GET['status']??''),
+        'priority'=>(string)($_GET['priority']??''),
+    ];
+    $filtered=array_values(array_filter($requests,static function (array $request) use ($filters): bool {
+        return ($filters['status']==='' || $filters['status']===$request['status'])
+            && ($filters['priority']==='' || $filters['priority']===$request['priority'])
+            && ($filters['q']==='' || mb_stripos($request['title'].' '.$request['assigned_name'], $filters['q'])!==false);
+    }));
+    $listQuery=['project'=>$projectId]+$filters;
+    if ($action==='export_requests' && $projectId) {
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="solicitudes.csv"');
+        $output=fopen('php://output','wb');
+        fwrite($output,"\xEF\xBB\xBF");
+        fputcsv($output,['ID','Solicitud','Responsable','Estado','Prioridad','Fecha límite'],',','"','');
+        foreach ($filtered as $r) {
+            $row=[$r['id'],$r['title'],$r['assigned_name'],$statusLabels[$r['status']],$priorityLabels[$r['priority']],$r['due_date']];
+            $row=array_map(static function ($value): string {
+                $value=(string)$value;
+                return preg_match('/^(?:[\s\p{Z}]*[=+@-]|[\t\r\n])/u',$value) ? "'".$value : $value;
+            },$row);
+            fputcsv($output,$row,',','"','');
+        }
+        fclose($output);
+        exit;
+    }
+    $pageCount=max(1,(int)ceil(count($filtered)/25));
+    $page=min($pageCount,max(1,(int)($_GET['page']??1)));
+    $visibleRequests=array_slice($filtered,($page-1)*25,25);
 }
 ?><!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -223,7 +273,7 @@ if ($me) {
 <div class="detail"><section class="stack"><div class="panel"><h2>Detalles de solicitud #<?=$selected['id']?></h2><p><?=nl2br(h($selected['description']))?></p><p><span class="pill <?=h($selected['status'])?>"><?=h($selected['status'])?></span> · Prioridad: <?=h($selected['priority'])?> · Fecha límite: <?=h($selected['due_date']??'Sin fecha')?></p><p class="muted">Asignado a: <?=h($selected['assigned_name']??'Sin asignar')?></p>
 <?php if($selected['status']==='submitted' && in_array($role,['auditor','admin'],true)):?>
 <form method="post" class="actions" data-confirm="¿Registrar revisión de esta solicitud?"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="status"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><button name="status" value="accepted">Aceptar</button><button class="secondary" name="status" value="returned">Devolver</button></form><?php endif;?></div>
-<div class="panel"><h2>Documentos compartidos</h2><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="upload"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="document">Subir PDF, Office, imágenes, ZIP, TXT o CSV (máx. 20MB)</label><input id="document" name="document" type="file" required></div><button>Subir documento</button></form>
+<?php if (in_array($role,['admin','auditor'],true)): ?><details class="panel"><summary>Editar solicitud</summary><?php require dirname(__DIR__).'/app/request-form.php'; ?></details><?php endif; ?><div class="panel"><h2>Documentos compartidos</h2><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="upload"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="document">Subir PDF, Office, imágenes, ZIP, TXT o CSV (máx. 20MB)</label><input id="document" name="document" type="file" required></div><button>Subir documento</button></form>
 <?php foreach($documents as $d):?><div class="file"><div><strong><?=h($d['original_name'])?></strong><div class="small muted"><?=h($d['author_name'])?> · <?=h($d['created_at'])?> · <?=number_format((int)$d['byte_size']/1024,1)?> KB</div></div><a href="?action=download&amp;file=<?=$d['id']?>">Descargar</a></div><?php endforeach;?>
 <?php if(!$documents):?><p class="muted" style="margin-top:18px">No hay documentos compartidos todavía.</p><?php endif;?></div></section>
 <section class="stack"><div class="panel"><h2>Comentarios</h2><?php foreach($comments as $c):?><div class="file"><div><strong><?=h($c['author_name'])?></strong> <span class="small muted"><?=h($c['created_at'])?></span><p><?=nl2br(h($c['body']))?></p></div></div><?php endforeach;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="comment"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="body">Nuevo comentario</label><textarea id="body" name="body" maxlength="5000" required></textarea></div><button>Publicar comentario</button></form></div><div class="panel"><h2>Actividad reciente</h2><?php foreach($events as $e):?><p class="small"><b><?=h($e['author_name'])?></b> · <?=h($e['action'])?><br><span class="muted"><?=h($e['created_at'])?> <?=h($e['details'])?></span></p><?php endforeach;?></div></section></div>
@@ -252,9 +302,23 @@ if ($me) {
   <?php endforeach; ?>
 </section>
 <div class="grid"><div class="panel"><div class="metric"><?=$counts['total']?></div><div class="metric-caption">Solicitudes totales</div></div><div class="panel"><div class="metric"><?=$counts['open']?></div><div class="metric-caption">Pendientes</div></div><div class="panel"><div class="metric"><?=$counts['submitted']?></div><div class="metric-caption">Recibidas</div></div><div class="panel"><div class="metric"><?=$counts['overdue']?></div><div class="metric-caption danger">Vencidas</div></div></div>
-<section class="panel"><div class="toolbar"><div><h2>Document requests</h2><p class="muted">Intercambio, seguimiento y revisión de evidencia.</p></div><input id="filter-text" type="search" placeholder="Buscar solicitudes…" aria-label="Buscar solicitudes"></div>
-<div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th></tr></thead><tbody><?php foreach($requests as $r):?><tr data-request-row><td><?=h((string)$r['id'])?></td><td><a href="?request=<?=$r['id']?>"><?=h($r['title'])?></a></td><td><?=h($r['assigned_name']??'—')?></td><td><span class="pill <?=h($r['status'])?>"><?=h($r['status'])?></span></td><td><?=h($r['priority'])?></td><td><?=h($r['due_date']??'—')?></td></tr><?php endforeach;?></tbody></table><?php if(!$requests):?><p class="muted">Todavía no hay solicitudes en este proyecto.</p><?php endif;?></div></section>
-<?php if(in_array($role,['auditor','admin'],true)):?><section class="panel" id="new-request" style="margin-top:20px"><h2>Nueva solicitud</h2><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="create"><input type="hidden" name="project_id" value="<?=$projectId?>"><div class="detail"><div><div class="field"><label>Título</label><input name="title" maxlength="240" required></div><div class="field"><label>Descripción</label><textarea name="description"></textarea></div></div><div><div class="field"><label>Responsable</label><select name="assigned_to"><option value="">Sin asignar</option><?php foreach($members as $m):?><option value="<?=$m['id']?>"><?=h($m['name'])?></option><?php endforeach;?></select></div><div class="field"><label>Prioridad</label><select name="priority"><option value="normal">Normal</option><option value="high">Alta</option><option value="critical">Crítica</option></select></div><div class="field"><label>Fecha límite</label><input name="due_date" type="date"></div></div></div><button>Crear solicitud</button></form></section><?php endif;?>
+<section class="panel"><div class="toolbar"><div><h2>Solicitudes de documentos</h2><p class="muted">Intercambio, seguimiento y revisión de evidencia.</p></div><form method="get" class="actions">
+  <input type="hidden" name="project" value="<?=$projectId?>">
+  <input name="q" type="search" value="<?=h($filters['q'])?>" placeholder="Buscar solicitudes…" aria-label="Buscar solicitudes">
+  <select name="status" aria-label="Estado"><option value="">Todos los estados</option><?php foreach ($statusLabels as $value=>$label): ?><option value="<?=$value?>" <?php if ($value===$filters['status']): ?>selected<?php endif; ?>><?=h($label)?></option><?php endforeach; ?></select>
+  <select name="priority" aria-label="Prioridad"><option value="">Todas las prioridades</option><?php foreach ($priorityLabels as $value=>$label): ?><option value="<?=$value?>" <?php if ($value===$filters['priority']): ?>selected<?php endif; ?>><?=h($label)?></option><?php endforeach; ?></select>
+  <button>Filtrar</button>
+  <?php if ($projectId): ?><a href="?<?=h(http_build_query($listQuery+['action'=>'export_requests']))?>">Descargar CSV</a><?php endif; ?>
+</form></div>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th></tr></thead><tbody><?php foreach($visibleRequests as $r):?><tr data-request-row><td><?=h((string)$r['id'])?></td><td><a href="?request=<?=$r['id']?>"><?=h($r['title'])?></a></td><td><?=h($r['assigned_name']??'—')?></td><td><span class="pill <?=h($r['status'])?>"><?=h($statusLabels[$r['status']])?></span></td><td><?=h($priorityLabels[$r['priority']])?></td><td><?=h($r['due_date']??'—')?></td></tr><?php endforeach;?></tbody></table><?php if (!$visibleRequests): ?><p class="muted">No hay solicitudes para mostrar.</p><?php endif; ?></div>
+<?php if ($pageCount>1): ?>
+  <nav class="actions" aria-label="Paginación de solicitudes">
+    <?php if ($page>1): ?><a href="?<?=h(http_build_query($listQuery+['page'=>$page-1]))?>">Anterior</a><?php endif; ?>
+    <span>Página <?=$page?> de <?=$pageCount?></span>
+    <?php if ($page<$pageCount): ?><a href="?<?=h(http_build_query($listQuery+['page'=>$page+1]))?>">Siguiente</a><?php endif; ?>
+  </nav>
+<?php endif; ?></section>
+<?php if(in_array($role,['auditor','admin'],true)):?><section class="panel" id="new-request" style="margin-top:20px"><h2>Nueva solicitud</h2><?php require dirname(__DIR__).'/app/request-form.php'; ?></section><?php endif;?>
 <section class="panel" id="team">
   <h2>Miembros del proyecto</h2>
   <?php $roleLabels=['admin'=>'Administrador','auditor'=>'Equipo de la compañía','client'=>'Cliente']; ?>

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-12 — Edición, filtros y exportación de solicitudes
+- El equipo de la compañía puede editar solicitudes. El tablero permite filtrar por texto, estado y prioridad, navegar por páginas y descargar un CSV del proyecto.
+- El cambio de estado y su historial se guardan juntos. La revisión comprueba el estado vigente antes de actualizarlo.
+
 ## 2026-11-12 — Administración de proyectos y miembros
 - Los administradores pueden crear y editar proyectos, asociar cuentas existentes y crear cuentas de cliente o de equipo desde el portal. Cada usuario navega por los proyectos en los que tiene membresía.
 - Verificado en XAMPP el flujo de creación de proyecto y solicitud, carga y descarga íntegra, devolución, reenvío, aceptación, comentarios, cierre de sesión y aislamiento entre proyectos.
