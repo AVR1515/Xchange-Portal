@@ -32,8 +32,8 @@ Xchange-Portal/
 
 ## Entidades principales
 - `users`: identidades y passwords bcrypt/argon2 gestionados por PHP.
-- `projects`: engagements (auditoría).
-- `project_members`: acceso usuario↔proyecto, con rol `admin|auditor|client`.
+- `projects`: proyectos en los que colaboran la compañía y el cliente.
+- `project_members`: acceso usuario↔proyecto, con rol `admin|auditor|client`. El identificador existente `auditor` representa al equipo de la compañía que solicita y revisa documentos.
 - `requests`: documentos pedidos, fechas, prioridad, estado, autor y responsable.
 - `documents`: metadatos y ruta interna opaca; no ruta servible por web.
 - `request_comments`: comunicaciones de las partes.
@@ -48,7 +48,7 @@ Xchange-Portal/
 6. Se registra cada acción relevante con actor, request y timestamp.
 
 ## Estados del documento solicitado
-`open → submitted → accepted`; desde `submitted → returned → submitted`. Solo auditor/admin acepta o devuelve; cliente/auditor puede cargar evidencia según membresía, pero solo los roles autorizados cambian estado. `overdue` es atributo calculado, no estado permanente.
+`open → submitted → accepted`; desde `submitted → returned → submitted`. El equipo de la compañía y los administradores pueden aceptar o devolver entregas. Los permisos de carga y cambio de estado se verifican según la membresía y el rol. `overdue` es atributo calculado, no estado permanente.
 
 ## Protección
 - Autorización **por objeto** en todas las vistas/acciones y descargas.

@@ -144,7 +144,7 @@ if ($me) {
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Xchange Portal</title><link rel="stylesheet" href="assets/app.css"><link rel="stylesheet" href="assets/theme.css"><script src="assets/app.js" defer></script></head><body>
 <?php if (!$me): ?>
-<main class="login"><form class="panel" method="post"><div class="brand"><b>✦</b> Xchange Portal</div><h1>Bienvenido</h1><p class="muted">Centro de colaboración para auditorías y documentos.</p>
+<main class="login"><form class="panel" method="post"><div class="brand"><b>✦</b> Xchange Portal</div><h1>Bienvenido</h1><p class="muted">Colabora con tus clientes y gestiona los documentos de cada proyecto.</p>
 <?php if($error):?><p class="message"><?=h($error)?></p><?php endif;?>
 <input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="login">
 <div class="field"><label for="email">Correo electrónico</label><input id="email" name="email" type="email" required autocomplete="username"></div>
@@ -152,7 +152,7 @@ if ($me) {
 <button type="submit">Iniciar sesión</button><p class="small muted" style="margin-top:20px">Entorno local · PHP / SQL · sin dependencias externas</p></form></main>
 <?php else: ?>
 <div class="app"><aside class="side"><div class="brand"><b>✦</b> Xchange</div><nav><a href="index.php" class="active">◫ &nbsp; Solicitudes</a><a href="index.php#new-request">＋ &nbsp; Nueva solicitud</a><a href="index.php#team">♙ &nbsp; Equipo</a></nav><p class="small muted" style="margin-top:35px">Portal seguro de intercambio de archivos</p></aside>
-<main class="main"><header class="top"><div><p class="eyebrow">WORKSPACE / AUDITORÍA</p><h1><?=h($selected?$selected['title']:'Centro de solicitudes')?></h1><p class="muted"><?=h($selected?$selected['project_name']:($projects[0]['name']??'Sin proyectos asignados'))?></p></div><div class="topuser"><?=h($me['name'])?> <form method="post" style="display:inline-block;margin-left:12px"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="secondary">Salir</button></form></div></header>
+<main class="main"><header class="top"><div><p class="eyebrow">PROYECTOS / DOCUMENTOS</p><h1><?=h($selected?$selected['title']:'Centro de solicitudes')?></h1><p class="muted"><?=h($selected?$selected['project_name']:($projects[0]['name']??'Sin proyectos asignados'))?></p></div><div class="topuser"><?=h($me['name'])?> <form method="post" style="display:inline-block;margin-left:12px"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="secondary">Salir</button></form></div></header>
 <?php if($error):?><p class="message"><?=h($error)?></p><?php endif;?>
 <?php if($selected):?>
 <p><a href="index.php?project=<?=$projectId?>">← Volver a solicitudes</a></p>

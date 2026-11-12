@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-12 — Colaboración por proyecto entre compañía y cliente
+- Actualizado el alcance del producto, la interfaz y el roadmap para centrar el portal en la gestión de solicitudes y documentos por proyecto. La demo muestra un proyecto de auditoría como ejemplo.
+
 ## 2026-11-12 — Acceso desde la raíz en XAMPP
 - Apache redirige la URL base a `public/`, desactiva el listado de carpetas y deniega el acceso web a directorios internos.
 

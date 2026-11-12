@@ -1,9 +1,11 @@
 # Xchange Portal
 
-Plataforma de colaboración para solicitudes de auditoría e intercambio de documentos, inspirada funcionalmente en EY Canvas Client Portal. Proyecto independiente, sin afiliación con EY.
+Xchange Portal es una plataforma de colaboración entre una compañía y sus clientes. La compañía puede gestionar varios proyectos y centralizar en cada uno las solicitudes de documentos, las entregas del cliente y su revisión.
+
+EY Canvas Client Portal es una referencia para el flujo de solicitudes e intercambio de documentos. Xchange Portal es un proyecto independiente, sin afiliación con EY.
 
 ## Objetivo
-**Primero entregar el flujo completo de document requests/sharing**: auditor crea solicitud → cliente recibe → adjunta archivos → auditor revisa → acepta o devuelve → auditoría queda registrada.
+El equipo de la compañía crea una solicitud en un proyecto, el cliente adjunta los documentos y el equipo los acepta o devuelve para corrección. El portal conserva los comentarios y el historial de cada solicitud.
 
 ## Stack y restricciones
 - PHP 8.2+ sin framework; MySQL/MariaDB compatible con XAMPP; PDO y consultas preparadas.

@@ -6,7 +6,7 @@
 **Seguimiento:** https://github.com/AVR1515/Xchange-Portal/issues
 
 ## Principios
-1. El intercambio de documentos es prioridad absoluta.
+1. La compañía gestiona varios proyectos con sus clientes. La prioridad es solicitar, recibir y revisar documentos dentro de cada proyecto.
 2. Cada milestone tiene **criterios verificables**, pruebas y documentación.
 3. Estado `[ ]` significa pendiente; `[x]` significa funcionalidad implementada y verificada. No confundir código de ejemplo con entrega terminada.
 4. Sin frameworks CSS ni CDNs ni dependencias de internet durante la ejecución.
@@ -44,23 +44,24 @@
 ## Definition of Done
 - Código en `main`, sin ramas ni PR.
 - Comprobado en entorno XAMPP con base de datos fresca.
-- Privilegios verificados: auditor, cliente, admin.
+- Privilegios verificados para el equipo de la compañía, el cliente y los administradores.
 - SQL con PDO preparado, CSRF en escrituras y escaping HTML en vistas.
 - Sin llamadas externas; recursos CSS/JS servidos localmente.
 - Funcionalidad y cambios registrados en `docs/CHANGELOG.md`.
 - Issue cerrada solo si satisface sus criterios de aceptación y hay evidencia de prueba.
 
 ## Casos de uso de aceptación del MVP
-1. Administrador crea auditor y cliente y los incorpora a un proyecto.
-2. Auditor solicita documento con título, descripción, prioridad y fecha de vencimiento.
+1. Un administrador incorpora al equipo de la compañía y al cliente a un proyecto.
+2. El equipo de la compañía solicita un documento con título, descripción, prioridad y fecha de vencimiento.
 3. Cliente inicia sesión y ve únicamente solicitudes de proyectos a los que pertenece.
 4. Cliente sube evidencia: nombre visible, MIME/tamaño validados, bytes en ubicación privada.
-5. Auditor descarga evidencia tras validar permisos y la acepta o devuelve con comentario.
+5. El equipo de la compañía descarga los documentos tras validar permisos y la acepta o devuelve con comentario.
 6. Cliente corrige o reenvía; historia y timestamps preservados.
 7. Usuario de otro proyecto no puede leer ni descargar evidencia ajena.
 8. Request overdue aparece automáticamente si venció y no fue aceptado.
 
 ## Roadmap de UI
+- Proyectos: creación, acceso por membresía y navegación entre proyectos de distintos clientes.
 - Dashboard: contador total, received/outstanding, accepted, overdue, próximas fechas, prioridades.
 - Requests: barra de búsqueda, filtros, estado y fechas, tabla con paginación.
 - Drawer detalle: descripción, asignados, vencimiento, archivos, comentarios, historial y acciones.
