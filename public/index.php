@@ -370,8 +370,19 @@ if ($me) {
     }
     $views=['requests'=>'Solicitudes','projects'=>'Proyectos','updates'=>'Actividad','team'=>'Equipo','account'=>'Mi cuenta'];
     if (in_array($role,['admin','auditor'],true)) $views['new']='Nueva solicitud';
-    $view=(string)($_GET['view']??'requests');
+    $view=(string)($_GET['view']??(isset($_GET['project'])?'requests':'projects'));
     if (!isset($views[$view])) $view='requests';
+    $projectStats=[];
+    if ($view==='projects' && !$selected) {
+        $summary=db()->prepare("SELECT pm.project_id, COUNT(r.id) AS total,
+            COUNT(CASE WHEN r.status='accepted' THEN 1 END) AS accepted,
+            COUNT(CASE WHEN r.status IN ('open','submitted','returned') THEN 1 END) AS active,
+            COUNT(CASE WHEN r.status IN ('open','submitted','returned') AND r.due_date<? THEN 1 END) AS overdue
+            FROM project_members pm LEFT JOIN requests r ON r.project_id=pm.project_id
+            WHERE pm.user_id=? GROUP BY pm.project_id");
+        $summary->execute([$today,$uid]);
+        foreach ($summary as $row) $projectStats[$row['project_id']]=$row;
+    }
     $viewUrl=static fn(string $key): string => '?'.http_build_query(['project'=>$projectId,'view'=>$key]);
     $listQuery=['project'=>$projectId]+$filters;
     if ($action==='export_requests' && $projectId) {
@@ -431,6 +442,7 @@ if ($me) {
 </aside>
 <main class="main" id="main-content" tabindex="-1">
   <header class="top">
+    <div><strong><?=h($selected?'Solicitudes':$views[$view])?></strong><br><span class="small muted"><?=h($activeProject['name']??'Xchange Portal')?></span></div>
     <div class="topuser">
       <span><?=h($me['name'])?></span>
       <form method="post">
@@ -440,7 +452,7 @@ if ($me) {
       </form>
     </div>
   </header>
-  <div class="page-heading">
+  <?php if ($selected || $view!=='projects'): ?><div class="page-heading">
     <div>
       <p class="eyebrow"><?=h($activeProject['name']??'Espacio de trabajo')?></p>
       <h1><?=h($selected?$selected['title']:$views[$view])?></h1>
@@ -448,7 +460,7 @@ if ($me) {
     <?php if (!$selected && $view==='requests' && isset($views['new'])): ?>
       <a class="btn" href="<?=h($viewUrl('new'))?>">＋ Nueva solicitud</a>
     <?php endif; ?>
-  </div>
+  </div><?php endif; ?>
 <?php if($error):?><p class="message"><?=h($error)?></p><?php endif;?>
 <?php if($selected):?>
 <p><a href="index.php?project=<?=$projectId?>">← Volver a solicitudes</a></p>
@@ -460,17 +472,37 @@ if ($me) {
 <?php if(!$documents):?><p class="muted" style="margin-top:18px">No hay documentos compartidos todavía.</p><?php endif;?></div></section>
 <section class="stack"><div class="panel"><h2>Comentarios</h2><?php foreach($comments as $c):?><div class="file"><div><strong><?=h($c['author_name'])?></strong> <span class="small muted"><?=h($c['created_at'])?></span><p><?=nl2br(h($c['body']))?></p></div></div><?php endforeach;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="comment"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="body">Nuevo comentario</label><textarea id="body" name="body" maxlength="5000" required></textarea></div><button>Publicar comentario</button></form></div><div class="panel"><h2>Actividad reciente</h2><?php foreach($events as $e):?><p class="small"><b><?=h($e['author_name'])?></b> · <?=h($e['action'])?><br><span class="muted"><?=h($e['created_at'])?> <?=h($e['details'])?></span></p><?php endforeach;?></div></section></div>
 <?php elseif ($view==='projects'): ?>
-<section class="panel" id="projects">
-  <h2>Proyectos</h2>
+<section id="projects">
+  <div class="panel workspace-intro">
+    <div><p class="eyebrow">TU ESPACIO DE TRABAJO</p><h1>Hola, <?=h($me['name'])?></h1><p class="muted">Gestiona tus proyectos, solicitudes y entregas de documentos.</p></div>
+    <?php if ($canCreateProject): ?><a class="btn" href="<?=h($viewUrl('projects'))?>&amp;create=1#project-editor">＋ Nuevo proyecto</a><?php endif; ?>
+  </div>
+  <div class="request-stats workspace-stats" aria-label="Resumen de proyectos">
+    <?php foreach (['projects'=>'Proyectos','active'=>'Solicitudes activas','accepted'=>'Aceptadas','overdue'=>'Vencidas'] as $metric=>$label): ?>
+      <div class="stat-card stat-<?=$metric?>"><strong><?=$metric==='projects'?count($projects):array_sum(array_column($projectStats,$metric))?></strong><span><?=h($label)?></span></div>
+    <?php endforeach; ?>
+  </div>
+  <h2>Mis proyectos</h2>
   <?php if (!$projects): ?><p class="muted">No tienes proyectos asignados.</p><?php endif; ?>
-  <?php foreach ($projects as $availableProject): ?>
-    <p><a href="?project=<?=$availableProject['id']?>" <?php if ((int)$availableProject['id']===$projectId): ?>aria-current="page"<?php endif; ?>><?=h($availableProject['name'])?></a></p>
-  <?php endforeach; ?>
-  <?php if ($activeProject && $activeProject['description']): ?><p><?=nl2br(h($activeProject['description']))?></p><?php endif; ?>
+  <div class="project-grid">
+    <?php foreach ($projects as $availableProject): ?>
+      <?php $stats=$projectStats[$availableProject['id']]; $percent=$stats['total']?round(100*$stats['accepted']/$stats['total']):0; ?>
+      <article class="panel project-card">
+        <div class="project-card-top"><span class="brand-icon" aria-hidden="true"><?=h(mb_strtoupper(mb_substr($availableProject['name'],0,1)))?></span><span class="result-count"><?=$percent?>%</span></div>
+        <h3><?=h($availableProject['name'])?></h3>
+        <?php if ($availableProject['description']): ?><p class="muted"><?=h($availableProject['description'])?></p><?php endif; ?>
+        <div class="project-card-status"><span class="small muted"><?=$stats['total']?> solicitudes · <?=$stats['accepted']?> aceptadas</span>
+        <progress max="100" value="<?=$percent?>" aria-label="Porcentaje de solicitudes aceptadas"></progress></div>
+        <div class="actions"><a class="btn" href="?project=<?=$availableProject['id']?>">Abrir</a>
+        <?php if ($availableProject['role']==='admin'): ?><a class="btn secondary" href="?project=<?=$availableProject['id']?>&amp;view=projects&amp;edit=1#project-editor">Editar</a><?php endif; ?></div>
+      </article>
+    <?php endforeach; ?>
+  </div>
+  <div id="project-editor" class="project-editor">
   <?php foreach (['create_project'=>'Nuevo proyecto','edit_project'=>'Editar proyecto'] as $projectAction=>$label): ?>
     <?php if ($projectAction==='create_project' ? !$canCreateProject : $role!=='admin') continue; ?>
     <?php $editing=$projectAction==='edit_project'; ?>
-    <details>
+    <details class="panel" <?php if (isset($_GET[$editing?'edit':'create']) || ($error && $postAction===$projectAction)): ?>open<?php endif; ?>>
       <summary><?=h($label)?></summary>
       <form method="post">
         <input type="hidden" name="csrf" value="<?=h(csrf())?>">
@@ -483,7 +515,7 @@ if ($me) {
     </details>
   <?php endforeach; ?>
   <?php if ($role==='admin'): ?>
-    <details>
+    <details class="panel">
       <summary>Historial de administración</summary>
       <?php $projectEventLabels=['project_created'=>'Proyecto creado','project_updated'=>'Proyecto editado','project_member_added'=>'Miembro añadido','project_member_role_changed'=>'Rol actualizado','project_member_removed'=>'Miembro retirado']; ?>
       <?php if (!$projectHistory): ?><p class="muted">Todavía no hay cambios registrados.</p><?php endif; ?>
@@ -492,6 +524,7 @@ if ($me) {
       <?php endforeach; ?>
     </details>
   <?php endif; ?>
+  </div>
 </section>
 <?php elseif ($view==='account'): ?>
 <details class="panel" id="account" open>

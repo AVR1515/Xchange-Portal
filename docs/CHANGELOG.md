@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-12 — Inicio de proyectos y tema oscuro
+- El portal abre en Mis proyectos con tarjetas, avance documental e indicadores calculados sobre los proyectos del usuario.
+- El tema usa CSS nativo y una paleta azul oscura. Se verificó el inicio en Chrome a 360, 768 y 1440 px.
+
 ## 2026-11-12 — Entrega de varios archivos
 - Una solicitud admite hasta diez archivos por envío, sujeto a los límites de XAMPP. Si uno falla, se rechaza la entrega completa.
 - Se verificaron la carga de dos adjuntos, el rechazo de un envío mixto sin guardar archivos parciales y el flujo de devolución y reenvío.
