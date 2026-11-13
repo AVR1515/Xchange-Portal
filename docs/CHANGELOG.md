@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-12 — Vista rápida de solicitudes
+- El listado abre un panel lateral con estado, responsable, fecha límite y acceso al detalle. Verificados Escape y retorno del foco en Chrome a 360 y 1280 px.
+
 ## 2026-11-12 — Rediseño del espacio de trabajo
 - El listado de solicitudes pasa a ser la vista principal, con indicadores que abren sus filtros, selector de proyecto, navegación por secciones y acceso directo a crear una solicitud.
 - Añadidos el filtro Asignadas a mí y el orden por fecha límite. Ambos se aplican al CSV.

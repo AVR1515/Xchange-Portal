@@ -96,6 +96,17 @@ tr:hover td { background: #f3f7ff; }
 .message { background: #e6eefc; color: #203d70; }
 .file { border-color: var(--line); }
 .detail .actions .field { flex-basis: 100%; }
+.preview-trigger { padding: 4px 8px; margin-inline-start: 8px; font-size: .75rem; }
+.request-preview {
+  position: fixed; inset: 0 0 0 auto; margin: 0; height: 100%; max-height: 100%;
+  width: min(100%, 460px); max-width: 100%; padding: 24px; border: 0;
+  background: var(--panel); color: var(--txt); box-shadow: -12px 0 40px #14213829;
+}
+.request-preview::backdrop { background: #14213866; }
+.request-preview form { text-align: right; margin-bottom: 20px; }
+.preview-content { overflow-wrap: anywhere; }
+.preview-content dt { color: var(--muted); }
+.preview-content dd { margin: 0 0 12px; }
 @media (max-width: 680px) {
   .app { display: block; }
   .side .brand, .project-picker { margin-bottom: 12px; }

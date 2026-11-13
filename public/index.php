@@ -509,11 +509,24 @@ if ($me) {
   <?php endif; ?>
   <?php if ($projectId): ?><a href="?<?=h(http_build_query($listQuery+['action'=>'export_requests']))?>">Descargar CSV</a><?php endif; ?>
 </form></div>
-<div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th></tr></thead><tbody><?php foreach($visibleRequests as $r):?><tr data-request-row><td><?=h((string)$r['id'])?></td><td><a href="?request=<?=$r['id']?>"><?=h($r['title'])?></a></td><td><?=h($r['assigned_name']??'—')?></td><td><span class="pill <?=h($r['status'])?>"><?=h($statusLabels[$r['status']])?></span></td><td><?=h($priorityLabels[$r['priority']])?></td><td><?=h($r['due_date']??'—')?></td></tr><?php endforeach;?></tbody></table><?php if (!$visibleRequests): ?><div class="empty-list">
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th></tr></thead><tbody><?php foreach($visibleRequests as $r):?><tr data-request-row><td><?=h((string)$r['id'])?></td><td><a href="?request=<?=$r['id']?>"><?=h($r['title'])?></a>
+<button type="button" class="preview-trigger secondary" data-preview="preview-<?=$r['id']?>" aria-label="Vista rápida de <?=h($r['title'])?>" hidden>Vista rápida</button>
+<template id="preview-<?=$r['id']?>">
+  <h2><?=h($r['title'])?></h2>
+  <p><?=nl2br(h($r['description']))?></p>
+  <dl><dt>Estado</dt><dd><?=h($statusLabels[$r['status']])?></dd>
+  <dt>Responsable</dt><dd><?=h($r['assigned_name']??'Sin asignar')?></dd>
+  <dt>Fecha límite</dt><dd><?=h($r['due_date']??'Sin fecha')?></dd></dl>
+  <a class="btn" href="?request=<?=$r['id']?>">Abrir solicitud</a>
+</template></td><td><?=h($r['assigned_name']??'—')?></td><td><span class="pill <?=h($r['status'])?>"><?=h($statusLabels[$r['status']])?></span></td><td><?=h($priorityLabels[$r['priority']])?></td><td><?=h($r['due_date']??'—')?></td></tr><?php endforeach;?></tbody></table><?php if (!$visibleRequests): ?><div class="empty-list">
   <strong><?=$requests?'No hay coincidencias':'Todavía no hay solicitudes'?></strong>
   <p class="muted"><?=$requests?'Cambia o limpia los filtros para ampliar la búsqueda.':'Las solicitudes de documentos de este proyecto aparecerán aquí.'?></p>
   <?php if (!$requests && isset($views['new'])): ?><a href="<?=h($viewUrl('new'))?>">Crear la primera solicitud</a><?php endif; ?>
 </div><?php endif; ?></div>
+<dialog class="request-preview" aria-label="Vista rápida de solicitud">
+  <form method="dialog"><button class="secondary" autofocus>Cerrar</button></form>
+  <div class="preview-content"></div>
+</dialog>
 <?php if ($pageCount>1): ?>
   <nav class="actions" aria-label="Paginación de solicitudes">
     <?php if ($page>1): ?><a href="?<?=h(http_build_query($listQuery+['page'=>$page-1]))?>">Anterior</a><?php endif; ?>

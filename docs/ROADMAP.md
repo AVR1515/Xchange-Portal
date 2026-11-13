@@ -23,7 +23,7 @@
 | 1B | P0 | Subir, descargar y compartir documentos protegidos | #4 | 🟡 TXT, PDF, PNG, DOCX y XLSX verificados, junto con tamaño, MIME, permisos e integridad |
 | 1C | P0 | Workflow de revisión, comentarios, historia | #5 #6 | 🟡 Devolución con motivo, reenvío, aceptación, historial y revisión concurrente verificados |
 | 2 | P0 | Administrar proyectos, clientes y miembros | #8 | 🟡 Alta, cambio de rol, revocación de acceso e historial verificados |
-| 2 | P1 | UI dashboard, métricas, CSV | #7 #9 | 🟡 Listado y detalle adaptables, filtro personal y CSV verificados. Panel lateral pendiente |
+| 2 | P1 | UI dashboard, métricas, CSV | #7 #9 | 🟢 Listado, detalle, panel lateral con teclado, filtro personal y CSV verificados |
 | 3 | P2 | Versiones, avisos y QA integral | #10 #11 | 🟡 Versiones, avisos y restauración SQL con verificación de archivos comprobados |
 
 ## Actualización visual y controles de demo
@@ -40,10 +40,10 @@
 
 ## Corte de implementación 2026-11-12
 
-- El tablero interactivo registra 9 de 11 tareas completadas (82 %). Siguen en progreso la interfaz del detalle (#7) y la validación integral de entrega (#11).
+- El tablero interactivo registra 10 de 11 tareas completadas (91 %). Sigue en progreso la validación integral de entrega (#11).
 - El portal incluye administración de proyectos y miembros, edición y filtros de solicitudes, paginación, CSV, avisos y versiones por nombre.
 - El flujo documental básico y el aislamiento de proyectos, solicitudes y descargas se probaron en XAMPP con cuentas distintas.
-- Se verificaron el inicio de sesión y la descarga íntegra desde una copia aislada restaurada. Se comprobó el salto al contenido con teclado y el detalle en móvil. Queda validar la navegación completa con teclado y el panel lateral de detalle.
+- Se verificaron el inicio de sesión y la descarga íntegra desde una copia aislada restaurada. En Chrome se comprobaron el listado y el detalle en móvil y escritorio, el salto al contenido y el cierre de la vista rápida con Escape y retorno del foco.
 
 ## Definition of Done
 - Código en `main`, sin ramas ni PR.
