@@ -41,7 +41,7 @@
 ## Corte de implementación 2026-11-12
 - El portal incluye administración de proyectos y miembros, edición y filtros de solicitudes, paginación, CSV, avisos y versiones por nombre.
 - El flujo documental básico y el aislamiento de proyectos, solicitudes y descargas se probaron en XAMPP con cuentas distintas.
-- Quedan pruebas del detalle con teclado y en móvil, y una sesión del portal sobre una base restaurada.
+- Se verificaron el inicio de sesión y la descarga íntegra desde una copia aislada restaurada. Quedan pruebas del detalle con teclado y en móvil.
 
 ## Definition of Done
 - Código en `main`, sin ramas ni PR.

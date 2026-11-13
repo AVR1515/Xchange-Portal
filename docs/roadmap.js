@@ -31,7 +31,7 @@ const VERIFIED = {
  8: 'Se verificó la creación y edición de un proyecto, el alta de una cuenta cliente y el aislamiento entre dos proyectos. También se verificaron la asociación de cuentas existentes, el cambio de rol y el retiro de miembros con revocación de acceso.',
  9: 'Se verificaron el CSV filtrado, el bloqueo de exportación desde otro proyecto y el tratamiento de títulos que podrían interpretarse como fórmulas y los conteos por estado.',
  10: 'Se comprobaron dos versiones del mismo nombre y avisos por solicitudes y comentarios. Se comprobó el aviso de vencimiento. Se comprobó que el portal rechaza un archivo alterado al descargarlo.',
- 11: 'La URL base redirige al formulario de acceso y sus recursos cargan en XAMPP. Se restauró una copia SQL en una base aislada y se comprobó el SHA-256 de dos archivos respaldados. Queda probar el portal contra esa copia restaurada.'
+ 11: 'Se restauró una copia SQL en una base aislada, se comprobó el SHA-256 de dos archivos y se verificaron el inicio de sesión y la descarga desde el portal restaurado.'
 };
 const PHASES = [
  {id:0,name:'Fundamentos',subtitle:'Arquitectura y seguridad',label:'FASE 00'},
