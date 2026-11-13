@@ -23,7 +23,7 @@
 | 1B | P0 | Subir, descargar y compartir documentos protegidos | #4 | 🟡 TXT, PDF, rechazo por tamaño y MIME, y aislamiento verificados |
 | 1C | P0 | Workflow de revisión, comentarios, historia | #5 #6 | 🟡 Devolución con motivo, reenvío, aceptación, historial y revisión concurrente verificados |
 | 2 | P0 | Administrar proyectos, clientes y miembros | #8 | 🟡 Creación, edición, alta de miembros y cambio de rol verificados |
-| 2 | P1 | UI dashboard, métricas, CSV | #7 #9 | 🟡 CSV filtrado y permisos verificados. Métricas y experiencia móvil por validar |
+| 2 | P1 | UI dashboard, métricas, CSV | #7 #9 | 🟡 Métricas por estado, CSV filtrado y permisos verificados. Experiencia móvil por validar |
 | 3 | P2 | Versiones, avisos y QA integral | #10 #11 | 🟡 Versiones, avisos y restauración SQL con verificación de archivos comprobados |
 
 ## Actualización visual y controles de demo
@@ -41,7 +41,7 @@
 ## Corte de implementación 2026-11-12
 - El portal incluye administración de proyectos y miembros, edición y filtros de solicitudes, paginación, CSV, avisos y versiones por nombre.
 - El flujo documental básico y el aislamiento de proyectos, solicitudes y descargas se probaron en XAMPP con cuentas distintas.
-- Quedan pruebas de concurrencia, formatos y tamaños de archivos, uso en móvil y restauración de respaldos.
+- Quedan pruebas de formatos Office, uso en móvil y una sesión del portal sobre una base restaurada.
 
 ## Definition of Done
 - Código en `main`, sin ramas ni PR.

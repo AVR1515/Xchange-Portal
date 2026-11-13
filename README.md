@@ -73,4 +73,4 @@ Capturas aportadas por el solicitante: dashboard, request list, detalle, team me
 4. Abrir `http://localhost/Xchange-Portal/`. Apache redirige a `public/`, que también se puede abrir directamente.
 5. Seguir `docs/XAMPP.md`, `docs/SECURITY.md` y `docs/ROADMAP.md`.
 
-**Pendiente de validación:** más formatos y tamaños de archivos, revisiones concurrentes, experiencia móvil y restauración de respaldos. Los documentos se agrupan como versiones por nombre dentro de una misma solicitud.
+**Pendiente de validación:** formatos Office, experiencia móvil y acceso desde el portal a una copia restaurada. Ya se verificaron revisiones concurrentes, el rechazo de archivos demasiado grandes y la restauración SQL con verificación de archivos. Los documentos se agrupan como versiones por nombre dentro de una misma solicitud.

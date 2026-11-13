@@ -27,6 +27,7 @@ const VERIFIED = {
  4: 'Se verificaron la carga de TXT, la descarga íntegra y el bloqueo de acceso a archivos desde otro proyecto. También se verificaron PDF, PNG, rechazo de MIME incorrecto y rechazo por tamaño.',
  5: 'Se verificaron la devolución con motivo obligatorio, el reenvío y la aceptación, así como el bloqueo de la revisión para clientes. Con dos sesiones concurrentes se registró un solo cambio de estado.',
  6: 'Se verificó la publicación de comentarios y la aparición de los cambios de estado en el historial.',
+ 7: 'Chrome abrió el tablero autenticado a 360, 768 y 1280 píxeles sin desplazamiento horizontal de página. Queda validar el detalle y el recorrido con teclado.',
  8: 'Se verificó la creación y edición de un proyecto, el alta de una cuenta cliente y el aislamiento entre dos proyectos. También se verificó asociar una cuenta existente y actualizar el rol de un miembro.',
  9: 'Se verificaron el CSV filtrado, el bloqueo de exportación desde otro proyecto y el tratamiento de títulos que podrían interpretarse como fórmulas y los conteos por estado.',
  10: 'Se comprobaron dos versiones del mismo nombre y avisos por solicitudes y comentarios. Se comprobó el aviso de vencimiento. Se comprobó que el portal rechaza un archivo alterado al descargarlo.',

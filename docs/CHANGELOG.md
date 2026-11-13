@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-12 — Filtros en pantallas pequeñas
+- Añadido un enlace para limpiar filtros y retirado el filtro antiguo del navegador. Chrome verificó el tablero autenticado a 360, 768 y 1280 píxeles sin desplazamiento horizontal de página.
+
 ## 2026-11-12 — Distribución de estados
 - El tablero muestra la distribución de solicitudes por estado y permite abrir cada filtro desde la métrica.
 - Se verificó la carga y descarga de PNG y el rechazo de una descarga cuyo SHA-256 difiere del registrado.
