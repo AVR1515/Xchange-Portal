@@ -474,16 +474,13 @@ if ($me) {
     <a class="account-link" href="<?=h($viewUrl('account'))?>"><?=h($me['name'])?></a>
     <form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="secondary">Salir</button></form>
   </div>
-</header>
-<aside class="side">
-  <nav aria-label="Navegación del proyecto">
+  <nav class="workspace-nav" aria-label="Navegación del proyecto">
     <?php foreach ($views as $key=>$label): ?>
       <?php if ($key==='new') continue; ?>
-      <?php $icons=['projects'=>'⌂','requests'=>'☷','updates'=>'◷','team'=>'♙','account'=>'⚙']; ?>
-      <a href="<?=h($viewUrl($key))?>" aria-label="<?=h($label)?>" title="<?=h($label)?>" <?php if ($view===$key): ?>class="active" aria-current="page"<?php endif; ?>><?=h($icons[$key])?></a>
+      <a href="<?=h($viewUrl($key))?>" <?php if ($view===$key): ?>aria-current="page"<?php endif; ?>><?=h($label)?></a>
     <?php endforeach; ?>
   </nav>
-</aside>
+</header>
 <main class="main" id="main-content" tabindex="-1">
   <?php if ($selected || $view!=='projects'): ?><div class="page-heading">
     <div>
@@ -498,13 +495,13 @@ if ($me) {
 <?php if ($flash && !$selected): ?><p class="message success" role="status"><?=h($flash)?></p><?php endif; ?>
 <?php if ($view==='projects'): ?>
 <section id="projects">
-  <div class="page-heading">
-    <h1>Hola, <?=h($me['name'])?></h1>
+  <div class="page-heading workspace-heading">
+    <div><h1>Mis proyectos</h1><p class="muted">Consulta el avance y abre las solicitudes de cada proyecto.</p></div>
     <?php if ($canCreateProject): ?><a class="btn" href="<?=h($viewUrl('projects'))?>&amp;create=1#project-editor">＋ Nuevo proyecto</a><?php endif; ?>
   </div>
   <div class="overview-layout">
-  <div class="panel project-directory">
-  <h2>Proyectos <span class="result-count"><?=count($projects)?></span></h2>
+  <div class="project-directory">
+  <h2>Espacios de trabajo <span class="result-count"><?=count($projects)?></span></h2>
   <label class="small muted" for="project-search">Buscar proyectos</label>
   <input type="search" id="project-search" placeholder="Nombre del proyecto">
   <?php if (!$projects): ?><p class="muted">No tienes proyectos asignados.</p><?php endif; ?>
@@ -516,6 +513,7 @@ if ($me) {
         <h3><?=h($availableProject['name'])?></h3>
         <?php if ($availableProject['description']): ?><p class="muted"><?=h($availableProject['description'])?></p><?php endif; ?>
         <div class="project-card-status"><span class="small muted"><?=$stats['total']?> solicitudes · <?=$stats['accepted']?> aceptadas</span>
+        <?php if ($stats['overdue']): ?><a class="project-overdue" href="?project=<?=$availableProject['id']?>&amp;due=overdue"><?=$stats['overdue']?> vencidas</a><?php endif; ?>
         <progress max="100" value="<?=$percent?>" aria-label="Porcentaje de solicitudes aceptadas"></progress></div>
         <div class="actions"><a class="btn" href="?project=<?=$availableProject['id']?>">Abrir</a>
         <?php if ($availableProject['role']==='admin'): ?><a class="btn secondary" href="?project=<?=$availableProject['id']?>&amp;view=projects&amp;edit=1#project-editor">Editar</a><?php endif; ?></div>
@@ -535,11 +533,12 @@ if ($me) {
       </section>
       <?php require dirname(__DIR__).'/app/due-chart.php'; ?>
     </div>
-    <section class="panel"><h2>Vencidas por proyecto</h2>
+    <section class="panel attention-panel"><h2>Requieren atención</h2>
       <?php foreach ($projects as $project): ?>
+        <?php if (!$projectStats[$project['id']]['overdue']) continue; ?>
         <p><a href="?project=<?=$project['id']?>&amp;due=overdue"><?=h($project['name'])?></a> <span class="result-count"><?=$projectStats[$project['id']]['overdue']?></span></p>
       <?php endforeach; ?>
-      <?php if (!$projects): ?><p class="muted">No tienes proyectos asignados.</p><?php endif; ?>
+      <?php if (!array_sum(array_column($projectStats,'overdue'))): ?><p class="muted">No hay solicitudes vencidas en tus proyectos.</p><?php endif; ?>
     </section>
   </div>
   </div>
