@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-13 — Espacio de trabajo adaptable
+- Barra lateral minimizable con preferencia guardada, barra de contexto con proyecto y cuenta, Poppins local y componentes redondeados.
+- Gráficos de estados y prioridades, junto al gráfico de vencimientos.
+
 ## 2026-11-13 — Paleta cálida y navegación del detalle
 - El portal usa una paleta ciruela, terracota y crema sobre la estructura de proyectos, solicitudes y detalle lateral.
 - El detalle mantiene el foco dentro del diálogo y lo devuelve a la solicitud al cerrar. El listado ignora valores de filtro que no sean texto.

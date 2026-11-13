@@ -1,16 +1,31 @@
 'use strict';
 const sidebarToggle = document.querySelector('.sidebar-toggle');
 if (sidebarToggle) {
+  const app = sidebarToggle.closest('.app');
   const sidebarContent = document.getElementById('sidebar-content');
+  const collapse = document.querySelector('.sidebar-collapse');
   const narrowScreen = window.matchMedia('(max-width: 780px)');
+  let compact = false;
+  try { compact = localStorage.getItem('xchange-sidebar') === 'compact'; } catch {}
   function setSidebarOpen(open) {
     sidebarContent.hidden = !open;
     sidebarToggle.setAttribute('aria-expanded', String(open));
   }
   function syncSidebar() {
     sidebarToggle.hidden = !narrowScreen.matches;
+    collapse.hidden = narrowScreen.matches;
+    app.classList.toggle('sidebar-compact', compact && !narrowScreen.matches);
+    collapse.setAttribute('aria-expanded', String(!compact));
+    const label = compact ? 'Expandir barra lateral' : 'Minimizar barra lateral';
+    collapse.setAttribute('aria-label', label);
+    collapse.title = label;
     setSidebarOpen(!narrowScreen.matches);
   }
+  collapse.addEventListener('click', () => {
+    compact = !compact;
+    try { localStorage.setItem('xchange-sidebar', compact ? 'compact' : 'expanded'); } catch {}
+    syncSidebar();
+  });
   sidebarToggle.addEventListener('click', () => setSidebarOpen(sidebarContent.hidden));
   narrowScreen.addEventListener('change', syncSidebar);
   syncSidebar();

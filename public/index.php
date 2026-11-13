@@ -468,23 +468,29 @@ if ($me) {
 <a class="skip-link" href="#main-content">Saltar al contenido</a>
 <div class="app">
 <aside class="portal-sidebar" aria-label="Xchange Portal">
-  <a class="portal-brand" href="?view=projects"><b class="brand-icon">X</b> Xchange Portal</a>
+  <a class="portal-brand" href="?view=projects" aria-label="Xchange Portal"><b class="brand-icon" aria-hidden="true">X</b><span class="sidebar-label">Xchange Portal</span></a>
   <button type="button" class="secondary sidebar-toggle" aria-controls="sidebar-content" aria-expanded="true" hidden>Menú</button>
   <div id="sidebar-content" class="sidebar-content">
-  <?php if ($activeProject && $view!=='projects'): ?><span class="portal-project"><?=h($activeProject['name'])?></span><?php endif; ?>
   <nav class="workspace-nav" aria-label="Navegación del proyecto">
     <?php foreach ($views as $key=>$label): ?>
       <?php if ($key==='new') continue; ?>
-      <a href="<?=h($viewUrl($key))?>" <?php if ($view===$key): ?>aria-current="page"<?php endif; ?>><?=h($label)?></a>
+      <?php $navIcons=['requests'=>'☷','projects'=>'▦','updates'=>'◷','team'=>'♙','account'=>'⚙']; ?>
+      <a href="<?=h($viewUrl($key))?>" aria-label="<?=h($label)?>" title="<?=h($label)?>" <?php if ($view===$key): ?>aria-current="page"<?php endif; ?>><span class="nav-icon" aria-hidden="true"><?=h($navIcons[$key])?></span><span class="sidebar-label"><?=h($label)?></span></a>
     <?php endforeach; ?>
   </nav>
   <div class="sidebar-account">
-    <a class="account-link" href="<?=h($viewUrl('account'))?>"><?=h($me['name'])?></a>
-    <form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="secondary">Salir</button></form>
+    <form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="secondary" aria-label="Cerrar sesión" title="Cerrar sesión"><span aria-hidden="true">↪</span><span class="sidebar-label"> Salir</span></button></form>
   </div>
   </div>
 </aside>
 <main class="main" id="main-content" tabindex="-1">
+  <header class="workspace-topbar">
+    <div class="workspace-context">
+      <button type="button" class="secondary sidebar-collapse" aria-label="Minimizar barra lateral" aria-controls="sidebar-content" aria-expanded="true" title="Minimizar barra lateral" hidden>☰</button>
+      <div><span class="small muted">Proyecto activo</span><strong><?=h($activeProject['name']??'Sin proyecto asignado')?></strong></div>
+    </div>
+    <a class="account-link" href="<?=h($viewUrl('account'))?>"><span class="account-avatar" aria-hidden="true"><?=h(mb_strtoupper(mb_substr($me['name'],0,1)))?></span><span><?=h($me['name'])?></span></a>
+  </header>
   <?php if ($selected || $view!=='projects'): ?><div class="page-heading">
     <div>
       <p class="eyebrow"><?=h($activeProject['name']??'Espacio de trabajo')?></p>
@@ -514,7 +520,10 @@ if ($me) {
       </div>
     <?php endforeach; ?>
   </div>
-  <?php require dirname(__DIR__).'/app/due-chart.php'; ?>
+  <div class="dashboard-charts">
+    <?php require dirname(__DIR__).'/app/due-chart.php'; ?>
+    <?php $chartRows=$projectStats; require dirname(__DIR__).'/app/status-chart.php'; ?>
+  </div>
   <div class="overview-layout">
   <div class="panel project-directory">
   <h2>Espacios de trabajo <span class="result-count"><?=count($projects)?></span></h2>
@@ -597,6 +606,31 @@ if ($me) {
   <?php endforeach; ?>
 </div>
 <?php require dirname(__DIR__).'/app/due-chart.php'; ?></div>
+<?php $chartRows=[['total'=>$counts['total'],'active'=>$counts['open']+$counts['submitted']+$counts['returned'],'accepted'=>$counts['accepted']]]; ?>
+<details class="panel request-analysis"><summary>Análisis del proyecto</summary>
+  <div class="dashboard-charts">
+    <?php require dirname(__DIR__).'/app/status-chart.php'; ?>
+    <section class="panel status-chart">
+      <h2>Prioridad de solicitudes activas</h2>
+      <?php
+      $activeByPriority=array_fill_keys(array_keys($priorityLabels),0);
+      foreach ($requests as $request) {
+          if (!in_array($request['status'],['accepted','cancelled'],true)) $activeByPriority[$request['priority']]++;
+      }
+      $activeTotal=array_sum($activeByPriority);
+      ?>
+      <?php if (!$activeTotal): ?><p class="chart-empty muted">No hay solicitudes activas.</p>
+      <?php else: ?><ul>
+        <?php foreach ($priorityLabels as $priority=>$label): ?>
+          <li><a href="?<?=h(http_build_query(['project'=>$projectId,'priority'=>$priority]))?>"><?=h($label)?></a>
+            <strong><?=$activeByPriority[$priority]?></strong>
+            <progress max="<?=$activeTotal?>" value="<?=$activeByPriority[$priority]?>" aria-label="<?=h($label)?>"></progress>
+          </li>
+        <?php endforeach; ?>
+      </ul><?php endif; ?>
+    </section>
+  </div>
+</details>
 <section class="panel"><div class="toolbar"><div><h2>Lista de solicitudes <span class="result-count"><?=count($filtered)?></span></h2></div><form method="get" class="request-filters">
   <input type="hidden" name="project" value="<?=$projectId?>">
   <input name="q" type="search" value="<?=h($filters['q'])?>" placeholder="Buscar solicitudes…" aria-label="Buscar solicitudes">

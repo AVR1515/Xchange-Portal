@@ -26,7 +26,7 @@ El equipo de la compañía crea una solicitud en un proyecto, el cliente adjunta
 ## Diseño visual actualizado (referencia PlannerDome)
 
 - Modo oscuro más profundo, superficies en gris azulado casi negro y **un solo acento azul**; sin gradientes llamativos.
-- Tipografía geométrica: se prioriza **Poppins si está instalada localmente** y se usan alternativas locales (Century Gothic, Avenir Next, Lato, Trebuchet MS y system-ui). **No se descargan ni distribuyen fuentes de terceros**; la captura no contiene los archivos originales de la tipografía y no se puede garantizar una copia exacta.
+- El portal PHP incluye **Poppins** en WOFF2 y su licencia SIL Open Font License en `public/assets/fonts/`. La fuente se sirve desde el propio portal.
 - `demo/theme.css` aplica el diseño a la demo HTML. `public/assets/theme.css` aplica la misma dirección visual al PHP.
 - `demo/enhancements.js` añade filtro por vencimiento, orden por fecha/prioridad/título, exportación CSV y reinicio de registros de demostración.
 - Las tareas de la demo **no se sincronizan** con SQL, GitHub ni otros navegadores.

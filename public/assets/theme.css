@@ -323,3 +323,47 @@ button, .btn, input, select, textarea, .stat-card { border-radius: 4px; }
 .due-bars meter::-webkit-meter-optimum-value { background: #3e858b; }
 @media (max-width: 1040px) { .dashboard-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 380px) { .dashboard-metric { padding: 10px; gap: 7px; } }
+
+@font-face { font-family: Poppins; src: url("fonts/poppins-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: Poppins; src: url("fonts/poppins-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: Poppins; src: url("fonts/poppins-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+
+body { font-family: Poppins, "Segoe UI", sans-serif; }
+.app { grid-template-columns: 268px minmax(0, 1fr); }
+.app.sidebar-compact { grid-template-columns: 76px minmax(0, 1fr); }
+.app .main { max-width: none; min-width: 0; }
+.portal-sidebar { padding-inline: 18px; }
+.sidebar-compact .portal-sidebar { padding-inline: 10px; }
+.sidebar-compact .sidebar-label { display: none; }
+.sidebar-compact .portal-brand, .sidebar-compact .workspace-nav a { justify-content: center; }
+.sidebar-compact .sidebar-account { justify-items: center; }
+.workspace-nav a { display: flex; align-items: center; gap: 10px; min-height: 44px; border-radius: 11px; }
+.nav-icon { flex: 0 0 20px; text-align: center; font: 18px system-ui, sans-serif; }
+.workspace-topbar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 24px; padding: 12px 16px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+}
+.workspace-context { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.workspace-context strong, .workspace-context .small { display: block; overflow-wrap: anywhere; }
+.workspace-topbar .account-link { font-size: .85rem; }
+.sidebar-collapse { min-width: 40px; padding: 8px; }
+button, .btn, input, textarea, select { border-radius: 11px; }
+.app .panel, .app #projects .panel, .login .panel, .request-drawer, .request-preview { border-radius: 16px; }
+.stat-card, .dashboard-metric { border-radius: 15px; }
+.app .project-grid { border-top: 0; gap: 8px; }
+.app .project-card { padding: 13px; border: 1px solid var(--line); border-radius: 12px; background: #fafaff; }
+.dashboard-charts { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; margin-bottom: 18px; }
+.status-chart ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.status-chart li { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; }
+.status-chart progress { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); }
+.status-chart li:nth-child(2) progress { accent-color: #23797d; }
+.status-chart li:nth-child(3) progress { accent-color: #69758d; }
+.request-analysis { margin-bottom: 16px; }
+.request-analysis .status-chart { border: 0; padding: 12px 0 0; }
+.request-analysis .dashboard-charts { margin-bottom: 0; }
+@media (max-width: 960px) { .dashboard-charts { grid-template-columns: 1fr; } }
+@media (max-width: 780px) {
+  .portal-sidebar { padding-inline: 14px; }
+  .workspace-topbar { margin-bottom: 16px; }
+}
