@@ -21,11 +21,11 @@ const TASKS = [
  {id:11,phase:3,priority:'P2',status:'progress',icon:'⚙',title:'Pruebas, seguridad y entrega XAMPP',summary:'QA funcional, documentación y validación de seguridad antes de producción.',criteria:['Ejecución reproducible en Windows XAMPP','Pruebas de autorización y subida','Checklist de seguridad documentado','Backups y restauración probados']}
 ];
 const VERIFIED = {
- 1: 'En XAMPP se verificaron el inicio y cierre de sesión y el aislamiento de proyectos, solicitudes y descargas. Queda validar CSRF y sesiones en mayor profundidad.',
+ 1: 'En XAMPP se verificaron el inicio y cierre de sesión y el aislamiento de proyectos, solicitudes y descargas. También se comprobó el rechazo de un POST sin token CSRF.',
  2: 'El esquema se importó en MariaDB y se creó un proyecto demo con tres miembros. Queda verificar claves, índices y aislamiento con varios proyectos.',
  3: 'Se verificaron creación, edición, filtros combinados y permisos de acceso. También se verificó la paginación con 26 solicitudes. Queda validar la asignación.',
- 4: 'Se verificaron la carga de TXT, la descarga íntegra y el bloqueo de acceso a archivos desde otro proyecto. Quedan más tipos y tamaños.',
- 5: 'Se verificaron la devolución con motivo obligatorio, el reenvío y la aceptación, así como el bloqueo de la revisión para clientes. Quedan las pruebas concurrentes.',
+ 4: 'Se verificaron la carga de TXT, la descarga íntegra y el bloqueo de acceso a archivos desde otro proyecto. También se verificaron PDF, rechazo de MIME incorrecto y rechazo por tamaño.',
+ 5: 'Se verificaron la devolución con motivo obligatorio, el reenvío y la aceptación, así como el bloqueo de la revisión para clientes. Con dos sesiones concurrentes se registró un solo cambio de estado.',
  6: 'Se verificó la publicación de comentarios y la aparición de los cambios de estado en el historial.',
  8: 'Se verificó la creación y edición de un proyecto, el alta de una cuenta cliente y el aislamiento entre dos proyectos. También se verificó asociar una cuenta existente y actualizar el rol de un miembro.',
  9: 'Se verificaron el CSV filtrado, el bloqueo de exportación desde otro proyecto y el tratamiento de títulos que podrían interpretarse como fórmulas.',

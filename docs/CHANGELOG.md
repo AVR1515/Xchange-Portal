@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-12 — Historial de administración y revisión concurrente
+- Los administradores pueden consultar los cambios del proyecto y de sus miembros en el portal.
+- Se verificó en XAMPP que, con dos sesiones de revisión sobre la misma solicitud, solo una registra el cambio de estado. También se verificó el rechazo de un POST sin token CSRF.
+
 ## 2026-11-12 — Filtros de vencimiento y carga de archivos
 - El listado y el CSV pueden filtrarse por vencidas, próximas a vencer y sin fecha. Los controles se reorganizan según el ancho disponible.
 - Las entregas que exceden el límite de la petición reciben un mensaje de tamaño. Se verificaron descarga íntegra de PDF y rechazo de MIME incorrecto y de archivos de 21 MB.

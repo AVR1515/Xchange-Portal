@@ -19,9 +19,9 @@
 | Fase | Prioridad | Entregable | Issues | Estado |
 |---|---|---|---|---|
 | 0 | P0 | Instalación local, SQL, sesiones, roles | #1 #2 | 🟡 Esquema importado y acceso al tablero con tres roles verificado en XAMPP |
-| 1A | P0 | Crear/listar/filtrar solicitudes, detalle | #3 | 🟡 Creación, edición y filtros verificados. Paginación con volumen por validar |
-| 1B | P0 | Subir, descargar y compartir documentos protegidos | #4 | 🟡 Carga y descarga de TXT y aislamiento verificados. Más formatos y tamaños por validar |
-| 1C | P0 | Workflow de revisión, comentarios, historia | #5 #6 | 🟡 Devolución, reenvío, aceptación e historial verificados. Concurrencia por validar |
+| 1A | P0 | Crear/listar/filtrar solicitudes, detalle | #3 | 🟡 Creación, edición, filtros y paginación con 26 solicitudes verificados |
+| 1B | P0 | Subir, descargar y compartir documentos protegidos | #4 | 🟡 TXT, PDF, rechazo por tamaño y MIME, y aislamiento verificados |
+| 1C | P0 | Workflow de revisión, comentarios, historia | #5 #6 | 🟡 Devolución con motivo, reenvío, aceptación, historial y revisión concurrente verificados |
 | 2 | P0 | Administrar proyectos, clientes y miembros | #8 | 🟡 Creación, edición, alta de miembros y cambio de rol verificados |
 | 2 | P1 | UI dashboard, métricas, CSV | #7 #9 | 🟡 CSV filtrado y permisos verificados. Métricas y experiencia móvil por validar |
 | 3 | P2 | Versiones, avisos y QA integral | #10 #11 | 🟡 Versiones, avisos y restauración SQL con verificación de archivos comprobados |

@@ -242,6 +242,12 @@ if ($me) {
     $q=db()->prepare("SELECT a.action,a.created_at,r.id,r.title FROM audit_events a JOIN requests r ON r.id=a.request_id AND r.project_id=a.project_id WHERE a.project_id=? AND a.user_id<>? AND a.action IN ('request_created','request_updated','document_uploaded','status_changed','comment_added') ORDER BY a.id DESC LIMIT 15");
     $q->execute([$projectId,$uid]);
     $updates=$q->fetchAll();
+    $projectHistory=[];
+    if ($role==='admin') {
+        $q=db()->prepare('SELECT a.action,a.details,a.created_at,u.name FROM audit_events a JOIN users u ON u.id=a.user_id WHERE a.project_id=? AND a.request_id IS NULL ORDER BY a.id DESC LIMIT 25');
+        $q->execute([$projectId]);
+        $projectHistory=$q->fetchAll();
+    }
     $q=db()->prepare('SELECT r.*,u.name AS assigned_name FROM requests r JOIN project_members pm ON pm.project_id=r.project_id AND pm.user_id=? LEFT JOIN users u ON u.id=r.assigned_to WHERE r.project_id=? ORDER BY r.created_at DESC,r.id DESC');
     $q->execute([$uid,$projectId]); $requests=$q->fetchAll();
     if ($selected) {
@@ -363,6 +369,16 @@ if ($me) {
       </form>
     </details>
   <?php endforeach; ?>
+  <?php if ($role==='admin'): ?>
+    <details>
+      <summary>Historial de administración</summary>
+      <?php $projectEventLabels=['project_created'=>'Proyecto creado','project_updated'=>'Proyecto editado','project_member_added'=>'Miembro añadido','project_member_role_changed'=>'Rol actualizado']; ?>
+      <?php if (!$projectHistory): ?><p class="muted">Todavía no hay cambios registrados.</p><?php endif; ?>
+      <?php foreach ($projectHistory as $event): ?>
+        <p><?=h($projectEventLabels[$event['action']]??$event['action'])?> · <?=h($event['name'])?> · <?=h($event['created_at'])?><br><span class="muted"><?=h($event['details'])?></span></p>
+      <?php endforeach; ?>
+    </details>
+  <?php endif; ?>
 </section>
 <div class="grid"><div class="panel"><div class="metric"><?=$counts['total']?></div><div class="metric-caption">Solicitudes totales</div></div><div class="panel"><div class="metric"><?=$counts['open']?></div><div class="metric-caption">Pendientes</div></div><div class="panel"><div class="metric"><?=$counts['submitted']?></div><div class="metric-caption">Recibidas</div></div><div class="panel"><div class="metric"><?=$counts['overdue']?></div><div class="metric-caption danger">Vencidas</div></div><div class="panel"><div class="metric"><?=$counts['accepted']?></div><div class="metric-caption">Aceptadas</div></div></div>
 <section class="panel"><div class="toolbar"><div><h2>Solicitudes de documentos</h2><p class="muted">Intercambio, seguimiento y revisión de evidencia.</p></div><form method="get" class="request-filters">
