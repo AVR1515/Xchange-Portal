@@ -455,7 +455,7 @@ if ($me) {
 }
 ?><!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Xchange Portal</title><link rel="stylesheet" href="assets/app.css"><link rel="stylesheet" href="assets/theme.css"><script src="assets/app.js" defer></script></head><body>
+<title>Xchange Portal</title><link rel="stylesheet" href="assets/app.css"><link rel="stylesheet" href="assets/theme.css?v=<?=filemtime(__DIR__.'/assets/theme.css')?>"><script src="assets/app.js" defer></script></head><body>
 <?php if (!$me): ?>
 <main class="login"><form class="panel" method="post"><div class="brand"><b>✦</b> Xchange Portal</div><h1>Bienvenido</h1><p class="muted">Colabora con tus clientes y gestiona los documentos de cada proyecto.</p>
 <?php if($error):?><p class="message"><?=h($error)?></p><?php endif;?>
@@ -496,7 +496,7 @@ if ($me) {
 <?php if ($view==='projects'): ?>
 <section id="projects">
   <div class="page-heading workspace-heading">
-    <div><h1>Mis proyectos</h1><p class="muted">Consulta el avance y abre las solicitudes de cada proyecto.</p></div>
+    <h1>Mis proyectos</h1>
     <?php if ($canCreateProject): ?><a class="btn" href="<?=h($viewUrl('projects'))?>&amp;create=1#project-editor">＋ Nuevo proyecto</a><?php endif; ?>
   </div>
   <div class="overview-layout">
@@ -508,14 +508,13 @@ if ($me) {
   <div class="project-grid">
     <?php foreach ($projects as $availableProject): ?>
       <?php $stats=$projectStats[$availableProject['id']]; $percent=$stats['total']?round(100*$stats['accepted']/$stats['total']):0; ?>
-      <article class="panel project-card" data-project-card>
-        <div class="project-card-top"><span class="brand-icon" aria-hidden="true"><?=h(mb_strtoupper(mb_substr($availableProject['name'],0,1)))?></span><span class="result-count"><?=$percent?>%</span></div>
-        <h3><?=h($availableProject['name'])?></h3>
-        <?php if ($availableProject['description']): ?><p class="muted"><?=h($availableProject['description'])?></p><?php endif; ?>
-        <div class="project-card-status"><span class="small muted"><?=$stats['total']?> solicitudes · <?=$stats['accepted']?> aceptadas</span>
+      <article class="project-card" data-project-card>
+        <div class="project-name"><h3><a href="?project=<?=$availableProject['id']?>"><?=h($availableProject['name'])?></a></h3>
+        <?php if ($availableProject['description']): ?><p class="muted small"><?=h($availableProject['description'])?></p><?php endif; ?></div>
+        <div class="project-card-status"><span class="small muted"><?=$stats['accepted']?> de <?=$stats['total']?> aceptadas</span>
         <?php if ($stats['overdue']): ?><a class="project-overdue" href="?project=<?=$availableProject['id']?>&amp;due=overdue"><?=$stats['overdue']?> vencidas</a><?php endif; ?>
         <progress max="100" value="<?=$percent?>" aria-label="Porcentaje de solicitudes aceptadas"></progress></div>
-        <div class="actions"><a class="btn" href="?project=<?=$availableProject['id']?>">Abrir</a>
+        <div class="actions"><a class="project-open" href="?project=<?=$availableProject['id']?>" aria-label="<?=h('Abrir '.$availableProject['name'])?>">Abrir <span aria-hidden="true">↗</span></a>
         <?php if ($availableProject['role']==='admin'): ?><a class="btn secondary" href="?project=<?=$availableProject['id']?>&amp;view=projects&amp;edit=1#project-editor">Editar</a><?php endif; ?></div>
       </article>
     <?php endforeach; ?>
