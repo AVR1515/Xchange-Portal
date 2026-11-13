@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-12 — Pantalla de errores del portal
+- Los fallos inesperados devuelven una pantalla del portal con un código de incidente. El tipo de excepción y su ubicación se registran en el servidor.
+
 ## 2026-11-12 — Confirmaciones y contexto de solicitudes
 - El detalle conserva los filtros y la página del listado. Las operaciones muestran una confirmación después de guardar.
 - El selector de adjuntos muestra la cantidad seleccionada y valida el tamaño por archivo antes de enviar.

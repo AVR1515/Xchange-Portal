@@ -1,5 +1,17 @@
 <?php
 declare(strict_types=1);
+ini_set('display_errors','0');
+set_exception_handler(static function (Throwable $exception): void {
+    $incident=bin2hex(random_bytes(8));
+    error_log(sprintf('Xchange Portal [%s] %s in %s:%d', $incident, get_class($exception), $exception->getFile(), $exception->getLine()));
+    http_response_code(500);
+    header('Cache-Control: no-store');
+    header('Content-Type: text/html; charset=UTF-8');
+    echo '<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+        .'<title>Portal no disponible · Xchange</title><link rel="stylesheet" href="assets/app.css"><link rel="stylesheet" href="assets/theme.css">'
+        .'<main class="login"><section class="panel"><h1>El portal no está disponible</h1><p>Vuelve a intentarlo en unos momentos. Si el problema continúa, comparte este código con el administrador.</p>'
+        .'<p class="muted">Código: '.$incident.'</p><a class="btn" href="index.php">Volver al portal</a></section></main></html>';
+});
 require dirname(__DIR__).'/app/bootstrap.php';
 $action=(string)($_GET['action']??'');
 $error='';
