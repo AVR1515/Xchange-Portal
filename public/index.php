@@ -19,12 +19,32 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             if (!$user || !password_verify((string)($_POST['password']??''),$user['password_hash'])) throw new RuntimeException('Credenciales incorrectas.');
             session_regenerate_id(true);
             $_SESSION['uid']=(int)$user['id'];
+            $_SESSION['auth_version']=hash('sha256',$user['password_hash']);
             go();
         }
         if ($postAction==='logout') {
             $_SESSION=[]; session_regenerate_id(true); go();
         }
         $actor=requireUser(); $uid=(int)$actor['id'];
+        if ($postAction==='change_password') {
+            $current=(string)($_POST['current_password']??'');
+            $new=(string)($_POST['new_password']??'');
+            $confirmation=(string)($_POST['confirm_password']??'');
+            if (strlen($new)<12 || strlen($new)>72 || str_contains($new,chr(0)) || $new!==$confirmation) {
+                throw new RuntimeException('La nueva contraseña debe tener entre 12 y 72 bytes y coincidir con la confirmación');
+            }
+            $query=db()->prepare('SELECT password_hash FROM users WHERE id=? AND is_active=1');
+            $query->execute([$uid]);
+            $previous=$query->fetchColumn();
+            if (!$previous || !password_verify($current,$previous)) throw new RuntimeException('La contraseña actual es incorrecta');
+            if (password_verify($new,$previous)) throw new RuntimeException('Usa una contraseña diferente de la actual');
+            $query=db()->prepare('UPDATE users SET password_hash=? WHERE id=? AND password_hash=? AND is_active=1');
+            $query->execute([password_hash($new,PASSWORD_DEFAULT),$uid,$previous]);
+            if ($query->rowCount()!==1) throw new RuntimeException('La cuenta cambió. Vuelve a iniciar sesión');
+            $_SESSION=[];
+            session_regenerate_id(true);
+            go('?password_changed=1');
+        }
         if ($postAction==='edit_member_role' || $postAction==='remove_member') {
             $project=(int)($_POST['project_id']??0);
             $member=(int)($_POST['member_id']??0);
@@ -342,6 +362,7 @@ if ($me) {
 <?php if (!$me): ?>
 <main class="login"><form class="panel" method="post"><div class="brand"><b>✦</b> Xchange Portal</div><h1>Bienvenido</h1><p class="muted">Colabora con tus clientes y gestiona los documentos de cada proyecto.</p>
 <?php if($error):?><p class="message"><?=h($error)?></p><?php endif;?>
+<?php if (isset($_GET['password_changed'])): ?><p class="message">Contraseña actualizada. Inicia sesión con la nueva contraseña.</p><?php endif; ?>
 <input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="login">
 <div class="field"><label for="email">Correo electrónico</label><input id="email" name="email" type="email" required autocomplete="username"></div>
 <div class="field"><label for="password">Contraseña</label><input id="password" name="password" type="password" required autocomplete="current-password"></div>
@@ -393,6 +414,17 @@ if ($me) {
     </details>
   <?php endif; ?>
 </section>
+<details class="panel" id="account">
+  <summary>Cambiar contraseña</summary>
+  <form method="post">
+    <input type="hidden" name="csrf" value="<?=h(csrf())?>">
+    <input type="hidden" name="action" value="change_password">
+    <div class="field"><label>Contraseña actual <input name="current_password" type="password" autocomplete="current-password" required></label></div>
+    <div class="field"><label>Nueva contraseña <input name="new_password" type="password" autocomplete="new-password" minlength="12" maxlength="72" required></label></div>
+    <div class="field"><label>Confirmar nueva contraseña <input name="confirm_password" type="password" autocomplete="new-password" minlength="12" maxlength="72" required></label></div>
+    <button>Actualizar contraseña</button>
+  </form>
+</details>
 <div class="grid"><div class="panel"><div class="metric"><?=$counts['total']?></div><div class="metric-caption">Solicitudes totales</div></div><div class="panel"><div class="metric"><?=$counts['open']?></div><div class="metric-caption">Pendientes</div></div><div class="panel"><div class="metric"><?=$counts['submitted']?></div><div class="metric-caption">Recibidas</div></div><div class="panel"><div class="metric"><?=$counts['overdue']?></div><div class="metric-caption danger">Vencidas</div></div><div class="panel"><div class="metric"><?=$counts['accepted']?></div><div class="metric-caption">Aceptadas</div></div></div>
 <section class="panel"><div class="toolbar"><div><h2>Solicitudes de documentos</h2><p class="muted">Intercambio, seguimiento y revisión de evidencia.</p></div><form method="get" class="request-filters">
   <input type="hidden" name="project" value="<?=$projectId?>">

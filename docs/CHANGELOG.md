@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-12 — Cambio de contraseña
+- Cada usuario puede cambiar su contraseña desde el portal. Se comprueba la contraseña actual y se invalidan las sesiones anteriores.
+
 ## 2026-11-12 — Retiro de miembros
 - Un administrador puede retirar a un cliente o integrante del equipo de un proyecto. El portal revoca su acceso, libera sus asignaciones y registra el cambio en el historial.
 

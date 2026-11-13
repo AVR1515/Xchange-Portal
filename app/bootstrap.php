@@ -31,9 +31,15 @@ function checkCsrf(): void {
 }
 function me(): ?array {
     if (empty($_SESSION['uid'])) return null;
-    $s=db()->prepare('SELECT id,name,email FROM users WHERE id=? AND is_active=1');
+    $s=db()->prepare('SELECT id,name,email,password_hash FROM users WHERE id=? AND is_active=1');
     $s->execute([$_SESSION['uid']]);
-    return $s->fetch() ?: null;
+    $user=$s->fetch();
+    if (!$user || !hash_equals(hash('sha256',$user['password_hash']),$_SESSION['auth_version']??'')) {
+        $_SESSION=[];
+        return null;
+    }
+    unset($user['password_hash']);
+    return $user;
 }
 function requireUser(): array {
     $u=me();
