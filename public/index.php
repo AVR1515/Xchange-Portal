@@ -455,7 +455,7 @@ if ($me) {
 }
 ?><!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Xchange Portal</title><link rel="stylesheet" href="assets/app.css"><link rel="stylesheet" href="assets/theme.css?v=<?=filemtime(__DIR__.'/assets/theme.css')?>"><script src="assets/app.js" defer></script></head><body>
+<title>Xchange Portal</title><link rel="stylesheet" href="assets/app.css"><link rel="stylesheet" href="assets/theme.css?v=<?=filemtime(__DIR__.'/assets/theme.css')?>"><script src="assets/app.js?v=<?=filemtime(__DIR__.'/assets/app.js')?>" defer></script></head><body>
 <?php if (!$me): ?>
 <main class="login"><form class="panel" method="post"><div class="brand"><b>✦</b> Xchange Portal</div><h1>Bienvenido</h1><p class="muted">Colabora con tus clientes y gestiona los documentos de cada proyecto.</p>
 <?php if($error):?><p class="message"><?=h($error)?></p><?php endif;?>
@@ -467,20 +467,23 @@ if ($me) {
 <?php else: ?>
 <a class="skip-link" href="#main-content">Saltar al contenido</a>
 <div class="app">
-<header class="portal-bar">
+<aside class="portal-sidebar" aria-label="Xchange Portal">
   <a class="portal-brand" href="?view=projects"><b class="brand-icon">X</b> Xchange Portal</a>
+  <button type="button" class="secondary sidebar-toggle" aria-controls="sidebar-content" aria-expanded="true" hidden>Menú</button>
+  <div id="sidebar-content" class="sidebar-content">
   <?php if ($activeProject && $view!=='projects'): ?><span class="portal-project"><?=h($activeProject['name'])?></span><?php endif; ?>
-  <div class="topuser">
-    <a class="account-link" href="<?=h($viewUrl('account'))?>"><?=h($me['name'])?></a>
-    <form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="secondary">Salir</button></form>
-  </div>
   <nav class="workspace-nav" aria-label="Navegación del proyecto">
     <?php foreach ($views as $key=>$label): ?>
       <?php if ($key==='new') continue; ?>
       <a href="<?=h($viewUrl($key))?>" <?php if ($view===$key): ?>aria-current="page"<?php endif; ?>><?=h($label)?></a>
     <?php endforeach; ?>
   </nav>
-</header>
+  <div class="sidebar-account">
+    <a class="account-link" href="<?=h($viewUrl('account'))?>"><?=h($me['name'])?></a>
+    <form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="secondary">Salir</button></form>
+  </div>
+  </div>
+</aside>
 <main class="main" id="main-content" tabindex="-1">
   <?php if ($selected || $view!=='projects'): ?><div class="page-heading">
     <div>

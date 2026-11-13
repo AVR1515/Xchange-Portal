@@ -1,4 +1,20 @@
 'use strict';
+const sidebarToggle = document.querySelector('.sidebar-toggle');
+if (sidebarToggle) {
+  const sidebarContent = document.getElementById('sidebar-content');
+  const narrowScreen = window.matchMedia('(max-width: 780px)');
+  function setSidebarOpen(open) {
+    sidebarContent.hidden = !open;
+    sidebarToggle.setAttribute('aria-expanded', String(open));
+  }
+  function syncSidebar() {
+    sidebarToggle.hidden = !narrowScreen.matches;
+    setSidebarOpen(!narrowScreen.matches);
+  }
+  sidebarToggle.addEventListener('click', () => setSidebarOpen(sidebarContent.hidden));
+  narrowScreen.addEventListener('change', syncSidebar);
+  syncSidebar();
+}
 const projectSearch = document.querySelector('#project-search');
 if (projectSearch) {
   const cards = Array.from(document.querySelectorAll('[data-project-card]'));
