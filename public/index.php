@@ -598,7 +598,7 @@ if ($me) {
 </details>
 <?php elseif ($view==='requests'): ?>
 <div class="request-overview"><div class="request-stats" aria-label="Resumen de solicitudes">
-  <?php foreach (['total'=>'Todas','open'=>'Pendientes','submitted'=>'Recibidas','overdue'=>'Vencidas','accepted'=>'Aceptadas'] as $metric=>$label): ?>
+  <?php foreach (['total'=>'Todas','open'=>'Pendientes','submitted'=>'Recibidas','returned'=>'Devueltas','overdue'=>'Vencidas','accepted'=>'Aceptadas'] as $metric=>$label): ?>
     <?php $target=$metric==='overdue'?['due'=>'overdue']:($metric==='total'?[]:['status'=>$metric]); ?>
     <a href="?<?=h(http_build_query(['project'=>$projectId]+$target))?>" class="stat-card stat-<?=$metric?>">
       <span><?=h($label)?></span><strong><?=$counts[$metric]?></strong>
@@ -637,13 +637,15 @@ if ($me) {
   <select name="status" aria-label="Estado"><option value="">Todos los estados</option><?php foreach ($statusLabels as $value=>$label): ?><option value="<?=$value?>" <?php if ($value===$filters['status']): ?>selected<?php endif; ?>><?=h($label)?></option><?php endforeach; ?></select>
   <select name="priority" aria-label="Prioridad"><option value="">Todas las prioridades</option><?php foreach ($priorityLabels as $value=>$label): ?><option value="<?=$value?>" <?php if ($value===$filters['priority']): ?>selected<?php endif; ?>><?=h($label)?></option><?php endforeach; ?></select>
   <select name="due" aria-label="Vencimiento"><option value="">Todos los vencimientos</option><?php foreach ($dueLabels as $value=>$label): ?><option value="<?=$value?>" <?php if ($value===$filters['due']): ?>selected<?php endif; ?>><?=h($label)?></option><?php endforeach; ?></select>
-    <select name="sort" aria-label="Orden"><option value="">Más recientes</option><option value="due" <?php if ($filters['sort']==='due'): ?>selected<?php endif; ?>>Fecha límite</option></select>
+  <select name="sort" aria-label="Orden"><option value="">Más recientes</option><option value="due" <?php if ($filters['sort']==='due'): ?>selected<?php endif; ?>>Fecha límite</option></select>
+  <div class="filter-actions">
   <label class="mine-filter"><input type="checkbox" name="mine" value="1" <?php if ($filters['mine']==='1'): ?>checked<?php endif; ?>> Asignadas a mí</label>
   <button>Filtrar</button>
   <?php if (array_filter($filters,static fn(string $value): bool => $value!=='')): ?>
     <a href="?project=<?=$projectId?>">Limpiar filtros</a>
   <?php endif; ?>
   <?php if ($projectId): ?><a href="?<?=h(http_build_query($listQuery+['action'=>'export_requests']))?>">Descargar CSV</a><?php endif; ?>
+  </div>
 </form></div>
 <div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th><th>Actividad</th></tr></thead><tbody><?php foreach($visibleRequests as $r):?><tr id="request-<?=$r['id']?>" data-request-row <?php if ((int)($selected['id']??0)===(int)$r['id']): ?>class="request-current"<?php endif; ?>><td><?=h((string)$r['id'])?></td><td><a href="<?=h($requestUrl((int)$r['id'],$requestFilters))?>"><?=h($r['title'])?></a>
 <button type="button" class="preview-trigger secondary" data-preview="preview-<?=$r['id']?>" aria-label="Vista rápida de <?=h($r['title'])?>" hidden>Vista rápida</button>
