@@ -26,3 +26,30 @@ Utilizar `C:\\xampp\\php\\php.exe scripts\\seed.php`.
 
 ## Advertencia
 Las credenciales de ejemplo, cuentas demo y HTTP localhost son solo para desarrollo. Para producción: HTTPS, `config.php` excluido de Git, secret management, backups, hardening, antivirus/escaneo de documentos y pruebas de seguridad.
+
+## Respaldo y restauración de prueba
+
+1. Detén Apache en el panel de XAMPP y deja MariaDB activo. Así se conservan juntos los registros y los archivos de la misma entrega.
+2. En PowerShell, desde la raíz del repositorio, crea una carpeta de respaldo nueva fuera de `htdocs`. Los comandos usan la cuenta local `root`. Agrega `-p` si esa cuenta tiene contraseña.
+
+   ```powershell
+   $portalBackup = Join-Path $env:USERPROFILE ("xchange-backup-" + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+   New-Item -ItemType Directory -Path $portalBackup -ErrorAction Stop
+   & C:/xampp/mysql/bin/mariadb-dump.exe -h 127.0.0.1 -u root --single-transaction --no-tablespaces "--result-file=$portalBackup/database.sql" xchange_portal
+   if ($LASTEXITCODE -ne 0) { throw 'Falló el respaldo SQL' }
+   Copy-Item -LiteralPath storage/private -Destination "$portalBackup/private" -Recurse -ErrorAction Stop
+   ```
+
+3. Vuelve a iniciar Apache. El respaldo contiene cuentas y documentos. Guárdalo en una ubicación de acceso restringido.
+4. Para probar la restauración, crea una base nueva con nombre único. El volcado se generó sin `--databases`, por lo que se puede cargar en esa base.
+
+   ```powershell
+   $portalRestore = "xchange_restore_" + (Get-Date -Format 'yyyyMMddHHmmss')
+   & C:/xampp/mysql/bin/mysql.exe -h 127.0.0.1 -u root -e "CREATE DATABASE $portalRestore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+   if ($LASTEXITCODE -ne 0) { throw 'Falló la creación de la base de prueba' }
+   $portalDump = (Join-Path $portalBackup 'database.sql').Replace('\','/')
+   & C:/xampp/mysql/bin/mysql.exe -h 127.0.0.1 -u root $portalRestore -e "source $portalDump"
+   if ($LASTEXITCODE -ne 0) { throw 'Falló la restauración SQL' }
+   ```
+
+5. En una copia de prueba del portal, configura `db_name` con el nombre de la base restaurada y `storage_path` con una copia de la carpeta `private` del respaldo. Inicia sesión, abre un proyecto y descarga un archivo. Compara su SHA-256 con el del original.

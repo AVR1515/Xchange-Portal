@@ -24,7 +24,7 @@
 | 1C | P0 | Workflow de revisión, comentarios, historia | #5 #6 | 🟡 Devolución, reenvío, aceptación e historial verificados. Concurrencia por validar |
 | 2 | P0 | Administrar proyectos, clientes y miembros | #8 | 🟡 Creación, edición, alta de miembros y cambio de rol verificados |
 | 2 | P1 | UI dashboard, métricas, CSV | #7 #9 | 🟡 CSV filtrado y permisos verificados. Métricas y experiencia móvil por validar |
-| 3 | P2 | Versiones, avisos y QA integral | #10 #11 | 🟡 Versiones por nombre y avisos de actividad verificados. Respaldo y restauración por validar |
+| 3 | P2 | Versiones, avisos y QA integral | #10 #11 | 🟡 Versiones, avisos y restauración SQL con verificación de archivos comprobados |
 
 ## Actualización visual y controles de demo
 - Diseño oscuro de bajo contraste cromático aplicado a demo y frontend PHP mediante hojas CSS locales.

@@ -142,11 +142,18 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             $status=(string)($_POST['status']??'');
             $allowed=['submitted'=>['accepted','returned'],'returned'=>[],'open'=>[],'accepted'=>[]];
             if (!in_array($status,$allowed[$req['status']]??[],true)) throw new RuntimeException('Transición de estado inválida');
+            $reason=trim((string)($_POST['reason']??''));
+            if (($status==='returned' && $reason==='') || mb_strlen($reason)>5000) {
+                throw new RuntimeException('Indica un motivo de devolución de hasta 5000 caracteres');
+            }
             $projectTransaction=db();
             $projectTransaction->beginTransaction();
             $update=db()->prepare('UPDATE requests SET status=? WHERE id=? AND status=?');
             $update->execute([$status,$rid,$req['status']]);
             if ($update->rowCount()!==1) throw new RuntimeException('El estado cambió. Actualiza la página y vuelve a revisar la solicitud.');
+            if ($reason!=='') {
+                db()->prepare('INSERT INTO request_comments(request_id,user_id,body) VALUES(?,?,?)')->execute([$rid,$uid,$reason]);
+            }
             recordEvent((int)$req['project_id'],$rid,$uid,'status_changed',$req['status'].' → '.$status);
             $projectTransaction->commit();
             go('?request='.$rid);
@@ -312,7 +319,7 @@ if ($me) {
 <p><a href="index.php?project=<?=$projectId?>">← Volver a solicitudes</a></p>
 <div class="detail"><section class="stack"><div class="panel"><h2>Detalles de solicitud #<?=$selected['id']?></h2><p><?=nl2br(h($selected['description']))?></p><p><span class="pill <?=h($selected['status'])?>"><?=h($selected['status'])?></span> · Prioridad: <?=h($selected['priority'])?> · Fecha límite: <?=h($selected['due_date']??'Sin fecha')?></p><p class="muted">Asignado a: <?=h($selected['assigned_name']??'Sin asignar')?></p>
 <?php if($selected['status']==='submitted' && in_array($role,['auditor','admin'],true)):?>
-<form method="post" class="actions" data-confirm="¿Registrar revisión de esta solicitud?"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="status"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><button name="status" value="accepted">Aceptar</button><button class="secondary" name="status" value="returned">Devolver</button></form><?php endif;?></div>
+<form method="post" class="actions" data-confirm="¿Registrar revisión de esta solicitud?"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="status"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label>Comentario de revisión (obligatorio al devolver)<textarea name="reason" maxlength="5000"></textarea></label></div><button name="status" value="accepted">Aceptar</button><button class="secondary" name="status" value="returned">Devolver</button></form><?php endif;?></div>
 <?php if (in_array($role,['admin','auditor'],true)): ?><details class="panel"><summary>Editar solicitud</summary><?php require dirname(__DIR__).'/app/request-form.php'; ?></details><?php endif; ?><div class="panel"><h2>Documentos compartidos</h2><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="upload"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="document">Subir PDF, Office, imágenes, ZIP, TXT o CSV (máx. 20MB)</label><input id="document" name="document" type="file" required></div><button>Subir documento</button></form>
 <?php foreach($documents as $d):?><div class="file"><div><strong><?=h($d['original_name'])?></strong><div class="small muted">Versión <?=$d['version']?> · <?=h($d['author_name'])?> · <?=h($d['created_at'])?> · <?=number_format((int)$d['byte_size']/1024,1)?> KB</div></div><a href="?action=download&amp;file=<?=$d['id']?>">Descargar</a></div><?php endforeach;?>
 <?php if(!$documents):?><p class="muted" style="margin-top:18px">No hay documentos compartidos todavía.</p><?php endif;?></div></section>
