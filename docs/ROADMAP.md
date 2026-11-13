@@ -39,6 +39,8 @@
 - Esta demo no equivale a cerrar issues de backend; la validación de XAMPP, SQL y políticas de seguridad sigue abierta.
 
 ## Corte de implementación 2026-11-12
+
+- El tablero interactivo registra 9 de 11 tareas completadas (82 %). Siguen en progreso la interfaz del detalle (#7) y la validación integral de entrega (#11).
 - El portal incluye administración de proyectos y miembros, edición y filtros de solicitudes, paginación, CSV, avisos y versiones por nombre.
 - El flujo documental básico y el aislamiento de proyectos, solicitudes y descargas se probaron en XAMPP con cuentas distintas.
 - Se verificaron el inicio de sesión y la descarga íntegra desde una copia aislada restaurada. Quedan pruebas del detalle con teclado y en móvil.

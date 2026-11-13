@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-12 — Verificación de comentarios e historial
+- En XAMPP se comprobó que las etiquetas HTML de un comentario se muestran como texto y que el historial registra las cargas y los cambios de estado.
+
 ## 2026-11-12 — Cierre de entregas aceptadas
 - Una solicitud aceptada conserva sus documentos y deja de admitir nuevas cargas. Se verificó en XAMPP que el cliente puede descargar la versión revisada.
 
