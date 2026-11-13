@@ -200,16 +200,11 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             if (in_array($req['status'],['accepted','cancelled'],true)) {
                 throw new RuntimeException('La solicitud está cerrada y no admite nuevos documentos');
             }
-            if (!isset($_FILES['document']) || !is_array($_FILES['document'])) throw new RuntimeException('Archivo requerido');
-            $f=$_FILES['document'];
-            if ($f['error']!==UPLOAD_ERR_OK || !is_uploaded_file($f['tmp_name'])) throw new RuntimeException('Falló la carga o se excedió el límite de PHP');
-            global $config;
-            $max=(int)$config['max_upload_bytes'];
-            if ((int)$f['size']<=0 || (int)$f['size']>$max) throw new RuntimeException('Archivo vacío o superior a 20MB');
-            $original=basename(str_replace('\\','/',(string)$f['name']));
-            $original=preg_replace('/[\x00-\x1f\x7f]/u','',$original)?:'documento';
-            if (strlen($original)>255) throw new RuntimeException('Nombre muy largo');
-            $ext=strtolower(pathinfo($original,PATHINFO_EXTENSION));
+            $files=$_FILES['document']??[];
+            $names=(array)($files['name']??[]);
+            if (!$names || count($names)>10) throw new RuntimeException('Selecciona entre 1 y 10 archivos');
+            $uploads=[];
+            $types=new finfo(FILEINFO_MIME_TYPE);
             $allowed=[
                 'pdf'=>['application/pdf'],'png'=>['image/png'],'jpg'=>['image/jpeg'],'jpeg'=>['image/jpeg'],
                 'txt'=>['text/plain'],'csv'=>['text/plain','text/csv','application/csv','application/vnd.ms-excel'],
@@ -217,13 +212,29 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
                 'xlsx'=>['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/zip'],
                 'zip'=>['application/zip','application/x-zip-compressed']
             ];
-            $mime=(new finfo(FILEINFO_MIME_TYPE))->file($f['tmp_name']);
-            if (!isset($allowed[$ext]) || !in_array($mime,$allowed[$ext],true)) throw new RuntimeException('Tipo de archivo no permitido');
+            foreach ($names as $i=>$original) {
+                $tmp=((array)($files['tmp_name']??[]))[$i]??'';
+                $size=(int)(((array)($files['size']??[]))[$i]??0);
+                $errorCode=((array)($files['error']??[]))[$i]??UPLOAD_ERR_NO_FILE;
+                if ($errorCode!==UPLOAD_ERR_OK || !is_uploaded_file($tmp)) {
+                    throw new RuntimeException('Falló la carga de un archivo o se excedió el límite de PHP');
+                }
+                if ($size<=0 || $size>(int)$config['max_upload_bytes']) {
+                    throw new RuntimeException('Cada archivo debe tener contenido y respetar el tamaño máximo');
+                }
+                $original=basename(str_replace('\\','/',(string)$original));
+                $original=preg_replace('/[\x00-\x1f\x7f]/u','',$original)?:'documento';
+                if (strlen($original)>255) throw new RuntimeException('Nombre de archivo demasiado largo');
+                $ext=strtolower(pathinfo($original,PATHINFO_EXTENSION));
+                $mime=$types->file($tmp);
+                if (!isset($allowed[$ext]) || !in_array($mime,$allowed[$ext],true)) {
+                    throw new RuntimeException('Tipo de archivo no permitido: '.$original);
+                }
+                $uploads[]=[$tmp,$size,$original,$mime];
+            }
             $dir=$config['storage_path'];
-            if (!is_dir($dir) && !mkdir($dir,0700,true) && !is_dir($dir)) throw new RuntimeException('Storage no disponible');
-            $name=bin2hex(random_bytes(24)).'.bin';
-            $target=$dir.'/'.$name;
-            if (!move_uploaded_file($f['tmp_name'],$target)) throw new RuntimeException('No se pudo almacenar archivo');
+            if (!is_dir($dir) && !mkdir($dir,0700,true) && !is_dir($dir)) throw new RuntimeException('Almacenamiento no disponible');
+            $targets=[];
             try {
                 db()->beginTransaction();
                 $lock=db()->prepare('SELECT status FROM requests WHERE id=? FOR UPDATE');
@@ -231,12 +242,20 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
                 if (!in_array($lock->fetchColumn(),['open','returned','submitted'],true)) {
                     throw new RuntimeException('La solicitud está cerrada y no admite nuevos documentos');
                 }
-                db()->prepare('INSERT INTO documents(request_id,uploaded_by,original_name,storage_name,mime_type,byte_size,sha256) VALUES(?,?,?,?,?,?,?)')
-                  ->execute([$rid,$uid,$original,$name,$mime,(int)$f['size'],hash_file('sha256',$target)]);
+                $insert=db()->prepare('INSERT INTO documents(request_id,uploaded_by,original_name,storage_name,mime_type,byte_size,sha256) VALUES(?,?,?,?,?,?,?)');
+                foreach ($uploads as [$tmp,$size,$original,$mime]) {
+                    $name=bin2hex(random_bytes(24)).'.bin';
+                    $target=$dir.'/'.$name;
+                    if (!move_uploaded_file($tmp,$target)) throw new RuntimeException('No se pudo almacenar el archivo');
+                    $targets[]=$target;
+                    $hash=hash_file('sha256',$target);
+                    if ($hash===false) throw new RuntimeException('No se pudo verificar el archivo');
+                    $insert->execute([$rid,$uid,$original,$name,$mime,$size,$hash]);
+                    recordEvent((int)$req['project_id'],$rid,$uid,'document_uploaded',$original);
+                }
                 db()->prepare("UPDATE requests SET status='submitted' WHERE id=? AND status IN ('open','returned')")->execute([$rid]);
-                recordEvent((int)$req['project_id'],$rid,$uid,'document_uploaded',$original);
                 db()->commit();
-            } catch (Throwable $ex) { if (db()->inTransaction()) db()->rollBack(); @unlink($target); throw $ex; }
+            } catch (Throwable $ex) { if (db()->inTransaction()) db()->rollBack(); foreach ($targets as $target) @unlink($target); throw $ex; }
             go('?request='.$rid);
         }
         throw new RuntimeException('Acción desconocida');
@@ -436,7 +455,7 @@ if ($me) {
 <div class="detail"><section class="stack"><div class="panel"><h2>Detalles de solicitud #<?=$selected['id']?></h2><p><?=nl2br(h($selected['description']))?></p><p><span class="pill <?=h($selected['status'])?>"><?=h($statusLabels[$selected['status']])?></span> · Prioridad: <?=h($selected['priority'])?> · Fecha límite: <?=h($selected['due_date']??'Sin fecha')?></p><p class="muted">Asignado a: <?=h($selected['assigned_name']??'Sin asignar')?></p>
 <?php if(in_array($selected['status'],['open','submitted','returned'],true) && in_array($role,['auditor','admin'],true)):?>
 <form method="post" class="actions" data-confirm="¿Registrar revisión de esta solicitud?"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="status"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label>Motivo (obligatorio al devolver o cancelar)<textarea name="reason" maxlength="5000"></textarea></label></div><?php if ($selected['status']==='submitted'): ?><button name="status" value="accepted">Aceptar</button><button class="secondary" name="status" value="returned">Devolver</button><?php endif; ?><button class="secondary" name="status" value="cancelled">Cancelar solicitud</button></form><?php endif;?></div>
-<?php if (in_array($role,['admin','auditor'],true)): ?><details class="panel"><summary>Editar solicitud</summary><?php require dirname(__DIR__).'/app/request-form.php'; ?></details><?php endif; ?><div class="panel"><h2>Documentos compartidos</h2><?php if (in_array($selected['status'],['accepted','cancelled'],true)): ?><p class="muted"><?=$selected['status']==='accepted'?'Esta solicitud fue aceptada.':'Esta solicitud fue cancelada.'?></p><?php else: ?><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="upload"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="document">Subir PDF, Office, imágenes, ZIP, TXT o CSV (máx. 20MB)</label><input id="document" name="document" type="file" required></div><button>Subir documento</button></form><?php endif; ?>
+<?php if (in_array($role,['admin','auditor'],true)): ?><details class="panel"><summary>Editar solicitud</summary><?php require dirname(__DIR__).'/app/request-form.php'; ?></details><?php endif; ?><div class="panel"><h2>Documentos compartidos</h2><?php if (in_array($selected['status'],['accepted','cancelled'],true)): ?><p class="muted"><?=$selected['status']==='accepted'?'Esta solicitud fue aceptada.':'Esta solicitud fue cancelada.'?></p><?php else: ?><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="upload"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="document">Selecciona hasta 10 archivos. PDF, Office, imágenes, ZIP, TXT o CSV.</label><input id="document" name="document[]" type="file" multiple required></div><button>Enviar archivos</button></form><?php endif; ?>
 <?php foreach($documents as $d):?><div class="file"><div><strong><?=h($d['original_name'])?></strong><div class="small muted">Versión <?=$d['version']?> · <?=h($d['author_name'])?> · <?=h($d['created_at'])?> · <?=number_format((int)$d['byte_size']/1024,1)?> KB</div></div><a href="?action=download&amp;file=<?=$d['id']?>">Descargar</a></div><?php endforeach;?>
 <?php if(!$documents):?><p class="muted" style="margin-top:18px">No hay documentos compartidos todavía.</p><?php endif;?></div></section>
 <section class="stack"><div class="panel"><h2>Comentarios</h2><?php foreach($comments as $c):?><div class="file"><div><strong><?=h($c['author_name'])?></strong> <span class="small muted"><?=h($c['created_at'])?></span><p><?=nl2br(h($c['body']))?></p></div></div><?php endforeach;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="comment"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="body">Nuevo comentario</label><textarea id="body" name="body" maxlength="5000" required></textarea></div><button>Publicar comentario</button></form></div><div class="panel"><h2>Actividad reciente</h2><?php foreach($events as $e):?><p class="small"><b><?=h($e['author_name'])?></b> · <?=h($e['action'])?><br><span class="muted"><?=h($e['created_at'])?> <?=h($e['details'])?></span></p><?php endforeach;?></div></section></div>

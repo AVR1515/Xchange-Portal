@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-12 — Entrega de varios archivos
+- Una solicitud admite hasta diez archivos por envío, sujeto a los límites de XAMPP. Si uno falla, se rechaza la entrega completa.
+- Se verificaron la carga de dos adjuntos, el rechazo de un envío mixto sin guardar archivos parciales y el flujo de devolución y reenvío.
+
 ## 2026-11-12 — Vista rápida de solicitudes
 - El listado abre un panel lateral con estado, responsable, fecha límite y acceso al detalle. Verificados Escape y retorno del foco en Chrome a 360 y 1280 px.
 
