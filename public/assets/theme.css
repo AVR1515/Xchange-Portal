@@ -81,6 +81,9 @@ tr:hover td { background: #213047; }
 .preview-content { overflow-wrap: anywhere; }
 .preview-content dt { color: var(--muted); }
 .preview-content dd { margin: 0 0 12px; }
+.message.success { background: #23493f; color: #c1f3df; }
+#upload-summary:empty { display: none; }
+#documents, #comments { scroll-margin-top: 16px; }
 @media (max-width: 680px) {
   .app { display: block; }
   .side .brand, .project-picker { margin-bottom: 12px; }

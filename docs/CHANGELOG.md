@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-12 — Confirmaciones y contexto de solicitudes
+- El detalle conserva los filtros y la página del listado. Las operaciones muestran una confirmación después de guardar.
+- El selector de adjuntos muestra la cantidad seleccionada y valida el tamaño por archivo antes de enviar.
+
 ## 2026-11-12 — Inicio de proyectos y tema oscuro
 - El portal abre en Mis proyectos con tarjetas, avance documental e indicadores calculados sobre los proyectos del usuario.
 - El tema usa CSS nativo y una paleta azul oscura. Se verificó el inicio en Chrome a 360, 768 y 1440 px.

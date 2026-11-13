@@ -3,6 +3,11 @@ declare(strict_types=1);
 require dirname(__DIR__).'/app/bootstrap.php';
 $action=(string)($_GET['action']??'');
 $error='';
+$requestFilters=array_intersect_key($_GET,array_flip(['q','status','priority','due','mine','sort','page']));
+$requestFilters=array_filter($requestFilters,'is_string');
+$requestUrl=static fn(int $id,array $context): string => '?'.http_build_query(['request'=>$id]+$context);
+$flash=$_SESSION['portal_flash']??'';
+unset($_SESSION['portal_flash']);
 if ($_SERVER['REQUEST_METHOD']==='POST') {
     $postLimit=ini_parse_quantity((string)ini_get('post_max_size'));
     if ($postLimit>0 && (int)($_SERVER['CONTENT_LENGTH']??0)>$postLimit) {
@@ -163,7 +168,8 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             }
             recordEvent($project,$rid,$uid,$editing?'request_updated':'request_created',$title);
             $projectTransaction->commit();
-            go('?request='.$rid);
+            $_SESSION['portal_flash']=$editing?'Cambios guardados.':'Solicitud creada.';
+            go($requestUrl($rid,$requestFilters));
         }
         $rid=(int)($_POST['request_id']??0);
         $req=getRequest($rid,$uid);
@@ -173,7 +179,8 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             if ($body==='' || mb_strlen($body)>5000) throw new RuntimeException('Comentario inválido');
             db()->prepare('INSERT INTO request_comments(request_id,user_id,body) VALUES(?,?,?)')->execute([$rid,$uid,$body]);
             recordEvent((int)$req['project_id'],$rid,$uid,'comment_added');
-            go('?request='.$rid);
+            $_SESSION['portal_flash']='Comentario publicado.';
+            go($requestUrl($rid,$requestFilters).'#comments');
         }
         if ($postAction==='status') {
             if (!in_array($role,['auditor','admin'],true)) throw new RuntimeException('Sin permisos de revisión');
@@ -194,7 +201,8 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             }
             recordEvent((int)$req['project_id'],$rid,$uid,'status_changed',$req['status'].' → '.$status);
             $projectTransaction->commit();
-            go('?request='.$rid);
+            $_SESSION['portal_flash']='Revisión registrada.';
+            go($requestUrl($rid,$requestFilters));
         }
         if ($postAction==='upload') {
             if (in_array($req['status'],['accepted','cancelled'],true)) {
@@ -256,7 +264,8 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
                 db()->prepare("UPDATE requests SET status='submitted' WHERE id=? AND status IN ('open','returned')")->execute([$rid]);
                 db()->commit();
             } catch (Throwable $ex) { if (db()->inTransaction()) db()->rollBack(); foreach ($targets as $target) @unlink($target); throw $ex; }
-            go('?request='.$rid);
+            $_SESSION['portal_flash']=count($uploads)===1?'Archivo enviado.':count($uploads).' archivos enviados.';
+            go($requestUrl($rid,$requestFilters).'#documents');
         }
         throw new RuntimeException('Acción desconocida');
     } catch (Throwable $ex) {
@@ -462,15 +471,16 @@ if ($me) {
     <?php endif; ?>
   </div><?php endif; ?>
 <?php if($error):?><p class="message"><?=h($error)?></p><?php endif;?>
+<?php if ($flash): ?><p class="message success" role="status"><?=h($flash)?></p><?php endif; ?>
 <?php if($selected):?>
-<p><a href="index.php?project=<?=$projectId?>">← Volver a solicitudes</a></p>
+<p><a href="?<?=h(http_build_query(['project'=>$projectId]+$requestFilters))?>">← Volver a solicitudes</a></p>
 <div class="detail"><section class="stack"><div class="panel"><h2>Detalles de solicitud #<?=$selected['id']?></h2><p><?=nl2br(h($selected['description']))?></p><p><span class="pill <?=h($selected['status'])?>"><?=h($statusLabels[$selected['status']])?></span> · Prioridad: <?=h($selected['priority'])?> · Fecha límite: <?=h($selected['due_date']??'Sin fecha')?></p><p class="muted">Asignado a: <?=h($selected['assigned_name']??'Sin asignar')?></p>
 <?php if(in_array($selected['status'],['open','submitted','returned'],true) && in_array($role,['auditor','admin'],true)):?>
 <form method="post" class="actions" data-confirm="¿Registrar revisión de esta solicitud?"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="status"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label>Motivo (obligatorio al devolver o cancelar)<textarea name="reason" maxlength="5000"></textarea></label></div><?php if ($selected['status']==='submitted'): ?><button name="status" value="accepted">Aceptar</button><button class="secondary" name="status" value="returned">Devolver</button><?php endif; ?><button class="secondary" name="status" value="cancelled">Cancelar solicitud</button></form><?php endif;?></div>
-<?php if (in_array($role,['admin','auditor'],true)): ?><details class="panel"><summary>Editar solicitud</summary><?php require dirname(__DIR__).'/app/request-form.php'; ?></details><?php endif; ?><div class="panel"><h2>Documentos compartidos</h2><?php if (in_array($selected['status'],['accepted','cancelled'],true)): ?><p class="muted"><?=$selected['status']==='accepted'?'Esta solicitud fue aceptada.':'Esta solicitud fue cancelada.'?></p><?php else: ?><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="upload"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="document">Selecciona hasta 10 archivos. PDF, Office, imágenes, ZIP, TXT o CSV.</label><input id="document" name="document[]" type="file" multiple required></div><button>Enviar archivos</button></form><?php endif; ?>
+<?php if (in_array($role,['admin','auditor'],true)): ?><details class="panel"><summary>Editar solicitud</summary><?php require dirname(__DIR__).'/app/request-form.php'; ?></details><?php endif; ?><div class="panel" id="documents"><h2>Documentos compartidos</h2><?php if (in_array($selected['status'],['accepted','cancelled'],true)): ?><p class="muted"><?=$selected['status']==='accepted'?'Esta solicitud fue aceptada.':'Esta solicitud fue cancelada.'?></p><?php else: ?><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="upload"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="document">Selecciona hasta 10 archivos. PDF, Office, imágenes, ZIP, TXT o CSV.</label><input id="document" name="document[]" type="file" multiple required accept=".pdf,.png,.jpg,.jpeg,.txt,.csv,.docx,.xlsx,.zip" data-max-bytes="<?=(int)$config['max_upload_bytes']?>"><p class="small muted">Máximo <?=number_format($config['max_upload_bytes']/1048576,0)?> MB por archivo. El servidor también limita el tamaño total.</p><output id="upload-summary" class="small" aria-live="polite"></output></div><button>Enviar archivos</button></form><?php endif; ?>
 <?php foreach($documents as $d):?><div class="file"><div><strong><?=h($d['original_name'])?></strong><div class="small muted">Versión <?=$d['version']?> · <?=h($d['author_name'])?> · <?=h($d['created_at'])?> · <?=number_format((int)$d['byte_size']/1024,1)?> KB</div></div><a href="?action=download&amp;file=<?=$d['id']?>">Descargar</a></div><?php endforeach;?>
 <?php if(!$documents):?><p class="muted" style="margin-top:18px">No hay documentos compartidos todavía.</p><?php endif;?></div></section>
-<section class="stack"><div class="panel"><h2>Comentarios</h2><?php foreach($comments as $c):?><div class="file"><div><strong><?=h($c['author_name'])?></strong> <span class="small muted"><?=h($c['created_at'])?></span><p><?=nl2br(h($c['body']))?></p></div></div><?php endforeach;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="comment"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="body">Nuevo comentario</label><textarea id="body" name="body" maxlength="5000" required></textarea></div><button>Publicar comentario</button></form></div><div class="panel"><h2>Actividad reciente</h2><?php foreach($events as $e):?><p class="small"><b><?=h($e['author_name'])?></b> · <?=h($e['action'])?><br><span class="muted"><?=h($e['created_at'])?> <?=h($e['details'])?></span></p><?php endforeach;?></div></section></div>
+<section class="stack"><div class="panel" id="comments"><h2>Comentarios</h2><?php foreach($comments as $c):?><div class="file"><div><strong><?=h($c['author_name'])?></strong> <span class="small muted"><?=h($c['created_at'])?></span><p><?=nl2br(h($c['body']))?></p></div></div><?php endforeach;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="comment"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="body">Nuevo comentario</label><textarea id="body" name="body" maxlength="5000" required></textarea></div><button>Publicar comentario</button></form></div><div class="panel"><h2>Actividad reciente</h2><?php foreach($events as $e):?><p class="small"><b><?=h($e['author_name'])?></b> · <?=h($e['action'])?><br><span class="muted"><?=h($e['created_at'])?> <?=h($e['details'])?></span></p><?php endforeach;?></div></section></div>
 <?php elseif ($view==='projects'): ?>
 <section id="projects">
   <div class="panel workspace-intro">
@@ -561,7 +571,7 @@ if ($me) {
   <?php endif; ?>
   <?php if ($projectId): ?><a href="?<?=h(http_build_query($listQuery+['action'=>'export_requests']))?>">Descargar CSV</a><?php endif; ?>
 </form></div>
-<div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th></tr></thead><tbody><?php foreach($visibleRequests as $r):?><tr data-request-row><td><?=h((string)$r['id'])?></td><td><a href="?request=<?=$r['id']?>"><?=h($r['title'])?></a>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th></tr></thead><tbody><?php foreach($visibleRequests as $r):?><tr data-request-row><td><?=h((string)$r['id'])?></td><td><a href="<?=h($requestUrl((int)$r['id'],$requestFilters))?>"><?=h($r['title'])?></a>
 <button type="button" class="preview-trigger secondary" data-preview="preview-<?=$r['id']?>" aria-label="Vista rápida de <?=h($r['title'])?>" hidden>Vista rápida</button>
 <template id="preview-<?=$r['id']?>">
   <h2><?=h($r['title'])?></h2>
@@ -569,7 +579,7 @@ if ($me) {
   <dl><dt>Estado</dt><dd><?=h($statusLabels[$r['status']])?></dd>
   <dt>Responsable</dt><dd><?=h($r['assigned_name']??'Sin asignar')?></dd>
   <dt>Fecha límite</dt><dd><?=h($r['due_date']??'Sin fecha')?></dd></dl>
-  <a class="btn" href="?request=<?=$r['id']?>">Abrir solicitud</a>
+  <a class="btn" href="<?=h($requestUrl((int)$r['id'],$requestFilters))?>">Abrir solicitud</a>
 </template></td><td><?=h($r['assigned_name']??'—')?></td><td><span class="pill <?=h($r['status'])?>"><?=h($statusLabels[$r['status']])?></span></td><td><?=h($priorityLabels[$r['priority']])?></td><td><?=h($r['due_date']??'—')?></td></tr><?php endforeach;?></tbody></table><?php if (!$visibleRequests): ?><div class="empty-list">
   <strong><?=$requests?'No hay coincidencias':'Todavía no hay solicitudes'?></strong>
   <p class="muted"><?=$requests?'Cambia o limpia los filtros para ampliar la búsqueda.':'Las solicitudes de documentos de este proyecto aparecerán aquí.'?></p>
