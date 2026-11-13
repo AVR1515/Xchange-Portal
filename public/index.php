@@ -362,12 +362,12 @@ if ($me) {
     }
     usort($deadlines,static fn(array $left,array $right): int => $left['due_date']<=>$right['due_date']);
     $filters=[
-        'q'=>trim((string)($_GET['q']??'')),
-        'status'=>(string)($_GET['status']??''),
-        'priority'=>(string)($_GET['priority']??''),
-        'due'=>(string)($_GET['due']??''),
-        'mine'=>($_GET['mine']??'')==='1'?'1':'',
-        'sort'=>($_GET['sort']??'')==='due'?'due':'',
+        'q'=>trim((string)($requestFilters['q']??'')),
+        'status'=>(string)($requestFilters['status']??''),
+        'priority'=>(string)($requestFilters['priority']??''),
+        'due'=>(string)($requestFilters['due']??''),
+        'mine'=>($requestFilters['mine']??'')==='1'?'1':'',
+        'sort'=>($requestFilters['sort']??'')==='due'?'due':'',
     ];
     $dueLabels=['overdue'=>'Vencidas','upcoming'=>'Próximos 7 días','none'=>'Sin fecha'];
     $filtered=array_values(array_filter($requests,static function (array $request) use ($filters,$today,$nextWeek,$uid): bool {
@@ -424,7 +424,7 @@ if ($me) {
         exit;
     }
     $pageCount=max(1,(int)ceil(count($filtered)/25));
-    $page=min($pageCount,max(1,(int)($_GET['page']??1)));
+    $page=min($pageCount,max(1,(int)($requestFilters['page']??1)));
     $visibleRequests=array_slice($filtered,($page-1)*25,25);
     $requestActivity=[];
     if ($view==='requests' && $visibleRequests) {
@@ -607,7 +607,7 @@ if ($me) {
   <?php endif; ?>
   <?php if ($projectId): ?><a href="?<?=h(http_build_query($listQuery+['action'=>'export_requests']))?>">Descargar CSV</a><?php endif; ?>
 </form></div>
-<div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th><th>Actividad</th></tr></thead><tbody><?php foreach($visibleRequests as $r):?><tr data-request-row <?php if ((int)($selected['id']??0)===(int)$r['id']): ?>class="request-current"<?php endif; ?>><td><?=h((string)$r['id'])?></td><td><a href="<?=h($requestUrl((int)$r['id'],$requestFilters))?>"><?=h($r['title'])?></a>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th><th>Actividad</th></tr></thead><tbody><?php foreach($visibleRequests as $r):?><tr id="request-<?=$r['id']?>" data-request-row <?php if ((int)($selected['id']??0)===(int)$r['id']): ?>class="request-current"<?php endif; ?>><td><?=h((string)$r['id'])?></td><td><a href="<?=h($requestUrl((int)$r['id'],$requestFilters))?>"><?=h($r['title'])?></a>
 <button type="button" class="preview-trigger secondary" data-preview="preview-<?=$r['id']?>" aria-label="Vista rápida de <?=h($r['title'])?>" hidden>Vista rápida</button>
 <template id="preview-<?=$r['id']?>">
   <h2><?=h($r['title'])?></h2>
@@ -699,10 +699,10 @@ if ($me) {
 </section>
 <?php endif; ?>
 <?php if ($selected): ?>
-<aside class="request-drawer" aria-labelledby="drawer-title">
+<dialog class="request-drawer" open aria-labelledby="drawer-title">
   <header class="drawer-header">
     <h2 id="drawer-title">#<?=$selected['id']?> <span><?=h($selected['title'])?></span></h2>
-    <a class="btn secondary" href="?<?=h(http_build_query(['project'=>$projectId]+$requestFilters))?>" aria-label="Cerrar detalle">×</a>
+    <a class="btn secondary" href="?<?=h(http_build_query(['project'=>$projectId]+$requestFilters))?>#request-<?=$selected['id']?>" aria-label="Cerrar detalle" autofocus>×</a>
   </header>
   <nav class="drawer-tabs" aria-label="Secciones de la solicitud">
     <a href="#request-information">Detalle y documentos <span><?=count($documents)?></span></a>
@@ -719,6 +719,6 @@ if ($me) {
     <?php if ($position!==false && $position>0): ?><a class="btn secondary" href="<?=h($requestUrl((int)$filtered[$position-1]['id'],['page'=>intdiv($position-1,25)+1]+$requestFilters))?>">← Anterior</a><?php endif; ?>
     <?php if ($position!==false && isset($filtered[$position+1])): ?><a class="btn secondary" href="<?=h($requestUrl((int)$filtered[$position+1]['id'],['page'=>intdiv($position+1,25)+1]+$requestFilters))?>">Siguiente →</a><?php endif; ?>
   </footer>
-</aside>
+</dialog>
 <?php endif; ?>
 </main></div><?php endif; ?></body></html>

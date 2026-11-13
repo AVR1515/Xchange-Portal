@@ -11,6 +11,10 @@ if (projectSearch) {
 const drawer = document.querySelector('.request-drawer');
 if (drawer) {
   const close = drawer.querySelector('.drawer-header a');
+  if (typeof drawer.showModal === 'function') {
+    drawer.removeAttribute('open');
+    drawer.showModal();
+  }
   const tabs = Array.from(drawer.querySelectorAll('.drawer-tabs a'));
   function showSection() {
     const hash = location.hash === '#documents' ? '#request-information' : location.hash;
@@ -24,8 +28,20 @@ if (drawer) {
   showSection();
   window.addEventListener('hashchange', showSection);
   close.focus({ preventScroll: true });
+  drawer.addEventListener('cancel', event => {
+    event.preventDefault();
+    window.location.assign(close.href);
+  });
   drawer.addEventListener('keydown', event => {
-    if (event.key === 'Escape') window.location.assign(close.href);
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    window.location.assign(close.href);
+  });
+}
+const returnedRequest = document.getElementById(location.hash.slice(1));
+if (!drawer && returnedRequest?.matches('[data-request-row]')) {
+  window.addEventListener('pageshow', () => {
+    requestAnimationFrame(() => returnedRequest.querySelector('a').focus());
   });
 }
 const fileInput = document.querySelector('#document');

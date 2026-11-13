@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-13 — Paleta cálida y navegación del detalle
+- El portal usa una paleta ciruela, terracota y crema sobre la estructura de proyectos, solicitudes y detalle lateral.
+- El detalle mantiene el foco dentro del diálogo y lo devuelve a la solicitud al cerrar. El listado ignora valores de filtro que no sean texto.
+- Verificados en XAMPP los accesos a las vistas, la entrega, la descarga, los comentarios, la aceptación y el CSV. En Chrome se comprobaron las pestañas, Escape y retorno del foco a 360, 768 y 1440 px.
+
 ## 2026-11-13 — Actividad en el listado
 - Cada fila muestra sus conteos de documentos y comentarios con acceso directo a la sección correspondiente. El panel resalta la solicitud abierta y conserva los filtros al pasar de una página a otra.
 
