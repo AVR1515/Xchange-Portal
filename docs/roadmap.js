@@ -24,12 +24,12 @@ const VERIFIED = {
  1: 'En XAMPP se verificaron el inicio y cierre de sesión y el aislamiento de proyectos, solicitudes y descargas. También se comprobó el rechazo de un POST sin token CSRF.',
  2: 'El esquema se importó en MariaDB y se creó un proyecto demo con tres miembros. Queda verificar claves, índices y aislamiento con varios proyectos.',
  3: 'Se verificaron creación, edición, filtros combinados y permisos de acceso. También se verificó la paginación con 26 solicitudes. Queda validar la asignación.',
- 4: 'Se verificaron la carga de TXT, la descarga íntegra y el bloqueo de acceso a archivos desde otro proyecto. También se verificaron PDF, rechazo de MIME incorrecto y rechazo por tamaño.',
+ 4: 'Se verificaron la carga de TXT, la descarga íntegra y el bloqueo de acceso a archivos desde otro proyecto. También se verificaron PDF, PNG, rechazo de MIME incorrecto y rechazo por tamaño.',
  5: 'Se verificaron la devolución con motivo obligatorio, el reenvío y la aceptación, así como el bloqueo de la revisión para clientes. Con dos sesiones concurrentes se registró un solo cambio de estado.',
  6: 'Se verificó la publicación de comentarios y la aparición de los cambios de estado en el historial.',
  8: 'Se verificó la creación y edición de un proyecto, el alta de una cuenta cliente y el aislamiento entre dos proyectos. También se verificó asociar una cuenta existente y actualizar el rol de un miembro.',
- 9: 'Se verificaron el CSV filtrado, el bloqueo de exportación desde otro proyecto y el tratamiento de títulos que podrían interpretarse como fórmulas.',
- 10: 'Se comprobaron dos versiones del mismo nombre y avisos por solicitudes y comentarios. Se comprobó el aviso de vencimiento. Queda probar una descarga con integridad fallida.',
+ 9: 'Se verificaron el CSV filtrado, el bloqueo de exportación desde otro proyecto y el tratamiento de títulos que podrían interpretarse como fórmulas y los conteos por estado.',
+ 10: 'Se comprobaron dos versiones del mismo nombre y avisos por solicitudes y comentarios. Se comprobó el aviso de vencimiento. Se comprobó que el portal rechaza un archivo alterado al descargarlo.',
  11: 'La URL base redirige al formulario de acceso y sus recursos cargan en XAMPP. Se restauró una copia SQL en una base aislada y se comprobó el SHA-256 de dos archivos respaldados. Queda probar el portal contra esa copia restaurada.'
 };
 const PHASES = [

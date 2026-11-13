@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-12 — Distribución de estados
+- El tablero muestra la distribución de solicitudes por estado y permite abrir cada filtro desde la métrica.
+- Se verificó la carga y descarga de PNG y el rechazo de una descarga cuyo SHA-256 difiere del registrado.
+
 ## 2026-11-12 — Cambio de contraseña
 - Cada usuario puede cambiar su contraseña desde el portal. Se comprueba la contraseña actual y se invalidan las sesiones anteriores.
 

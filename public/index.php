@@ -301,7 +301,7 @@ if ($me) {
     $q->execute([$projectId]);$members=$q->fetchAll();
     $statusLabels=['open'=>'Pendiente','submitted'=>'Recibida','returned'=>'Devuelta','accepted'=>'Aceptada'];
     $priorityLabels=['normal'=>'Normal','high'=>'Alta','critical'=>'Crítica'];
-    $counts=['total'=>count($requests),'open'=>0,'submitted'=>0,'accepted'=>0,'overdue'=>0];
+    $counts=['total'=>count($requests),'open'=>0,'submitted'=>0,'returned'=>0,'accepted'=>0,'overdue'=>0];
     $today=date('Y-m-d');
     $nextWeek=date('Y-m-d',strtotime('+7 days'));
     $deadlines=[];
@@ -426,6 +426,18 @@ if ($me) {
   </form>
 </details>
 <div class="grid"><div class="panel"><div class="metric"><?=$counts['total']?></div><div class="metric-caption">Solicitudes totales</div></div><div class="panel"><div class="metric"><?=$counts['open']?></div><div class="metric-caption">Pendientes</div></div><div class="panel"><div class="metric"><?=$counts['submitted']?></div><div class="metric-caption">Recibidas</div></div><div class="panel"><div class="metric"><?=$counts['overdue']?></div><div class="metric-caption danger">Vencidas</div></div><div class="panel"><div class="metric"><?=$counts['accepted']?></div><div class="metric-caption">Aceptadas</div></div></div>
+<section class="panel" aria-labelledby="request-status-summary">
+  <h2 id="request-status-summary">Estado de las solicitudes</h2>
+  <div class="request-status-summary">
+    <?php foreach ($statusLabels as $value=>$label): ?>
+      <div>
+        <a href="?<?=h(http_build_query(['project'=>$projectId,'status'=>$value]))?>"><?=h($label)?></a>
+        <strong><?=$counts[$value]?></strong>
+        <progress value="<?=$counts[$value]?>" max="<?=max(1,$counts['total'])?>" aria-label="<?=h($label)?>"></progress>
+      </div>
+    <?php endforeach; ?>
+  </div>
+</section>
 <section class="panel"><div class="toolbar"><div><h2>Solicitudes de documentos</h2><p class="muted">Intercambio, seguimiento y revisión de evidencia.</p></div><form method="get" class="request-filters">
   <input type="hidden" name="project" value="<?=$projectId?>">
   <input name="q" type="search" value="<?=h($filters['q'])?>" placeholder="Buscar solicitudes…" aria-label="Buscar solicitudes">

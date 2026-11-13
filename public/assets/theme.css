@@ -20,6 +20,18 @@ td,th{border-color:#283545}th{color:#9cabba}tr:hover td{background:#1e2b3c}
   width: 100%;
 }
 .request-filters input { max-width: none; }
+.request-status-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  gap: 12px;
+}
+.request-status-summary > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+}
+.request-status-summary progress { grid-column: 1 / -1; width: 100%; accent-color: var(--blue); }
+.panel:has(.request-status-summary) { margin-bottom: 20px; }
 .panel, .detail > *, .stack > * { min-width: 0; }
 .panel p, .file strong, .top h1 { overflow-wrap: anywhere; }
 #projects, #updates, #team { margin-block: 20px; }
