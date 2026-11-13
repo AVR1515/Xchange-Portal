@@ -8,21 +8,21 @@
  * GitHub issues mantienen el seguimiento oficial del proyecto.
  */
 const TASKS = [
- {id:2,phase:0,priority:'P0',status:'progress',icon:'▦',title:'Modelo SQL y estructura de datos',summary:'Usuarios, proyectos, membresías, solicitudes, documentos y eventos de auditoría.',criteria:['Importar database/schema.sql con XAMPP','Comprobar claves foráneas e índices','Documentar migraciones y datos de prueba','Verificar aislamiento entre proyectos']},
- {id:1,phase:0,priority:'P0',status:'progress',icon:'⛨',title:'Autenticación, sesiones y permisos',summary:'Inicio de sesión, roles de equipo de la compañía, cliente y administrador, CSRF y autorización por proyecto.',criteria:['Login/logout y sesiones en XAMPP','Probar roles por proyecto','Negar acceso a solicitudes ajenas','Validar CSRF y seguridad de sesiones']},
- {id:3,phase:1,priority:'P0',status:'progress',icon:'☷',title:'Gestión de solicitudes documentales',summary:'Crear y listar solicitudes, fechas, prioridad, asignación, detalle y búsqueda.',criteria:['Crear una solicitud como miembro del equipo de la compañía','Cliente ve solicitudes autorizadas','Editar y cancelar solicitudes, y aplicar filtros avanzados','Paginación y búsqueda verificadas']},
- {id:4,phase:1,priority:'P0',status:'progress',icon:'⇧',title:'Carga y descarga segura de documentos',summary:'Archivos locales con validación de tamaño y tipo, almacenamiento privado y permisos.',criteria:['Carga y descarga íntegra en XAMPP','Verificar MIME, extensiones y límites','Bloquear rutas directas a storage','Denegar descarga entre proyectos']},
- {id:5,phase:1,priority:'P0',status:'progress',icon:'✓',title:'Flujo de revisión y aceptación',summary:'Enviar, aceptar, devolver y reenviar evidencia con control de roles.',criteria:['Ejecutar open → submitted → accepted','Ejecutar submitted → returned → submitted','Prohibir aceptación por clientes','Verificar transiciones concurrentes']},
+ {id:2,phase:0,priority:'P0',status:'done',icon:'▦',title:'Modelo SQL y estructura de datos',summary:'Usuarios, proyectos, membresías, solicitudes, documentos y eventos de auditoría.',criteria:['Importar database/schema.sql con XAMPP','Comprobar claves foráneas e índices','Documentar migraciones y datos de prueba','Verificar aislamiento entre proyectos']},
+ {id:1,phase:0,priority:'P0',status:'done',icon:'⛨',title:'Autenticación, sesiones y permisos',summary:'Inicio de sesión, roles de equipo de la compañía, cliente y administrador, CSRF y autorización por proyecto.',criteria:['Login/logout y sesiones en XAMPP','Probar roles por proyecto','Negar acceso a solicitudes ajenas','Validar CSRF y seguridad de sesiones']},
+ {id:3,phase:1,priority:'P0',status:'done',icon:'☷',title:'Gestión de solicitudes documentales',summary:'Crear y listar solicitudes, fechas, prioridad, asignación, detalle y búsqueda.',criteria:['Crear una solicitud como miembro del equipo de la compañía','Cliente ve solicitudes autorizadas','Editar y cancelar solicitudes, y aplicar filtros avanzados','Paginación y búsqueda verificadas']},
+ {id:4,phase:1,priority:'P0',status:'done',icon:'⇧',title:'Carga y descarga segura de documentos',summary:'Archivos locales con validación de tamaño y tipo, almacenamiento privado y permisos.',criteria:['Carga y descarga íntegra en XAMPP','Verificar MIME, extensiones y límites','Bloquear rutas directas a storage','Denegar descarga entre proyectos']},
+ {id:5,phase:1,priority:'P0',status:'done',icon:'✓',title:'Flujo de revisión y aceptación',summary:'Enviar, aceptar, devolver y reenviar evidencia con control de roles.',criteria:['Ejecutar open → submitted → accepted','Ejecutar submitted → returned → submitted','Prohibir aceptación por clientes','Verificar transiciones concurrentes']},
  {id:6,phase:1,priority:'P0',status:'progress',icon:'◷',title:'Comentarios e historial de auditoría',summary:'Mensajes vinculados a solicitudes, eventos y trazabilidad de acciones.',criteria:['Publicar y mostrar comentarios','Historial de cambios por usuario','Escapar texto potencialmente malicioso','Auditar acciones sensibles']},
  {id:7,phase:2,priority:'P1',status:'progress',icon:'◫',title:'Interfaz moderna y responsive',summary:'Dashboard, tabla de solicitudes, navegación y detalle inspirados funcionalmente en las referencias.',criteria:['Interfaz responsive en CSS nativo','Construir drawer de detalle','Teclado, foco y estados vacíos','Validar experiencia en móvil y escritorio']},
- {id:8,phase:2,priority:'P0',status:'progress',icon:'♙',title:'Gestión de proyectos, clientes y miembros',summary:'Administrar varios proyectos desde el portal y controlar quién puede participar en cada uno.',criteria:['Crear y editar proyectos desde la interfaz','Crear cuentas o asociar usuarios existentes del cliente y de la compañía','Asignar miembros y roles por proyecto','Navegar entre proyectos con acceso autorizado','Verificar aislamiento con dos proyectos y clientes distintos']},
- {id:9,phase:2,priority:'P1',status:'progress',icon:'▥',title:'Dashboard, métricas y exportaciones',summary:'Indicadores calculados desde SQL, vencimientos, gráficos locales y CSV.',criteria:['Comprobar métricas contra SQL','Gráficos sin conexión a Internet','Filtros de dashboard','Exportaciones CSV autorizadas']},
- {id:10,phase:3,priority:'P2',status:'progress',icon:'▤',title:'Versionado y notificaciones internas',summary:'Versiones de documentos, hashes, alertas locales de cambios y fechas.',criteria:['Preservar versiones anteriores','Descargar versiones con autorización','Crear avisos internos','Verificar integridad por SHA-256']},
+ {id:8,phase:2,priority:'P0',status:'done',icon:'♙',title:'Gestión de proyectos, clientes y miembros',summary:'Administrar varios proyectos desde el portal y controlar quién puede participar en cada uno.',criteria:['Crear y editar proyectos desde la interfaz','Crear cuentas o asociar usuarios existentes del cliente y de la compañía','Asignar miembros y roles por proyecto','Navegar entre proyectos con acceso autorizado','Verificar aislamiento con dos proyectos y clientes distintos']},
+ {id:9,phase:2,priority:'P1',status:'done',icon:'▥',title:'Dashboard, métricas y exportaciones',summary:'Indicadores calculados desde SQL, vencimientos, gráficos locales y CSV.',criteria:['Comprobar métricas contra SQL','Gráficos sin conexión a Internet','Filtros de dashboard','Exportaciones CSV autorizadas']},
+ {id:10,phase:3,priority:'P2',status:'done',icon:'▤',title:'Versionado y notificaciones internas',summary:'Versiones de documentos, hashes, alertas locales de cambios y fechas.',criteria:['Preservar versiones anteriores','Descargar versiones con autorización','Crear avisos internos','Verificar integridad por SHA-256']},
  {id:11,phase:3,priority:'P2',status:'progress',icon:'⚙',title:'Pruebas, seguridad y entrega XAMPP',summary:'QA funcional, documentación y validación de seguridad antes de producción.',criteria:['Ejecución reproducible en Windows XAMPP','Pruebas de autorización y subida','Checklist de seguridad documentado','Backups y restauración probados']}
 ];
 const VERIFIED = {
  1: 'En XAMPP se verificaron el inicio y cierre de sesión y el aislamiento de proyectos, solicitudes y descargas. También se comprobó el rechazo de un POST sin token CSRF.',
- 2: 'El esquema se importó en MariaDB y se creó un proyecto demo con tres miembros. Queda verificar claves, índices y aislamiento con varios proyectos.',
+ 2: 'El esquema se importó en MariaDB y se creó un proyecto demo con tres miembros. Se comprobaron las claves foráneas, los índices de solicitudes y el aislamiento entre proyectos.',
  3: 'Se verificaron creación, edición, filtros combinados y permisos de acceso. También se verificó la paginación con 26 solicitudes. Se verificaron asignación y cancelación con conservación de adjuntos.',
  4: 'Se verificaron cargas y descargas de TXT, PDF, PNG, DOCX y XLSX, bloqueo de acceso desde otro proyecto y rechazo por MIME, tamaño o integridad.',
  5: 'Se verificaron la devolución con motivo obligatorio, el reenvío y la aceptación, así como el bloqueo de la revisión para clientes. Con dos sesiones concurrentes se registró un solo cambio de estado.',
@@ -53,6 +53,7 @@ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(userState));return t
 const cleanText=x=>typeof x==='string'?x.slice(0,6000):'';
 const card=(t)=>{
  const a=document.createElement('article');a.className='task-card';a.tabIndex=0;a.setAttribute('role','button');a.setAttribute('aria-label','Abrir tarea '+t.id+': '+t.title);
+ a.dataset.taskId=t.id;
  const icon=document.createElement('div');icon.className='task-icon';icon.textContent=t.icon;
  const main=document.createElement('div');main.className='task-main';
  const h=document.createElement('h3');h.textContent=t.title;
@@ -72,7 +73,7 @@ const card=(t)=>{
 function renderPhases(){
  const root=$('phase-strip');root.replaceChildren();
  for(const ph of PHASES){
-  const rows=TASKS.filter(t=>t.phase===ph.id).map(t=>state(t.id));
+  const rows=TASKS.filter(t=>t.phase===ph.id);
   const done=rows.filter(t=>t.status==='done').length, percent=Math.round(100*done/rows.length);
   const btn=document.createElement('button');btn.className='phase'+(activePhase===ph.id?' selected':'');btn.type='button';btn.setAttribute('aria-pressed',String(activePhase===ph.id));btn.setAttribute('aria-label',ph.name+'; '+done+' de '+rows.length+' completadas. Filtrar fase.');
   const top=document.createElement('div');top.className='phase-top';const label=document.createElement('span');label.textContent=ph.label;const pct=document.createElement('span');pct.textContent=percent+'%';top.append(label,pct);
@@ -87,13 +88,13 @@ function renderPhases(){
 }
 function render(){
  const tasks=TASKS.map(t=>state(t.id));
- const done=tasks.filter(t=>t.status==='done').length, active=tasks.filter(t=>t.status==='progress').length;
+ const done=TASKS.filter(t=>t.status==='done').length, active=TASKS.filter(t=>t.status==='progress').length;
  const pct=Math.round(100*done/tasks.length);
  $('stat-total').textContent=String(tasks.length);$('stat-progress').textContent=String(active);$('stat-done').textContent=String(done);
  $('stat-p0').textContent=String(tasks.filter(t=>t.priority==='P0').length);
  $('progress-value').textContent=pct+'%';$('progress-ring').style.background='conic-gradient(var(--teal) '+pct+'%, #34516a '+pct+'%)';
  $('progress-ring').setAttribute('aria-label','Progreso de tareas completadas: '+pct+' por ciento');
- $('progress-caption').textContent=done+' de '+tasks.length+' tareas completadas';
+ $('progress-caption').textContent=done+' de '+tasks.length+' tareas completadas en la versión publicada';
  renderPhases();
  const query=$('search').value.toLocaleLowerCase().trim(),status=$('status-filter').value,priority=$('priority-filter').value;
  const shown=tasks.filter(t=>(activePhase==='all'||t.phase===activePhase)&&(status==='all'||t.status===status)&&(priority==='all'||t.priority===priority)&&(t.title+' '+t.summary+' '+t.criteria.join(' ')).toLocaleLowerCase().includes(query));
@@ -118,8 +119,10 @@ function openTask(id){
  $('drawer-close').focus();
 }
 function closeTask(){
+ const taskId=selectedId;
  $('drawer').hidden=true;$('drawer-backdrop').hidden=true;document.body.style.overflow='';selectedId=null;
- if(priorFocus&&typeof priorFocus.focus==='function')priorFocus.focus();
+ const returnTarget=priorFocus?.isConnected?priorFocus:document.querySelector('[data-task-id="'+taskId+'"]')||$('search');
+ returnTarget.focus();
 }
 function saveTask(){
  if(selectedId===null)return;

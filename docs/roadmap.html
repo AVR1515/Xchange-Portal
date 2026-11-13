@@ -7,7 +7,7 @@
   <title>Roadmap Vivo · Xchange Portal</title>
   <meta name="description" content="Roadmap interactivo y local para desarrollar Xchange Portal con PHP, SQL y XAMPP.">
   <link rel="stylesheet" href="roadmap.css">
-  <script src="roadmap.js" defer></script>
+  <script src="roadmap.js?v=2" defer></script>
 </head>
 <body>
   <div class="shell">
@@ -36,14 +36,14 @@
       </header>
 
       <section class="hero" aria-labelledby="overview-title">
-        <div class="hero-copy"><div class="hero-label">ACTUALIZADO EL 12 DE NOVIEMBRE DE 2026</div><h2 id="overview-title">Del acceso local al flujo documental</h2><p>La base local y el acceso con los tres roles ya se verificaron en XAMPP. El siguiente hito es completar el flujo de solicitudes, entregas y revisión, y habilitar la administración de proyectos y miembros desde el portal.</p></div>
+        <div class="hero-copy"><div class="hero-label">ACTUALIZADO EL 12 DE NOVIEMBRE DE 2026</div><h2 id="overview-title">Avance de implementación</h2><p>El flujo documental, la administración de proyectos y los reportes ya se verificaron en XAMPP. El porcentaje muestra las tareas completadas en la versión publicada.</p></div>
         <div class="hero-progress"><div class="ring" id="progress-ring" role="img" aria-label="Progreso de tareas completadas: 0 por ciento"><div class="ring-inner"><strong id="progress-value">0%</strong><span>Completado</span></div></div><span class="progress-caption" id="progress-caption">0 de 11 tareas completadas</span></div>
       </section>
 
       <section class="stats" aria-label="Indicadores">
         <div class="stat"><span>Total tareas</span><strong id="stat-total">11</strong><small>4 fases de trabajo</small></div>
         <div class="stat"><span>En progreso</span><strong id="stat-progress">0</strong><small>Implementaciones activas</small></div>
-        <div class="stat"><span>Completadas</span><strong id="stat-done">0</strong><small>Verificadas y aprobadas</small></div>
+        <div class="stat"><span>Completadas</span><strong id="stat-done">0</strong><small>Verificadas en la versión publicada</small></div>
         <div class="stat"><span>Prioridad P0</span><strong id="stat-p0">7</strong><small>MVP documental</small></div>
       </section>
 
@@ -63,7 +63,7 @@
 
       <section class="lower-grid">
         <div class="info-card"><div class="eyebrow">CRITERIO DE ENTREGA</div><h2>¿Qué significa “completada”?</h2><p>Una tarea solo debe marcarse como completa cuando funcione en XAMPP, tenga permisos comprobados y se haya documentado en el changelog. El código publicado por sí solo no es una prueba.</p><a href="SECURITY.md">Ver controles de seguridad ↗</a></div>
-        <div class="info-card"><div class="eyebrow">TU CONTROL</div><h2>Tu progreso, tus decisiones.</h2><p>Los cambios y notas del tablero se guardan localmente. Exporta un JSON para respaldo o para mover el estado a otro navegador. Importarlo restaura estados y notas.</p><button class="button ghost danger" id="restore-btn" type="button">Restablecer tablero</button></div>
+        <div class="info-card"><div class="eyebrow">TU CONTROL</div><h2>Tu progreso, tus decisiones.</h2><p>Los cambios de estado y las notas se guardan localmente. Los indicadores de avance usan los estados publicados. Exporta un JSON para respaldo o para mover el estado a otro navegador. Importarlo restaura estados y notas.</p><button class="button ghost danger" id="restore-btn" type="button">Restablecer tablero</button></div>
       </section>
       <footer>© 2026 Xchange Portal · Proyecto independiente · UI local sin frameworks CSS ni CDN · <a href="https://github.com/AVR1515/Xchange-Portal/issues" target="_blank" rel="noopener noreferrer">Ver issues ↗</a></footer>
     </main>
