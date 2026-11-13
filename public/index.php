@@ -463,9 +463,9 @@ if ($me) {
 </aside>
 <main class="main" id="main-content" tabindex="-1">
   <header class="top">
-    <div><strong><?=h($selected?'Solicitudes':$views[$view])?></strong><br><span class="small muted"><?=h($activeProject['name']??'Xchange Portal')?></span></div>
+    <div class="top-context"><strong><?=h($selected?'Solicitudes':$views[$view])?></strong><span class="small muted"><?=h($view==='projects'&&!$selected?'Vista general':($activeProject['name']??'Xchange Portal'))?></span></div>
     <div class="topuser">
-      <span><?=h($me['name'])?></span>
+      <a class="account-link" href="<?=h($viewUrl('account'))?>"><span class="account-avatar" aria-hidden="true"><?=h(mb_strtoupper(mb_substr($me['name'],0,1)))?></span><span><?=h($me['name'])?></span></a>
       <form method="post">
         <input type="hidden" name="csrf" value="<?=h(csrf())?>">
         <input type="hidden" name="action" value="logout">

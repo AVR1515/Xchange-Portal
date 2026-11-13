@@ -84,6 +84,19 @@ tr:hover td { background: #213047; }
 .message.success { background: #23493f; color: #c1f3df; }
 #upload-summary:empty { display: none; }
 #documents, #comments { scroll-margin-top: 16px; }
+.top-context { display: grid; min-width: 0; overflow-wrap: anywhere; }
+.top-context strong { font-size: 1.05rem; }
+.account-link { display: flex; align-items: center; gap: 8px; color: var(--txt); min-width: 0; overflow-wrap: anywhere; }
+.account-avatar { display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 32px; border-radius: 50%; background: #233650; color: #c2d7ff; font-weight: 700; }
+.detail .stack { align-content: start; }
+.table-wrap a:not(.btn) { font-weight: 650; }
+.file > div { min-width: 0; overflow-wrap: anywhere; }
+.file > a { flex-shrink: 0; }
+@media (max-width: 480px) {
+  .topuser { gap: 8px; }
+  .account-link span:last-child { max-width: 9ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file { flex-wrap: wrap; }
+}
 @media (max-width: 680px) {
   .app { display: block; }
   .side .brand, .project-picker { margin-bottom: 12px; }
