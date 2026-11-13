@@ -1,4 +1,32 @@
 'use strict';
+const projectSearch = document.querySelector('#project-search');
+if (projectSearch) {
+  const cards = Array.from(document.querySelectorAll('[data-project-card]'));
+  projectSearch.addEventListener('input', () => {
+    const query = projectSearch.value.trim().toLocaleLowerCase();
+    for (const card of cards) card.hidden = !card.querySelector('h3').textContent.toLocaleLowerCase().includes(query);
+    document.querySelector('#project-search-empty').hidden = !cards.length || cards.some(card => !card.hidden);
+  });
+}
+const drawer = document.querySelector('.request-drawer');
+if (drawer) {
+  const close = drawer.querySelector('.drawer-header a');
+  const tabs = Array.from(drawer.querySelectorAll('.drawer-tabs a'));
+  function showSection() {
+    const hash = location.hash === '#documents' ? '#request-information' : location.hash;
+    const active = tabs.find(tab => tab.hash === hash) || tabs[0];
+    for (const tab of tabs) {
+      tab.toggleAttribute('aria-current', tab === active);
+      document.getElementById(tab.hash.slice(1)).hidden = tab !== active;
+    }
+  }
+  showSection();
+  window.addEventListener('hashchange', showSection);
+  close.focus({ preventScroll: true });
+  drawer.addEventListener('keydown', event => {
+    if (event.key === 'Escape') window.location.assign(close.href);
+  });
+}
 const fileInput = document.querySelector('#document');
 if (fileInput) {
   const summary = document.querySelector('#upload-summary');

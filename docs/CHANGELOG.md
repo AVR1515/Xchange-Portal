@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-13 — Estructura del espacio de trabajo basada en Canvas
+- Barra superior, navegación compacta, directorio de proyectos con resumen y gráfico de vencimientos de 30 días.
+- El detalle se abre sobre el listado, con secciones para documentos, comentarios e historial y navegación entre solicitudes del resultado actual.
+
 ## 2026-11-12 — Pantalla de errores del portal
 - Los fallos inesperados devuelven una pantalla del portal con un código de incidente. El tipo de excepción y su ubicación se registran en el servidor.
 

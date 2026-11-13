@@ -392,7 +392,7 @@ if ($me) {
     $views=['requests'=>'Solicitudes','projects'=>'Proyectos','updates'=>'Actividad','team'=>'Equipo','account'=>'Mi cuenta'];
     if (in_array($role,['admin','auditor'],true)) $views['new']='Nueva solicitud';
     $view=(string)($_GET['view']??(isset($_GET['project'])?'requests':'projects'));
-    if (!isset($views[$view])) $view='requests';
+    if ($selected || !isset($views[$view])) $view='requests';
     $projectStats=[];
     if ($view==='projects' && !$selected) {
         $summary=db()->prepare("SELECT pm.project_id, COUNT(r.id) AS total,
@@ -426,6 +426,21 @@ if ($me) {
     $pageCount=max(1,(int)ceil(count($filtered)/25));
     $page=min($pageCount,max(1,(int)($_GET['page']??1)));
     $visibleRequests=array_slice($filtered,($page-1)*25,25);
+    $chartStart=new DateTimeImmutable($today);
+    $dueBuckets=array_fill(0,5,0);
+    $chartRequests=$view==='projects'
+        ? [] : $requests;
+    if ($view==='projects') {
+        $dueQuery=db()->prepare("SELECT r.due_date FROM requests r JOIN project_members pm ON pm.project_id=r.project_id
+            WHERE pm.user_id=? AND r.status IN ('open','submitted','returned') AND r.due_date BETWEEN ? AND ?");
+        $dueQuery->execute([$uid,$today,$chartStart->modify('+29 days')->format('Y-m-d')]);
+        $chartRequests=$dueQuery->fetchAll();
+    }
+    foreach ($chartRequests as $item) {
+        if (!$item['due_date'] || in_array($item['status']??'', ['accepted','cancelled'],true)) continue;
+        $days=(int)$chartStart->diff(new DateTimeImmutable($item['due_date']))->format('%r%a');
+        if ($days>=0 && $days<30) $dueBuckets[intdiv($days,7)]++;
+    }
 }
 ?><!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -441,75 +456,51 @@ if ($me) {
 <?php else: ?>
 <a class="skip-link" href="#main-content">Saltar al contenido</a>
 <div class="app">
+<header class="portal-bar">
+  <a class="portal-brand" href="?view=projects"><b class="brand-icon">X</b> Xchange Portal</a>
+  <?php if ($activeProject && $view!=='projects'): ?><span class="portal-project"><?=h($activeProject['name'])?></span><?php endif; ?>
+  <div class="topuser">
+    <a class="account-link" href="<?=h($viewUrl('account'))?>"><?=h($me['name'])?></a>
+    <form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="secondary">Salir</button></form>
+  </div>
+</header>
 <aside class="side">
-  <a class="brand" href="<?=h($viewUrl('requests'))?>"><b class="brand-icon">X</b> Xchange Portal</a>
-  <?php if ($projects): ?>
-    <form method="get" class="project-picker">
-      <label for="active-project">Proyecto activo</label>
-      <select id="active-project" name="project">
-        <?php foreach ($projects as $projectOption): ?>
-          <option value="<?=$projectOption['id']?>" <?php if ((int)$projectOption['id']===$projectId): ?>selected<?php endif; ?>><?=h($projectOption['name'])?></option>
-        <?php endforeach; ?>
-      </select>
-      <button type="submit" class="secondary">Cambiar proyecto</button>
-    </form>
-  <?php endif; ?>
   <nav aria-label="Navegación del proyecto">
     <?php foreach ($views as $key=>$label): ?>
       <?php if ($key==='new') continue; ?>
-      <a href="<?=h($viewUrl($key))?>" <?php if (($selected?'requests':$view)===$key): ?>class="active" aria-current="page"<?php endif; ?>><?=h($label)?></a>
+      <?php $icons=['projects'=>'⌂','requests'=>'☷','updates'=>'◷','team'=>'♙','account'=>'⚙']; ?>
+      <a href="<?=h($viewUrl($key))?>" aria-label="<?=h($label)?>" title="<?=h($label)?>" <?php if ($view===$key): ?>class="active" aria-current="page"<?php endif; ?>><?=h($icons[$key])?></a>
     <?php endforeach; ?>
   </nav>
 </aside>
 <main class="main" id="main-content" tabindex="-1">
-  <header class="top">
-    <div class="top-context"><strong><?=h($selected?'Solicitudes':$views[$view])?></strong><span class="small muted"><?=h($view==='projects'&&!$selected?'Vista general':($activeProject['name']??'Xchange Portal'))?></span></div>
-    <div class="topuser">
-      <a class="account-link" href="<?=h($viewUrl('account'))?>"><span class="account-avatar" aria-hidden="true"><?=h(mb_strtoupper(mb_substr($me['name'],0,1)))?></span><span><?=h($me['name'])?></span></a>
-      <form method="post">
-        <input type="hidden" name="csrf" value="<?=h(csrf())?>">
-        <input type="hidden" name="action" value="logout">
-        <button class="secondary">Salir</button>
-      </form>
-    </div>
-  </header>
   <?php if ($selected || $view!=='projects'): ?><div class="page-heading">
     <div>
       <p class="eyebrow"><?=h($activeProject['name']??'Espacio de trabajo')?></p>
-      <h1><?=h($selected?$selected['title']:$views[$view])?></h1>
+      <h1><?=h($views[$view])?></h1>
     </div>
     <?php if (!$selected && $view==='requests' && isset($views['new'])): ?>
       <a class="btn" href="<?=h($viewUrl('new'))?>">＋ Nueva solicitud</a>
     <?php endif; ?>
   </div><?php endif; ?>
-<?php if($error):?><p class="message"><?=h($error)?></p><?php endif;?>
-<?php if ($flash): ?><p class="message success" role="status"><?=h($flash)?></p><?php endif; ?>
-<?php if($selected):?>
-<p><a href="?<?=h(http_build_query(['project'=>$projectId]+$requestFilters))?>">← Volver a solicitudes</a></p>
-<div class="detail"><section class="stack"><div class="panel"><h2>Detalles de solicitud #<?=$selected['id']?></h2><p><?=nl2br(h($selected['description']))?></p><p><span class="pill <?=h($selected['status'])?>"><?=h($statusLabels[$selected['status']])?></span> · Prioridad: <?=h($selected['priority'])?> · Fecha límite: <?=h($selected['due_date']??'Sin fecha')?></p><p class="muted">Asignado a: <?=h($selected['assigned_name']??'Sin asignar')?></p>
-<?php if(in_array($selected['status'],['open','submitted','returned'],true) && in_array($role,['auditor','admin'],true)):?>
-<form method="post" class="actions" data-confirm="¿Registrar revisión de esta solicitud?"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="status"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label>Motivo (obligatorio al devolver o cancelar)<textarea name="reason" maxlength="5000"></textarea></label></div><?php if ($selected['status']==='submitted'): ?><button name="status" value="accepted">Aceptar</button><button class="secondary" name="status" value="returned">Devolver</button><?php endif; ?><button class="secondary" name="status" value="cancelled">Cancelar solicitud</button></form><?php endif;?></div>
-<?php if (in_array($role,['admin','auditor'],true)): ?><details class="panel"><summary>Editar solicitud</summary><?php require dirname(__DIR__).'/app/request-form.php'; ?></details><?php endif; ?><div class="panel" id="documents"><h2>Documentos compartidos</h2><?php if (in_array($selected['status'],['accepted','cancelled'],true)): ?><p class="muted"><?=$selected['status']==='accepted'?'Esta solicitud fue aceptada.':'Esta solicitud fue cancelada.'?></p><?php else: ?><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="upload"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="document">Selecciona hasta 10 archivos. PDF, Office, imágenes, ZIP, TXT o CSV.</label><input id="document" name="document[]" type="file" multiple required accept=".pdf,.png,.jpg,.jpeg,.txt,.csv,.docx,.xlsx,.zip" data-max-bytes="<?=(int)$config['max_upload_bytes']?>"><p class="small muted">Máximo <?=number_format($config['max_upload_bytes']/1048576,0)?> MB por archivo. El servidor también limita el tamaño total.</p><output id="upload-summary" class="small" aria-live="polite"></output></div><button>Enviar archivos</button></form><?php endif; ?>
-<?php foreach($documents as $d):?><div class="file"><div><strong><?=h($d['original_name'])?></strong><div class="small muted">Versión <?=$d['version']?> · <?=h($d['author_name'])?> · <?=h($d['created_at'])?> · <?=number_format((int)$d['byte_size']/1024,1)?> KB</div></div><a href="?action=download&amp;file=<?=$d['id']?>">Descargar</a></div><?php endforeach;?>
-<?php if(!$documents):?><p class="muted" style="margin-top:18px">No hay documentos compartidos todavía.</p><?php endif;?></div></section>
-<section class="stack"><div class="panel" id="comments"><h2>Comentarios</h2><?php foreach($comments as $c):?><div class="file"><div><strong><?=h($c['author_name'])?></strong> <span class="small muted"><?=h($c['created_at'])?></span><p><?=nl2br(h($c['body']))?></p></div></div><?php endforeach;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="comment"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="body">Nuevo comentario</label><textarea id="body" name="body" maxlength="5000" required></textarea></div><button>Publicar comentario</button></form></div><div class="panel"><h2>Actividad reciente</h2><?php foreach($events as $e):?><p class="small"><b><?=h($e['author_name'])?></b> · <?=h($e['action'])?><br><span class="muted"><?=h($e['created_at'])?> <?=h($e['details'])?></span></p><?php endforeach;?></div></section></div>
-<?php elseif ($view==='projects'): ?>
+<?php if($error && !$selected):?><p class="message"><?=h($error)?></p><?php endif;?>
+<?php if ($flash && !$selected): ?><p class="message success" role="status"><?=h($flash)?></p><?php endif; ?>
+<?php if ($view==='projects'): ?>
 <section id="projects">
-  <div class="panel workspace-intro">
-    <div><p class="eyebrow">TU ESPACIO DE TRABAJO</p><h1>Hola, <?=h($me['name'])?></h1><p class="muted">Gestiona tus proyectos, solicitudes y entregas de documentos.</p></div>
+  <div class="page-heading">
+    <h1>Hola, <?=h($me['name'])?></h1>
     <?php if ($canCreateProject): ?><a class="btn" href="<?=h($viewUrl('projects'))?>&amp;create=1#project-editor">＋ Nuevo proyecto</a><?php endif; ?>
   </div>
-  <div class="request-stats workspace-stats" aria-label="Resumen de proyectos">
-    <?php foreach (['projects'=>'Proyectos','active'=>'Solicitudes activas','accepted'=>'Aceptadas','overdue'=>'Vencidas'] as $metric=>$label): ?>
-      <div class="stat-card stat-<?=$metric?>"><strong><?=$metric==='projects'?count($projects):array_sum(array_column($projectStats,$metric))?></strong><span><?=h($label)?></span></div>
-    <?php endforeach; ?>
-  </div>
-  <h2>Mis proyectos</h2>
+  <div class="overview-layout">
+  <div class="panel project-directory">
+  <h2>Proyectos <span class="result-count"><?=count($projects)?></span></h2>
+  <label class="small muted" for="project-search">Buscar proyectos</label>
+  <input type="search" id="project-search" placeholder="Nombre del proyecto">
   <?php if (!$projects): ?><p class="muted">No tienes proyectos asignados.</p><?php endif; ?>
   <div class="project-grid">
     <?php foreach ($projects as $availableProject): ?>
       <?php $stats=$projectStats[$availableProject['id']]; $percent=$stats['total']?round(100*$stats['accepted']/$stats['total']):0; ?>
-      <article class="panel project-card">
+      <article class="panel project-card" data-project-card>
         <div class="project-card-top"><span class="brand-icon" aria-hidden="true"><?=h(mb_strtoupper(mb_substr($availableProject['name'],0,1)))?></span><span class="result-count"><?=$percent?>%</span></div>
         <h3><?=h($availableProject['name'])?></h3>
         <?php if ($availableProject['description']): ?><p class="muted"><?=h($availableProject['description'])?></p><?php endif; ?>
@@ -519,6 +510,27 @@ if ($me) {
         <?php if ($availableProject['role']==='admin'): ?><a class="btn secondary" href="?project=<?=$availableProject['id']?>&amp;view=projects&amp;edit=1#project-editor">Editar</a><?php endif; ?></div>
       </article>
     <?php endforeach; ?>
+  </div>
+  <p id="project-search-empty" class="muted" hidden>No hay proyectos que coincidan.</p>
+  </div>
+  <div class="overview-data">
+    <div class="overview-top">
+      <section class="panel overview-summary">
+        <h2>Resumen</h2>
+        <?php $allTotal=array_sum(array_column($projectStats,'total')); $allAccepted=array_sum(array_column($projectStats,'accepted')); ?>
+        <div class="overview-total"><strong><?=$allTotal?></strong><span>Solicitudes</span></div>
+        <dl><div><dt>Activas</dt><dd><?=array_sum(array_column($projectStats,'active'))?></dd></div><div><dt>Aceptadas</dt><dd><?=$allAccepted?></dd></div></dl>
+        <progress max="<?=max(1,$allTotal)?>" value="<?=$allAccepted?>" aria-label="Solicitudes aceptadas"></progress>
+      </section>
+      <?php require dirname(__DIR__).'/app/due-chart.php'; ?>
+    </div>
+    <section class="panel"><h2>Vencidas por proyecto</h2>
+      <?php foreach ($projects as $project): ?>
+        <p><a href="?project=<?=$project['id']?>&amp;due=overdue"><?=h($project['name'])?></a> <span class="result-count"><?=$projectStats[$project['id']]['overdue']?></span></p>
+      <?php endforeach; ?>
+      <?php if (!$projects): ?><p class="muted">No tienes proyectos asignados.</p><?php endif; ?>
+    </section>
+  </div>
   </div>
   <div id="project-editor" class="project-editor">
   <?php foreach (['create_project'=>'Nuevo proyecto','edit_project'=>'Editar proyecto'] as $projectAction=>$label): ?>
@@ -561,7 +573,7 @@ if ($me) {
   </form>
 </details>
 <?php elseif ($view==='requests'): ?>
-<div class="request-stats" aria-label="Resumen de solicitudes">
+<div class="request-overview"><div class="request-stats" aria-label="Resumen de solicitudes">
   <?php foreach (['total'=>'Todas','open'=>'Pendientes','submitted'=>'Recibidas','overdue'=>'Vencidas','accepted'=>'Aceptadas'] as $metric=>$label): ?>
     <?php $target=$metric==='overdue'?['due'=>'overdue']:($metric==='total'?[]:['status'=>$metric]); ?>
     <a href="?<?=h(http_build_query(['project'=>$projectId]+$target))?>" class="stat-card stat-<?=$metric?>">
@@ -569,6 +581,7 @@ if ($me) {
     </a>
   <?php endforeach; ?>
 </div>
+<?php require dirname(__DIR__).'/app/due-chart.php'; ?></div>
 <section class="panel"><div class="toolbar"><div><h2>Lista de solicitudes <span class="result-count"><?=count($filtered)?></span></h2></div><form method="get" class="request-filters">
   <input type="hidden" name="project" value="<?=$projectId?>">
   <input name="q" type="search" value="<?=h($filters['q'])?>" placeholder="Buscar solicitudes…" aria-label="Buscar solicitudes">
@@ -667,4 +680,28 @@ if ($me) {
     </details>
   <?php endif; ?>
 </section>
-<?php endif;?></main></div><?php endif;?></body></html>
+<?php endif; ?>
+<?php if ($selected): ?>
+<aside class="request-drawer" aria-labelledby="drawer-title">
+  <header class="drawer-header">
+    <h2 id="drawer-title">#<?=$selected['id']?> <span><?=h($selected['title'])?></span></h2>
+    <a class="btn secondary" href="?<?=h(http_build_query(['project'=>$projectId]+$requestFilters))?>" aria-label="Cerrar detalle">×</a>
+  </header>
+  <nav class="drawer-tabs" aria-label="Secciones de la solicitud">
+    <a href="#request-information">Detalle y documentos <span><?=count($documents)?></span></a>
+    <a href="#comments">Comentarios <span><?=count($comments)?></span></a>
+    <a href="#request-history">Historial <span><?=count($events)?></span></a>
+  </nav>
+  <div class="drawer-body">
+    <?php if ($error): ?><p class="message" role="alert"><?=h($error)?></p><?php endif; ?>
+    <?php if ($flash): ?><p class="message success" role="status"><?=h($flash)?></p><?php endif; ?>
+    <?php require dirname(__DIR__).'/app/request-detail.php'; ?>
+  </div>
+  <footer class="drawer-footer">
+    <?php $position=array_search((int)$selected['id'],array_map('intval',array_column($filtered,'id')),true); ?>
+    <?php if ($position!==false && $position>0): ?><a class="btn secondary" href="<?=h($requestUrl((int)$filtered[$position-1]['id'],$requestFilters))?>">← Anterior</a><?php endif; ?>
+    <?php if ($position!==false && isset($filtered[$position+1])): ?><a class="btn secondary" href="<?=h($requestUrl((int)$filtered[$position+1]['id'],$requestFilters))?>">Siguiente →</a><?php endif; ?>
+  </footer>
+</aside>
+<?php endif; ?>
+</main></div><?php endif; ?></body></html>
