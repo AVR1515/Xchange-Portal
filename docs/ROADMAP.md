@@ -19,11 +19,11 @@
 | Fase | Prioridad | Entregable | Issues | Estado |
 |---|---|---|---|---|
 | 0 | P0 | Instalación local, SQL, sesiones, roles | #1 #2 | 🟡 Esquema importado y acceso al tablero con tres roles verificado en XAMPP |
-| 1A | P0 | Crear/listar/filtrar solicitudes, detalle | #3 | 🟡 Creación, edición, filtros y paginación con 26 solicitudes verificados |
+| 1A | P0 | Crear, editar, cancelar y consultar solicitudes | #3 | 🟡 Creación, edición, cancelación, filtros y paginación con 26 solicitudes verificados |
 | 1B | P0 | Subir, descargar y compartir documentos protegidos | #4 | 🟡 TXT, PDF, rechazo por tamaño y MIME, y aislamiento verificados |
 | 1C | P0 | Workflow de revisión, comentarios, historia | #5 #6 | 🟡 Devolución con motivo, reenvío, aceptación, historial y revisión concurrente verificados |
-| 2 | P0 | Administrar proyectos, clientes y miembros | #8 | 🟡 Creación, edición, alta de miembros y cambio de rol verificados |
-| 2 | P1 | UI dashboard, métricas, CSV | #7 #9 | 🟡 Métricas por estado, CSV filtrado y permisos verificados. Experiencia móvil por validar |
+| 2 | P0 | Administrar proyectos, clientes y miembros | #8 | 🟡 Alta, cambio de rol, revocación de acceso e historial verificados |
+| 2 | P1 | UI dashboard, métricas, CSV | #7 #9 | 🟡 Métricas, CSV y tablero a 360, 768 y 1280 px verificados. Detalle y teclado pendientes |
 | 3 | P2 | Versiones, avisos y QA integral | #10 #11 | 🟡 Versiones, avisos y restauración SQL con verificación de archivos comprobados |
 
 ## Actualización visual y controles de demo
@@ -41,7 +41,7 @@
 ## Corte de implementación 2026-11-12
 - El portal incluye administración de proyectos y miembros, edición y filtros de solicitudes, paginación, CSV, avisos y versiones por nombre.
 - El flujo documental básico y el aislamiento de proyectos, solicitudes y descargas se probaron en XAMPP con cuentas distintas.
-- Quedan pruebas de formatos Office, uso en móvil y una sesión del portal sobre una base restaurada.
+- Quedan pruebas de formatos Office, uso del detalle con teclado y en móvil, y una sesión del portal sobre una base restaurada.
 
 ## Definition of Done
 - Código en `main`, sin ramas ni PR.
