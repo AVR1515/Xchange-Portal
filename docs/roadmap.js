@@ -24,7 +24,7 @@ const VERIFIED = {
  1: 'En XAMPP se verificaron el inicio y cierre de sesión y el aislamiento de proyectos, solicitudes y descargas. También se comprobó el rechazo de un POST sin token CSRF.',
  2: 'El esquema se importó en MariaDB y se creó un proyecto demo con tres miembros. Queda verificar claves, índices y aislamiento con varios proyectos.',
  3: 'Se verificaron creación, edición, filtros combinados y permisos de acceso. También se verificó la paginación con 26 solicitudes. Se verificaron asignación y cancelación con conservación de adjuntos.',
- 4: 'Se verificaron la carga de TXT, la descarga íntegra y el bloqueo de acceso a archivos desde otro proyecto. También se verificaron PDF, PNG, rechazo de MIME incorrecto y rechazo por tamaño.',
+ 4: 'Se verificaron cargas y descargas de TXT, PDF, PNG, DOCX y XLSX, bloqueo de acceso desde otro proyecto y rechazo por MIME, tamaño o integridad.',
  5: 'Se verificaron la devolución con motivo obligatorio, el reenvío y la aceptación, así como el bloqueo de la revisión para clientes. Con dos sesiones concurrentes se registró un solo cambio de estado.',
  6: 'Se verificó la publicación de comentarios y la aparición de los cambios de estado en el historial.',
  7: 'Chrome abrió el tablero autenticado a 360, 768 y 1280 píxeles sin desplazamiento horizontal de página. Queda validar el detalle y el recorrido con teclado.',
