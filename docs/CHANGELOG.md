@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-12 — Cierre de entregas aceptadas
+- Una solicitud aceptada conserva sus documentos y deja de admitir nuevas cargas. Se verificó en XAMPP que el cliente puede descargar la versión revisada.
+
 ## 2026-11-12 — Navegación del portal y formatos Office
 - Añadido acceso directo a Mi cuenta y un enlace para saltar al contenido con el teclado. Nueva solicitud aparece para los roles autorizados.
 - Se verificó en XAMPP la carga y descarga de muestras DOCX y XLSX.

@@ -197,7 +197,9 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             go('?request='.$rid);
         }
         if ($postAction==='upload') {
-            if ($req['status']==='cancelled') throw new RuntimeException('La solicitud fue cancelada');
+            if (in_array($req['status'],['accepted','cancelled'],true)) {
+                throw new RuntimeException('La solicitud está cerrada y no admite nuevos documentos');
+            }
             if (!isset($_FILES['document']) || !is_array($_FILES['document'])) throw new RuntimeException('Archivo requerido');
             $f=$_FILES['document'];
             if ($f['error']!==UPLOAD_ERR_OK || !is_uploaded_file($f['tmp_name'])) throw new RuntimeException('Falló la carga o se excedió el límite de PHP');
@@ -226,7 +228,9 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
                 db()->beginTransaction();
                 $lock=db()->prepare('SELECT status FROM requests WHERE id=? FOR UPDATE');
                 $lock->execute([$rid]);
-                if ($lock->fetchColumn()==='cancelled') throw new RuntimeException('La solicitud fue cancelada');
+                if (!in_array($lock->fetchColumn(),['open','returned','submitted'],true)) {
+                    throw new RuntimeException('La solicitud está cerrada y no admite nuevos documentos');
+                }
                 db()->prepare('INSERT INTO documents(request_id,uploaded_by,original_name,storage_name,mime_type,byte_size,sha256) VALUES(?,?,?,?,?,?,?)')
                   ->execute([$rid,$uid,$original,$name,$mime,(int)$f['size'],hash_file('sha256',$target)]);
                 db()->prepare("UPDATE requests SET status='submitted' WHERE id=? AND status IN ('open','returned')")->execute([$rid]);
@@ -381,7 +385,7 @@ if ($me) {
 <div class="detail"><section class="stack"><div class="panel"><h2>Detalles de solicitud #<?=$selected['id']?></h2><p><?=nl2br(h($selected['description']))?></p><p><span class="pill <?=h($selected['status'])?>"><?=h($statusLabels[$selected['status']])?></span> · Prioridad: <?=h($selected['priority'])?> · Fecha límite: <?=h($selected['due_date']??'Sin fecha')?></p><p class="muted">Asignado a: <?=h($selected['assigned_name']??'Sin asignar')?></p>
 <?php if(in_array($selected['status'],['open','submitted','returned'],true) && in_array($role,['auditor','admin'],true)):?>
 <form method="post" class="actions" data-confirm="¿Registrar revisión de esta solicitud?"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="status"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label>Motivo (obligatorio al devolver o cancelar)<textarea name="reason" maxlength="5000"></textarea></label></div><?php if ($selected['status']==='submitted'): ?><button name="status" value="accepted">Aceptar</button><button class="secondary" name="status" value="returned">Devolver</button><?php endif; ?><button class="secondary" name="status" value="cancelled">Cancelar solicitud</button></form><?php endif;?></div>
-<?php if (in_array($role,['admin','auditor'],true)): ?><details class="panel"><summary>Editar solicitud</summary><?php require dirname(__DIR__).'/app/request-form.php'; ?></details><?php endif; ?><div class="panel"><h2>Documentos compartidos</h2><?php if ($selected['status']==='cancelled'): ?><p class="muted">Esta solicitud fue cancelada.</p><?php else: ?><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="upload"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="document">Subir PDF, Office, imágenes, ZIP, TXT o CSV (máx. 20MB)</label><input id="document" name="document" type="file" required></div><button>Subir documento</button></form><?php endif; ?>
+<?php if (in_array($role,['admin','auditor'],true)): ?><details class="panel"><summary>Editar solicitud</summary><?php require dirname(__DIR__).'/app/request-form.php'; ?></details><?php endif; ?><div class="panel"><h2>Documentos compartidos</h2><?php if (in_array($selected['status'],['accepted','cancelled'],true)): ?><p class="muted"><?=$selected['status']==='accepted'?'Esta solicitud fue aceptada.':'Esta solicitud fue cancelada.'?></p><?php else: ?><form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="upload"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="document">Subir PDF, Office, imágenes, ZIP, TXT o CSV (máx. 20MB)</label><input id="document" name="document" type="file" required></div><button>Subir documento</button></form><?php endif; ?>
 <?php foreach($documents as $d):?><div class="file"><div><strong><?=h($d['original_name'])?></strong><div class="small muted">Versión <?=$d['version']?> · <?=h($d['author_name'])?> · <?=h($d['created_at'])?> · <?=number_format((int)$d['byte_size']/1024,1)?> KB</div></div><a href="?action=download&amp;file=<?=$d['id']?>">Descargar</a></div><?php endforeach;?>
 <?php if(!$documents):?><p class="muted" style="margin-top:18px">No hay documentos compartidos todavía.</p><?php endif;?></div></section>
 <section class="stack"><div class="panel"><h2>Comentarios</h2><?php foreach($comments as $c):?><div class="file"><div><strong><?=h($c['author_name'])?></strong> <span class="small muted"><?=h($c['created_at'])?></span><p><?=nl2br(h($c['body']))?></p></div></div><?php endforeach;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="comment"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="body">Nuevo comentario</label><textarea id="body" name="body" maxlength="5000" required></textarea></div><button>Publicar comentario</button></form></div><div class="panel"><h2>Actividad reciente</h2><?php foreach($events as $e):?><p class="small"><b><?=h($e['author_name'])?></b> · <?=h($e['action'])?><br><span class="muted"><?=h($e['created_at'])?> <?=h($e['details'])?></span></p><?php endforeach;?></div></section></div>
