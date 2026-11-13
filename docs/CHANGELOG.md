@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-12 — Navegación del portal y formatos Office
+- Añadido acceso directo a Mi cuenta y un enlace para saltar al contenido con el teclado. Nueva solicitud aparece para los roles autorizados.
+- Se verificó en XAMPP la carga y descarga de muestras DOCX y XLSX.
+
 ## 2026-11-12 — Cancelación de solicitudes
 - El equipo de la compañía puede cancelar solicitudes activas con un motivo. El historial y los documentos existentes siguen disponibles y la solicitud queda fuera de los vencimientos activos.
 - Añadida una migración para instalaciones existentes. En XAMPP se verificaron la cancelación, la consulta de adjuntos anteriores y el bloqueo de nuevas cargas.

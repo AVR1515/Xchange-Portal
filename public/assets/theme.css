@@ -39,4 +39,6 @@ details > summary { cursor: pointer; padding-block: 6px; }
 details[open] > form { margin-top: 12px; }
 #team .actions select { width: auto; max-width: 100%; }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.skip-link { position: fixed; inset: 12px auto auto 12px; transform: translateY(-200%); z-index: 2; padding: 10px; background: var(--panel); }
+.skip-link:focus { transform: none; }
 @media(max-width:680px){.app{display:block}.main{padding:17px 12px}.side{padding:13px}.grid{gap:8px}}
