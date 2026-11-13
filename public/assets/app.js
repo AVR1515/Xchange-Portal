@@ -16,7 +16,8 @@ if (drawer) {
     const hash = location.hash === '#documents' ? '#request-information' : location.hash;
     const active = tabs.find(tab => tab.hash === hash) || tabs[0];
     for (const tab of tabs) {
-      tab.toggleAttribute('aria-current', tab === active);
+      if (tab === active) tab.setAttribute('aria-current', 'location');
+      else tab.removeAttribute('aria-current');
       document.getElementById(tab.hash.slice(1)).hidden = tab !== active;
     }
   }

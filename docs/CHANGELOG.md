@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-13 — Actividad en el listado
+- Cada fila muestra sus conteos de documentos y comentarios con acceso directo a la sección correspondiente. El panel resalta la solicitud abierta y conserva los filtros al pasar de una página a otra.
+
 ## 2026-11-13 — Estructura del espacio de trabajo basada en Canvas
 - Barra superior, navegación compacta, directorio de proyectos con resumen y gráfico de vencimientos de 30 días.
 - El detalle se abre sobre el listado, con secciones para documentos, comentarios e historial y navegación entre solicitudes del resultado actual.

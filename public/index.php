@@ -426,6 +426,17 @@ if ($me) {
     $pageCount=max(1,(int)ceil(count($filtered)/25));
     $page=min($pageCount,max(1,(int)($_GET['page']??1)));
     $visibleRequests=array_slice($filtered,($page-1)*25,25);
+    $requestActivity=[];
+    if ($view==='requests' && $visibleRequests) {
+        $ids=array_column($visibleRequests,'id');
+        $placeholders=implode(',',array_fill(0,count($ids),'?'));
+        $activity=db()->prepare("SELECT r.id,
+            (SELECT COUNT(*) FROM documents d WHERE d.request_id=r.id) AS documents,
+            (SELECT COUNT(*) FROM request_comments c WHERE c.request_id=r.id) AS comments
+            FROM requests r WHERE r.id IN ($placeholders)");
+        $activity->execute($ids);
+        foreach ($activity as $row) $requestActivity[$row['id']]=$row;
+    }
     $chartStart=new DateTimeImmutable($today);
     $dueBuckets=array_fill(0,5,0);
     $chartRequests=$view==='projects'
@@ -596,7 +607,7 @@ if ($me) {
   <?php endif; ?>
   <?php if ($projectId): ?><a href="?<?=h(http_build_query($listQuery+['action'=>'export_requests']))?>">Descargar CSV</a><?php endif; ?>
 </form></div>
-<div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th></tr></thead><tbody><?php foreach($visibleRequests as $r):?><tr data-request-row><td><?=h((string)$r['id'])?></td><td><a href="<?=h($requestUrl((int)$r['id'],$requestFilters))?>"><?=h($r['title'])?></a>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th><th>Actividad</th></tr></thead><tbody><?php foreach($visibleRequests as $r):?><tr data-request-row <?php if ((int)($selected['id']??0)===(int)$r['id']): ?>class="request-current"<?php endif; ?>><td><?=h((string)$r['id'])?></td><td><a href="<?=h($requestUrl((int)$r['id'],$requestFilters))?>"><?=h($r['title'])?></a>
 <button type="button" class="preview-trigger secondary" data-preview="preview-<?=$r['id']?>" aria-label="Vista rápida de <?=h($r['title'])?>" hidden>Vista rápida</button>
 <template id="preview-<?=$r['id']?>">
   <h2><?=h($r['title'])?></h2>
@@ -605,7 +616,13 @@ if ($me) {
   <dt>Responsable</dt><dd><?=h($r['assigned_name']??'Sin asignar')?></dd>
   <dt>Fecha límite</dt><dd><?=h($r['due_date']??'Sin fecha')?></dd></dl>
   <a class="btn" href="<?=h($requestUrl((int)$r['id'],$requestFilters))?>">Abrir solicitud</a>
-</template></td><td><?=h($r['assigned_name']??'—')?></td><td><span class="pill <?=h($r['status'])?>"><?=h($statusLabels[$r['status']])?></span></td><td><?=h($priorityLabels[$r['priority']])?></td><td><?=h($r['due_date']??'—')?></td></tr><?php endforeach;?></tbody></table><?php if (!$visibleRequests): ?><div class="empty-list">
+</template></td><td><?=h($r['assigned_name']??'—')?></td><td><span class="pill <?=h($r['status'])?>"><?=h($statusLabels[$r['status']])?></span></td><td><?=h($priorityLabels[$r['priority']])?></td><td><?=h($r['due_date']??'—')?></td><td><div class="row-activity">
+  <?php foreach (['documents'=>['Documentos','#documents'],'comments'=>['Comentarios','#comments']] as $kind=>[$label,$anchor]): ?>
+    <?php $count=(int)($requestActivity[$r['id']][$kind]??0); ?>
+    <?php if ($count): ?><a href="<?=h($requestUrl((int)$r['id'],$requestFilters).$anchor)?>" aria-label="<?=h($label.' ('.$count.') de '.$r['title'])?>"><?=h($label)?> <?=$count?></a><?php endif; ?>
+  <?php endforeach; ?>
+  <?php if (empty($requestActivity[$r['id']]['documents']) && empty($requestActivity[$r['id']]['comments'])): ?><span class="muted">—</span><?php endif; ?>
+</div></td></tr><?php endforeach;?></tbody></table><?php if (!$visibleRequests): ?><div class="empty-list">
   <strong><?=$requests?'No hay coincidencias':'Todavía no hay solicitudes'?></strong>
   <p class="muted"><?=$requests?'Cambia o limpia los filtros para ampliar la búsqueda.':'Las solicitudes de documentos de este proyecto aparecerán aquí.'?></p>
   <?php if (!$requests && isset($views['new'])): ?><a href="<?=h($viewUrl('new'))?>">Crear la primera solicitud</a><?php endif; ?>
@@ -699,8 +716,8 @@ if ($me) {
   </div>
   <footer class="drawer-footer">
     <?php $position=array_search((int)$selected['id'],array_map('intval',array_column($filtered,'id')),true); ?>
-    <?php if ($position!==false && $position>0): ?><a class="btn secondary" href="<?=h($requestUrl((int)$filtered[$position-1]['id'],$requestFilters))?>">← Anterior</a><?php endif; ?>
-    <?php if ($position!==false && isset($filtered[$position+1])): ?><a class="btn secondary" href="<?=h($requestUrl((int)$filtered[$position+1]['id'],$requestFilters))?>">Siguiente →</a><?php endif; ?>
+    <?php if ($position!==false && $position>0): ?><a class="btn secondary" href="<?=h($requestUrl((int)$filtered[$position-1]['id'],['page'=>intdiv($position-1,25)+1]+$requestFilters))?>">← Anterior</a><?php endif; ?>
+    <?php if ($position!==false && isset($filtered[$position+1])): ?><a class="btn secondary" href="<?=h($requestUrl((int)$filtered[$position+1]['id'],['page'=>intdiv($position+1,25)+1]+$requestFilters))?>">Siguiente →</a><?php endif; ?>
   </footer>
 </aside>
 <?php endif; ?>

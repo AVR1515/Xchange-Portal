@@ -187,6 +187,10 @@ tr:hover td { background: #213047; }
 .app th { background: #191923; }
 .app tbody tr:nth-child(even) td { background: #1c1c27; }
 .app tbody tr:hover td { background: #30303d; }
+.app tbody tr.request-current td { background: #303242; }
+.request-current td:first-child { box-shadow: inset 3px 0 #6ce3df; }
+.row-activity { display: flex; flex-wrap: wrap; gap: 6px; }
+.row-activity a { padding: 3px 8px; border: 1px solid var(--line); border-radius: 12px; font-size: .75rem; }
 .request-drawer {
   position: fixed; inset: var(--bar-height) 0 0 auto; z-index: 3;
   width: min(68vw, 1080px); display: flex; flex-direction: column;
