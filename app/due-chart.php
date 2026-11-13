@@ -1,5 +1,8 @@
 <section class="panel due-chart">
   <h2>Vencimientos en los próximos 30 días</h2>
+  <?php if (!array_sum($dueBuckets)): ?>
+    <p class="chart-empty muted">No hay solicitudes activas con vencimiento en este período.</p>
+  <?php else: ?>
   <div class="due-bars">
     <?php $maxDue=max(1,...$dueBuckets); ?>
     <?php foreach ($dueBuckets as $week=>$count): ?>
@@ -11,4 +14,5 @@
       </div>
     <?php endforeach; ?>
   </div>
+  <?php endif; ?>
 </section>

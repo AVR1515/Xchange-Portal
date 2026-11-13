@@ -502,8 +502,21 @@ if ($me) {
     <h1>Mis proyectos</h1>
     <?php if ($canCreateProject): ?><a class="btn" href="<?=h($viewUrl('projects'))?>&amp;create=1#project-editor">＋ Nuevo proyecto</a><?php endif; ?>
   </div>
+  <div class="dashboard-metrics" aria-label="Resumen de proyectos">
+    <?php foreach ([
+      ['Proyectos',count($projects),'▦'],
+      ['Solicitudes activas',array_sum(array_column($projectStats,'active')),'☷'],
+      ['Aceptadas',array_sum(array_column($projectStats,'accepted')),'✓'],
+      ['Vencidas',array_sum(array_column($projectStats,'overdue')),'◷'],
+    ] as [$label,$value,$symbol]): ?>
+      <div class="dashboard-metric"><span class="metric-symbol" aria-hidden="true"><?=h($symbol)?></span>
+        <div><span><?=h($label)?></span><strong><?=$value?></strong></div>
+      </div>
+    <?php endforeach; ?>
+  </div>
+  <?php require dirname(__DIR__).'/app/due-chart.php'; ?>
   <div class="overview-layout">
-  <div class="project-directory">
+  <div class="panel project-directory">
   <h2>Espacios de trabajo <span class="result-count"><?=count($projects)?></span></h2>
   <label class="small muted" for="project-search">Buscar proyectos</label>
   <input type="search" id="project-search" placeholder="Nombre del proyecto">
@@ -525,16 +538,6 @@ if ($me) {
   <p id="project-search-empty" class="muted" hidden>No hay proyectos que coincidan.</p>
   </div>
   <div class="overview-data">
-    <div class="overview-top">
-      <section class="panel overview-summary">
-        <h2>Resumen</h2>
-        <?php $allTotal=array_sum(array_column($projectStats,'total')); $allAccepted=array_sum(array_column($projectStats,'accepted')); ?>
-        <div class="overview-total"><strong><?=$allTotal?></strong><span>Solicitudes</span></div>
-        <dl><div><dt>Activas</dt><dd><?=array_sum(array_column($projectStats,'active'))?></dd></div><div><dt>Aceptadas</dt><dd><?=$allAccepted?></dd></div></dl>
-        <progress max="<?=max(1,$allTotal)?>" value="<?=$allAccepted?>" aria-label="Solicitudes aceptadas"></progress>
-      </section>
-      <?php require dirname(__DIR__).'/app/due-chart.php'; ?>
-    </div>
     <section class="panel attention-panel"><h2>Requieren atención</h2>
       <?php foreach ($projects as $project): ?>
         <?php if (!$projectStats[$project['id']]['overdue']) continue; ?>

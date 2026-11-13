@@ -295,3 +295,31 @@ button, .btn, input, select, textarea, .stat-card { border-radius: 4px; }
   .sidebar-content { grid-column: 1 / -1; }
   .sidebar-toggle { padding: 6px 10px; }
 }
+
+/* Dashboard */
+:root { --bg: #eff1fa; --accent: #4e3e9b; --blue: #4a3b91; --line: #dce0ee; }
+.portal-sidebar { border-top-color: transparent; }
+.portal-sidebar .brand-icon { background: var(--accent); color: white; }
+.workspace-nav a[aria-current] { background: #eeebfc; box-shadow: inset 3px 0 var(--accent); }
+.workspace-heading { border: 0; padding-bottom: 0; }
+.app .workspace-heading h1 { font-size: clamp(25px, 3vw, 35px); }
+.dashboard-metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; margin-bottom: 18px; }
+.dashboard-metric {
+  min-width: 0; display: flex; align-items: center; gap: 12px; padding: 15px;
+  border-radius: 8px; color: #fff; background: linear-gradient(115deg,#17616b,#23797d);
+  box-shadow: 0 3px 9px #26355220;
+}
+.dashboard-metric:nth-child(2) { background: linear-gradient(115deg,#354a9d,#246f99); }
+.dashboard-metric:nth-child(3) { background: linear-gradient(115deg,#175878,#236f87); }
+.dashboard-metric:nth-child(4) { background: linear-gradient(115deg,#514084,#435d97); }
+.dashboard-metric > div { display: grid; overflow-wrap: anywhere; }
+.dashboard-metric strong { font-size: 1.65rem; line-height: 1.1; }
+.dashboard-metric div > span { font-size: .83rem; }
+.metric-symbol { flex: 0 0 32px; display: grid; place-items: center; height: 32px; border-radius: 6px; background: #ffffff26; font-size: 18px; }
+.app #projects > .due-chart { margin-bottom: 18px; }
+.app #projects .panel { background: #fff; border-color: #e1e4ef; border-radius: 8px; }
+.chart-empty { display: grid; min-height: 112px; place-items: center; text-align: center; margin: 0; }
+.due-bars { border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.due-bars meter::-webkit-meter-optimum-value { background: #3e858b; }
+@media (max-width: 1040px) { .dashboard-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 380px) { .dashboard-metric { padding: 10px; gap: 7px; } }
