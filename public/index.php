@@ -4,6 +4,11 @@ require dirname(__DIR__).'/app/bootstrap.php';
 $action=(string)($_GET['action']??'');
 $error='';
 if ($_SERVER['REQUEST_METHOD']==='POST') {
+    $postLimit=ini_parse_quantity((string)ini_get('post_max_size'));
+    if ($postLimit>0 && (int)($_SERVER['CONTENT_LENGTH']??0)>$postLimit) {
+        http_response_code(413);
+        exit('La entrega excede el tamaño permitido por el servidor. Vuelve a la solicitud e intenta con un archivo más pequeño.');
+    }
     checkCsrf();
     $postAction=(string)($_POST['action']??'');
     try {
@@ -273,10 +278,21 @@ if ($me) {
         'q'=>trim((string)($_GET['q']??'')),
         'status'=>(string)($_GET['status']??''),
         'priority'=>(string)($_GET['priority']??''),
+        'due'=>(string)($_GET['due']??''),
     ];
-    $filtered=array_values(array_filter($requests,static function (array $request) use ($filters): bool {
+    $dueLabels=['overdue'=>'Vencidas','upcoming'=>'Próximos 7 días','none'=>'Sin fecha'];
+    $filtered=array_values(array_filter($requests,static function (array $request) use ($filters,$today,$nextWeek): bool {
+        $due=$request['due_date'];
+        $isOpen=$request['status']!=='accepted';
+        $matchesDue=match($filters['due']) {
+            'overdue'=>$isOpen && $due!==null && $due<$today,
+            'upcoming'=>$isOpen && $due!==null && $due>=$today && $due<=$nextWeek,
+            'none'=>$due===null,
+            default=>true,
+        };
         return ($filters['status']==='' || $filters['status']===$request['status'])
             && ($filters['priority']==='' || $filters['priority']===$request['priority'])
+            && $matchesDue
             && ($filters['q']==='' || mb_stripos($request['title'].' '.$request['assigned_name'], $filters['q'])!==false);
     }));
     $listQuery=['project'=>$projectId]+$filters;
@@ -349,11 +365,12 @@ if ($me) {
   <?php endforeach; ?>
 </section>
 <div class="grid"><div class="panel"><div class="metric"><?=$counts['total']?></div><div class="metric-caption">Solicitudes totales</div></div><div class="panel"><div class="metric"><?=$counts['open']?></div><div class="metric-caption">Pendientes</div></div><div class="panel"><div class="metric"><?=$counts['submitted']?></div><div class="metric-caption">Recibidas</div></div><div class="panel"><div class="metric"><?=$counts['overdue']?></div><div class="metric-caption danger">Vencidas</div></div><div class="panel"><div class="metric"><?=$counts['accepted']?></div><div class="metric-caption">Aceptadas</div></div></div>
-<section class="panel"><div class="toolbar"><div><h2>Solicitudes de documentos</h2><p class="muted">Intercambio, seguimiento y revisión de evidencia.</p></div><form method="get" class="actions">
+<section class="panel"><div class="toolbar"><div><h2>Solicitudes de documentos</h2><p class="muted">Intercambio, seguimiento y revisión de evidencia.</p></div><form method="get" class="request-filters">
   <input type="hidden" name="project" value="<?=$projectId?>">
   <input name="q" type="search" value="<?=h($filters['q'])?>" placeholder="Buscar solicitudes…" aria-label="Buscar solicitudes">
   <select name="status" aria-label="Estado"><option value="">Todos los estados</option><?php foreach ($statusLabels as $value=>$label): ?><option value="<?=$value?>" <?php if ($value===$filters['status']): ?>selected<?php endif; ?>><?=h($label)?></option><?php endforeach; ?></select>
   <select name="priority" aria-label="Prioridad"><option value="">Todas las prioridades</option><?php foreach ($priorityLabels as $value=>$label): ?><option value="<?=$value?>" <?php if ($value===$filters['priority']): ?>selected<?php endif; ?>><?=h($label)?></option><?php endforeach; ?></select>
+  <select name="due" aria-label="Vencimiento"><option value="">Todos los vencimientos</option><?php foreach ($dueLabels as $value=>$label): ?><option value="<?=$value?>" <?php if ($value===$filters['due']): ?>selected<?php endif; ?>><?=h($label)?></option><?php endforeach; ?></select>
   <button>Filtrar</button>
   <?php if ($projectId): ?><a href="?<?=h(http_build_query($listQuery+['action'=>'export_requests']))?>">Descargar CSV</a><?php endif; ?>
 </form></div>

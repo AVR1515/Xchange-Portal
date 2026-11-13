@@ -12,4 +12,19 @@ input,select,textarea{background:#101722;border-color:#303b4b;border-radius:8px;
 td,th{border-color:#283545}th{color:#9cabba}tr:hover td{background:#1e2b3c}
 .pill{background:#293748;color:#c9d3e2}.pill.accepted{background:#234139;color:#c1e9d6}.pill.returned{background:#45353c;color:#eec0cb}.pill.submitted{background:#263e61;color:#c2d5ff}
 .login{background:#0b111b}.login .panel{background:#141c28}.eyebrow{color:#96ace0}
+.request-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+.request-filters input { max-width: none; }
+.panel, .detail > *, .stack > * { min-width: 0; }
+.panel p, .file strong, .top h1 { overflow-wrap: anywhere; }
+#projects, #updates, #team { margin-block: 20px; }
+details > summary { cursor: pointer; padding-block: 6px; }
+details[open] > form { margin-top: 12px; }
+#team .actions select { width: auto; max-width: 100%; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 @media(max-width:680px){.app{display:block}.main{padding:17px 12px}.side{padding:13px}.grid{gap:8px}}

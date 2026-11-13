@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-12 — Filtros de vencimiento y carga de archivos
+- El listado y el CSV pueden filtrarse por vencidas, próximas a vencer y sin fecha. Los controles se reorganizan según el ancho disponible.
+- Las entregas que exceden el límite de la petición reciben un mensaje de tamaño. Se verificaron descarga íntegra de PDF y rechazo de MIME incorrecto y de archivos de 21 MB.
+
 ## 2026-11-12 — Motivos de devolución y recuperación
 - La devolución exige un motivo. El portal guarda el comentario, el estado y el historial en la misma transacción.
 - Documentado el respaldo de MariaDB y archivos privados. Se restauró el volcado en una base aislada y se verificó el SHA-256 de dos archivos.
