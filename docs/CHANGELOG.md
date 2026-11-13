@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-12 — Retiro de miembros
+- Un administrador puede retirar a un cliente o integrante del equipo de un proyecto. El portal revoca su acceso, libera sus asignaciones y registra el cambio en el historial.
+
 ## 2026-11-12 — Historial de administración y revisión concurrente
 - Los administradores pueden consultar los cambios del proyecto y de sus miembros en el portal.
 - Se verificó en XAMPP que, con dos sesiones de revisión sobre la misma solicitud, solo una registra el cambio de estado. También se verificó el rechazo de un POST sin token CSRF.

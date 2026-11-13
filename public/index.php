@@ -25,22 +25,31 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             $_SESSION=[]; session_regenerate_id(true); go();
         }
         $actor=requireUser(); $uid=(int)$actor['id'];
-        if ($postAction==='edit_member_role') {
+        if ($postAction==='edit_member_role' || $postAction==='remove_member') {
             $project=(int)($_POST['project_id']??0);
             $member=(int)($_POST['member_id']??0);
             $memberRole=(string)($_POST['member_role']??'');
             if ((membership($project,$uid)['role']??null)!=='admin') {
                 throw new RuntimeException('Sin permisos para administrar miembros');
             }
-            if (!in_array($memberRole,['auditor','client'],true)) {
+            $removing=$postAction==='remove_member';
+            if (!$removing && !in_array($memberRole,['auditor','client'],true)) {
                 throw new RuntimeException('Rol inválido');
             }
             $projectTransaction=db();
             $projectTransaction->beginTransaction();
-            $update=db()->prepare("UPDATE project_members SET role=? WHERE project_id=? AND user_id=? AND role IN ('auditor','client') AND role<>?");
-            $update->execute([$memberRole,$project,$member,$memberRole]);
-            if ($update->rowCount()===1) {
-                recordEvent($project,null,$uid,'project_member_role_changed',$member.' → '.$memberRole);
+            if ($removing) {
+                $delete=db()->prepare("DELETE FROM project_members WHERE project_id=? AND user_id=? AND role IN ('auditor','client')");
+                $delete->execute([$project,$member]);
+                if ($delete->rowCount()!==1) throw new RuntimeException('No se pudo retirar al miembro del proyecto');
+                db()->prepare('UPDATE requests SET assigned_to=NULL WHERE project_id=? AND assigned_to=?')->execute([$project,$member]);
+                recordEvent($project,null,$uid,'project_member_removed',(string)$member);
+            } else {
+                $update=db()->prepare("UPDATE project_members SET role=? WHERE project_id=? AND user_id=? AND role IN ('auditor','client') AND role<>?");
+                $update->execute([$memberRole,$project,$member,$memberRole]);
+                if ($update->rowCount()===1) {
+                    recordEvent($project,null,$uid,'project_member_role_changed',$member.' → '.$memberRole);
+                }
             }
             $projectTransaction->commit();
             go('?project='.$project.'#team');
@@ -115,10 +124,14 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             $due=(string)($_POST['due_date']??'');
             if ($due!=='' && (!DateTimeImmutable::createFromFormat('!Y-m-d',$due) || DateTimeImmutable::createFromFormat('!Y-m-d',$due)->format('Y-m-d')!==$due)) throw new RuntimeException('Fecha inválida');
             $assigned=(int)($_POST['assigned_to']??0);
-            if ($assigned && !membership($project,$assigned)) throw new RuntimeException('Asignado no pertenece al proyecto');
             $description=trim((string)($_POST['description']??''));
             $projectTransaction=db();
             $projectTransaction->beginTransaction();
+            if ($assigned) {
+                $assignment=db()->prepare('SELECT 1 FROM project_members WHERE project_id=? AND user_id=? FOR UPDATE');
+                $assignment->execute([$project,$assigned]);
+                if (!$assignment->fetchColumn()) throw new RuntimeException('Asignado no pertenece al proyecto');
+            }
             if ($editing) {
                 $rid=(int)$existing['id'];
                 $q=db()->prepare('UPDATE requests SET title=?,description=?,priority=?,due_date=?,assigned_to=? WHERE id=?');
@@ -372,7 +385,7 @@ if ($me) {
   <?php if ($role==='admin'): ?>
     <details>
       <summary>Historial de administración</summary>
-      <?php $projectEventLabels=['project_created'=>'Proyecto creado','project_updated'=>'Proyecto editado','project_member_added'=>'Miembro añadido','project_member_role_changed'=>'Rol actualizado']; ?>
+      <?php $projectEventLabels=['project_created'=>'Proyecto creado','project_updated'=>'Proyecto editado','project_member_added'=>'Miembro añadido','project_member_role_changed'=>'Rol actualizado','project_member_removed'=>'Miembro retirado']; ?>
       <?php if (!$projectHistory): ?><p class="muted">Todavía no hay cambios registrados.</p><?php endif; ?>
       <?php foreach ($projectHistory as $event): ?>
         <p><?=h($projectEventLabels[$event['action']]??$event['action'])?> · <?=h($event['name'])?> · <?=h($event['created_at'])?><br><span class="muted"><?=h($event['details'])?></span></p>
@@ -428,6 +441,13 @@ if ($me) {
           <?php foreach (['client','auditor'] as $value): ?><option value="<?=$value?>" <?php if ($member['role']===$value): ?>selected<?php endif; ?>><?=h($roleLabels[$value])?></option><?php endforeach; ?>
         </select>
         <button>Actualizar rol</button>
+      </form>
+      <form method="post" data-confirm="¿Retirar a este miembro y quitarle sus asignaciones en el proyecto?">
+        <input type="hidden" name="csrf" value="<?=h(csrf())?>">
+        <input type="hidden" name="action" value="remove_member">
+        <input type="hidden" name="project_id" value="<?=$projectId?>">
+        <input type="hidden" name="member_id" value="<?=$member['id']?>">
+        <button class="secondary">Retirar del proyecto</button>
       </form>
     <?php endif; ?>
   <?php endforeach; ?>
