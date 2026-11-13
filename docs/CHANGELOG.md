@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-12 — Rediseño del espacio de trabajo
+- El listado de solicitudes pasa a ser la vista principal, con indicadores que abren sus filtros, selector de proyecto, navegación por secciones y acceso directo a crear una solicitud.
+- Añadidos el filtro Asignadas a mí y el orden por fecha límite. Ambos se aplican al CSV.
+- Verificados el listado y el detalle en Chrome a 360, 768 y 1280 px, el enlace para saltar al contenido y el flujo documental en XAMPP.
+
 ## 2026-11-12 — Verificación de comentarios e historial
 - En XAMPP se comprobó que las etiquetas HTML de un comentario se muestran como texto y que el historial registra las cargas y los cambios de estado.
 

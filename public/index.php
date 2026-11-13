@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
                 }
             }
             $projectTransaction->commit();
-            go('?project='.$project.'#team');
+            go('?project='.$project.'&view=team');
         }
         if ($postAction==='add_member') {
             $project=(int)($_POST['project_id']??0);
@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             db()->prepare('INSERT INTO project_members(project_id,user_id,role) VALUES(?,?,?)')->execute([$project,$memberId,$memberRole]);
             recordEvent($project,null,$uid,'project_member_added',(string)$memberId);
             $projectTransaction->commit();
-            go('?project='.$project.'#team');
+            go('?project='.$project.'&view=team');
         }
         if ($postAction==='create_project' || $postAction==='edit_project') {
             $project=(int)($_POST['project_id']??0);
@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             }
             recordEvent($project,null,$uid,$creating?'project_created':'project_updated',$name);
             db()->commit();
-            go('?project='.$project.'#projects');
+            go('?project='.$project.'&view=projects');
         }
         if ($postAction==='create' || $postAction==='edit_request') {
             $editing=$postAction==='edit_request';
@@ -326,9 +326,11 @@ if ($me) {
         'status'=>(string)($_GET['status']??''),
         'priority'=>(string)($_GET['priority']??''),
         'due'=>(string)($_GET['due']??''),
+        'mine'=>($_GET['mine']??'')==='1'?'1':'',
+        'sort'=>($_GET['sort']??'')==='due'?'due':'',
     ];
     $dueLabels=['overdue'=>'Vencidas','upcoming'=>'Próximos 7 días','none'=>'Sin fecha'];
-    $filtered=array_values(array_filter($requests,static function (array $request) use ($filters,$today,$nextWeek): bool {
+    $filtered=array_values(array_filter($requests,static function (array $request) use ($filters,$today,$nextWeek,$uid): bool {
         $due=$request['due_date'];
         $isOpen=!in_array($request['status'],['accepted','cancelled'],true);
         $matchesDue=match($filters['due']) {
@@ -340,8 +342,18 @@ if ($me) {
         return ($filters['status']==='' || $filters['status']===$request['status'])
             && ($filters['priority']==='' || $filters['priority']===$request['priority'])
             && $matchesDue
+            && ($filters['mine']==='' || (int)$request['assigned_to']===$uid)
             && ($filters['q']==='' || mb_stripos($request['title'].' '.$request['assigned_name'], $filters['q'])!==false);
     }));
+    if ($filters['sort']==='due') {
+        usort($filtered,static fn(array $a,array $b): int =>
+            ($a['due_date']??'9999-12-31')<=>($b['due_date']??'9999-12-31'));
+    }
+    $views=['requests'=>'Solicitudes','projects'=>'Proyectos','updates'=>'Actividad','team'=>'Equipo','account'=>'Mi cuenta'];
+    if (in_array($role,['admin','auditor'],true)) $views['new']='Nueva solicitud';
+    $view=(string)($_GET['view']??'requests');
+    if (!isset($views[$view])) $view='requests';
+    $viewUrl=static fn(string $key): string => '?'.http_build_query(['project'=>$projectId,'view'=>$key]);
     $listQuery=['project'=>$projectId]+$filters;
     if ($action==='export_requests' && $projectId) {
         header('Content-Type: text/csv; charset=UTF-8');
@@ -377,8 +389,47 @@ if ($me) {
 <button type="submit">Iniciar sesión</button><p class="small muted" style="margin-top:20px">Entorno local · PHP / SQL · sin dependencias externas</p></form></main>
 <?php else: ?>
 <a class="skip-link" href="#main-content">Saltar al contenido</a>
-<div class="app"><aside class="side"><div class="brand"><b>✦</b> Xchange</div><nav aria-label="Navegación del proyecto"><a href="?project=<?=$projectId?>#projects">Proyectos</a><a href="?project=<?=$projectId?>" class="active">Solicitudes</a><?php if(in_array($role,['auditor','admin'],true)):?><a href="?project=<?=$projectId?>#new-request">Nueva solicitud</a><?php endif;?><a href="?project=<?=$projectId?>#updates">Avisos</a><a href="?project=<?=$projectId?>#team">Equipo</a><a href="?project=<?=$projectId?>#account">Mi cuenta</a></nav></aside>
-<main class="main" id="main-content" tabindex="-1"><header class="top"><div><p class="eyebrow">PROYECTOS / DOCUMENTOS</p><h1><?=h($selected?$selected['title']:'Centro de solicitudes')?></h1><p class="muted"><?=h($selected?$selected['project_name']:($activeProject['name']??'Sin proyectos asignados'))?></p></div><div class="topuser"><?=h($me['name'])?> <form method="post" style="display:inline-block;margin-left:12px"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="secondary">Salir</button></form></div></header>
+<div class="app">
+<aside class="side">
+  <a class="brand" href="<?=h($viewUrl('requests'))?>"><b class="brand-icon">X</b> Xchange Portal</a>
+  <?php if ($projects): ?>
+    <form method="get" class="project-picker">
+      <label for="active-project">Proyecto activo</label>
+      <select id="active-project" name="project">
+        <?php foreach ($projects as $projectOption): ?>
+          <option value="<?=$projectOption['id']?>" <?php if ((int)$projectOption['id']===$projectId): ?>selected<?php endif; ?>><?=h($projectOption['name'])?></option>
+        <?php endforeach; ?>
+      </select>
+      <button type="submit" class="secondary">Cambiar proyecto</button>
+    </form>
+  <?php endif; ?>
+  <nav aria-label="Navegación del proyecto">
+    <?php foreach ($views as $key=>$label): ?>
+      <?php if ($key==='new') continue; ?>
+      <a href="<?=h($viewUrl($key))?>" <?php if (($selected?'requests':$view)===$key): ?>class="active" aria-current="page"<?php endif; ?>><?=h($label)?></a>
+    <?php endforeach; ?>
+  </nav>
+</aside>
+<main class="main" id="main-content" tabindex="-1">
+  <header class="top">
+    <div class="topuser">
+      <span><?=h($me['name'])?></span>
+      <form method="post">
+        <input type="hidden" name="csrf" value="<?=h(csrf())?>">
+        <input type="hidden" name="action" value="logout">
+        <button class="secondary">Salir</button>
+      </form>
+    </div>
+  </header>
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow"><?=h($activeProject['name']??'Espacio de trabajo')?></p>
+      <h1><?=h($selected?$selected['title']:$views[$view])?></h1>
+    </div>
+    <?php if (!$selected && $view==='requests' && isset($views['new'])): ?>
+      <a class="btn" href="<?=h($viewUrl('new'))?>">＋ Nueva solicitud</a>
+    <?php endif; ?>
+  </div>
 <?php if($error):?><p class="message"><?=h($error)?></p><?php endif;?>
 <?php if($selected):?>
 <p><a href="index.php?project=<?=$projectId?>">← Volver a solicitudes</a></p>
@@ -389,7 +440,7 @@ if ($me) {
 <?php foreach($documents as $d):?><div class="file"><div><strong><?=h($d['original_name'])?></strong><div class="small muted">Versión <?=$d['version']?> · <?=h($d['author_name'])?> · <?=h($d['created_at'])?> · <?=number_format((int)$d['byte_size']/1024,1)?> KB</div></div><a href="?action=download&amp;file=<?=$d['id']?>">Descargar</a></div><?php endforeach;?>
 <?php if(!$documents):?><p class="muted" style="margin-top:18px">No hay documentos compartidos todavía.</p><?php endif;?></div></section>
 <section class="stack"><div class="panel"><h2>Comentarios</h2><?php foreach($comments as $c):?><div class="file"><div><strong><?=h($c['author_name'])?></strong> <span class="small muted"><?=h($c['created_at'])?></span><p><?=nl2br(h($c['body']))?></p></div></div><?php endforeach;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="comment"><input type="hidden" name="request_id" value="<?=$selected['id']?>"><div class="field"><label for="body">Nuevo comentario</label><textarea id="body" name="body" maxlength="5000" required></textarea></div><button>Publicar comentario</button></form></div><div class="panel"><h2>Actividad reciente</h2><?php foreach($events as $e):?><p class="small"><b><?=h($e['author_name'])?></b> · <?=h($e['action'])?><br><span class="muted"><?=h($e['created_at'])?> <?=h($e['details'])?></span></p><?php endforeach;?></div></section></div>
-<?php else:?>
+<?php elseif ($view==='projects'): ?>
 <section class="panel" id="projects">
   <h2>Proyectos</h2>
   <?php if (!$projects): ?><p class="muted">No tienes proyectos asignados.</p><?php endif; ?>
@@ -423,7 +474,8 @@ if ($me) {
     </details>
   <?php endif; ?>
 </section>
-<details class="panel" id="account">
+<?php elseif ($view==='account'): ?>
+<details class="panel" id="account" open>
   <summary>Cambiar contraseña</summary>
   <form method="post">
     <input type="hidden" name="csrf" value="<?=h(csrf())?>">
@@ -434,32 +486,34 @@ if ($me) {
     <button>Actualizar contraseña</button>
   </form>
 </details>
-<div class="grid"><div class="panel"><div class="metric"><?=$counts['total']?></div><div class="metric-caption">Solicitudes totales</div></div><div class="panel"><div class="metric"><?=$counts['open']?></div><div class="metric-caption">Pendientes</div></div><div class="panel"><div class="metric"><?=$counts['submitted']?></div><div class="metric-caption">Recibidas</div></div><div class="panel"><div class="metric"><?=$counts['overdue']?></div><div class="metric-caption danger">Vencidas</div></div><div class="panel"><div class="metric"><?=$counts['accepted']?></div><div class="metric-caption">Aceptadas</div></div></div>
-<section class="panel" aria-labelledby="request-status-summary">
-  <h2 id="request-status-summary">Estado de las solicitudes</h2>
-  <div class="request-status-summary">
-    <?php foreach ($statusLabels as $value=>$label): ?>
-      <div>
-        <a href="?<?=h(http_build_query(['project'=>$projectId,'status'=>$value]))?>"><?=h($label)?></a>
-        <strong><?=$counts[$value]?></strong>
-        <progress value="<?=$counts[$value]?>" max="<?=max(1,$counts['total'])?>" aria-label="<?=h($label)?>"></progress>
-      </div>
-    <?php endforeach; ?>
-  </div>
-</section>
-<section class="panel"><div class="toolbar"><div><h2>Solicitudes de documentos</h2><p class="muted">Intercambio, seguimiento y revisión de evidencia.</p></div><form method="get" class="request-filters">
+<?php elseif ($view==='requests'): ?>
+<div class="request-stats" aria-label="Resumen de solicitudes">
+  <?php foreach (['total'=>'Todas','open'=>'Pendientes','submitted'=>'Recibidas','overdue'=>'Vencidas','accepted'=>'Aceptadas'] as $metric=>$label): ?>
+    <?php $target=$metric==='overdue'?['due'=>'overdue']:($metric==='total'?[]:['status'=>$metric]); ?>
+    <a href="?<?=h(http_build_query(['project'=>$projectId]+$target))?>" class="stat-card stat-<?=$metric?>">
+      <span><?=h($label)?></span><strong><?=$counts[$metric]?></strong>
+    </a>
+  <?php endforeach; ?>
+</div>
+<section class="panel"><div class="toolbar"><div><h2>Lista de solicitudes <span class="result-count"><?=count($filtered)?></span></h2></div><form method="get" class="request-filters">
   <input type="hidden" name="project" value="<?=$projectId?>">
   <input name="q" type="search" value="<?=h($filters['q'])?>" placeholder="Buscar solicitudes…" aria-label="Buscar solicitudes">
   <select name="status" aria-label="Estado"><option value="">Todos los estados</option><?php foreach ($statusLabels as $value=>$label): ?><option value="<?=$value?>" <?php if ($value===$filters['status']): ?>selected<?php endif; ?>><?=h($label)?></option><?php endforeach; ?></select>
   <select name="priority" aria-label="Prioridad"><option value="">Todas las prioridades</option><?php foreach ($priorityLabels as $value=>$label): ?><option value="<?=$value?>" <?php if ($value===$filters['priority']): ?>selected<?php endif; ?>><?=h($label)?></option><?php endforeach; ?></select>
   <select name="due" aria-label="Vencimiento"><option value="">Todos los vencimientos</option><?php foreach ($dueLabels as $value=>$label): ?><option value="<?=$value?>" <?php if ($value===$filters['due']): ?>selected<?php endif; ?>><?=h($label)?></option><?php endforeach; ?></select>
+    <select name="sort" aria-label="Orden"><option value="">Más recientes</option><option value="due" <?php if ($filters['sort']==='due'): ?>selected<?php endif; ?>>Fecha límite</option></select>
+  <label class="mine-filter"><input type="checkbox" name="mine" value="1" <?php if ($filters['mine']==='1'): ?>checked<?php endif; ?>> Asignadas a mí</label>
   <button>Filtrar</button>
   <?php if (array_filter($filters,static fn(string $value): bool => $value!=='')): ?>
     <a href="?project=<?=$projectId?>">Limpiar filtros</a>
   <?php endif; ?>
   <?php if ($projectId): ?><a href="?<?=h(http_build_query($listQuery+['action'=>'export_requests']))?>">Descargar CSV</a><?php endif; ?>
 </form></div>
-<div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th></tr></thead><tbody><?php foreach($visibleRequests as $r):?><tr data-request-row><td><?=h((string)$r['id'])?></td><td><a href="?request=<?=$r['id']?>"><?=h($r['title'])?></a></td><td><?=h($r['assigned_name']??'—')?></td><td><span class="pill <?=h($r['status'])?>"><?=h($statusLabels[$r['status']])?></span></td><td><?=h($priorityLabels[$r['priority']])?></td><td><?=h($r['due_date']??'—')?></td></tr><?php endforeach;?></tbody></table><?php if (!$visibleRequests): ?><p class="muted">No hay solicitudes para mostrar.</p><?php endif; ?></div>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Asignado</th><th>Estado</th><th>Prioridad</th><th>Fecha límite</th></tr></thead><tbody><?php foreach($visibleRequests as $r):?><tr data-request-row><td><?=h((string)$r['id'])?></td><td><a href="?request=<?=$r['id']?>"><?=h($r['title'])?></a></td><td><?=h($r['assigned_name']??'—')?></td><td><span class="pill <?=h($r['status'])?>"><?=h($statusLabels[$r['status']])?></span></td><td><?=h($priorityLabels[$r['priority']])?></td><td><?=h($r['due_date']??'—')?></td></tr><?php endforeach;?></tbody></table><?php if (!$visibleRequests): ?><div class="empty-list">
+  <strong><?=$requests?'No hay coincidencias':'Todavía no hay solicitudes'?></strong>
+  <p class="muted"><?=$requests?'Cambia o limpia los filtros para ampliar la búsqueda.':'Las solicitudes de documentos de este proyecto aparecerán aquí.'?></p>
+  <?php if (!$requests && isset($views['new'])): ?><a href="<?=h($viewUrl('new'))?>">Crear la primera solicitud</a><?php endif; ?>
+</div><?php endif; ?></div>
 <?php if ($pageCount>1): ?>
   <nav class="actions" aria-label="Paginación de solicitudes">
     <?php if ($page>1): ?><a href="?<?=h(http_build_query($listQuery+['page'=>$page-1]))?>">Anterior</a><?php endif; ?>
@@ -467,7 +521,8 @@ if ($me) {
     <?php if ($page<$pageCount): ?><a href="?<?=h(http_build_query($listQuery+['page'=>$page+1]))?>">Siguiente</a><?php endif; ?>
   </nav>
 <?php endif; ?></section>
-<?php if(in_array($role,['auditor','admin'],true)):?><section class="panel" id="new-request" style="margin-top:20px"><h2>Nueva solicitud</h2><?php require dirname(__DIR__).'/app/request-form.php'; ?></section><?php endif;?>
+<?php elseif ($view==='new'): ?><section class="panel" id="new-request"><?php require dirname(__DIR__).'/app/request-form.php'; ?></section>
+<?php elseif ($view==='updates'): ?>
 <section class="panel" id="updates">
   <h2>Avisos del proyecto</h2>
   <h3>Vencidas o por vencer en los próximos 7 días</h3>
@@ -482,6 +537,7 @@ if ($me) {
     <p><?=h($updateLabels[$update['action']])?> · <a href="?request=<?=$update['id']?>"><?=h($update['title'])?></a> <small class="muted"><?=h($update['created_at'])?></small></p>
   <?php endforeach; ?>
 </section>
+<?php elseif ($view==='team'): ?>
 <section class="panel" id="team">
   <h2>Miembros del proyecto</h2>
   <?php $roleLabels=['admin'=>'Administrador','auditor'=>'Equipo de la compañía','client'=>'Cliente']; ?>
