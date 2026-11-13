@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-12 — Cancelación de solicitudes
+- El equipo de la compañía puede cancelar solicitudes activas con un motivo. El historial y los documentos existentes siguen disponibles y la solicitud queda fuera de los vencimientos activos.
+- Añadida una migración para instalaciones existentes. En XAMPP se verificaron la cancelación, la consulta de adjuntos anteriores y el bloqueo de nuevas cargas.
+
 ## 2026-11-12 — Filtros en pantallas pequeñas
 - Añadido un enlace para limpiar filtros y retirado el filtro antiguo del navegador. Chrome verificó el tablero autenticado a 360, 768 y 1280 píxeles sin desplazamiento horizontal de página.
 

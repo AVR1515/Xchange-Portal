@@ -17,6 +17,15 @@
 ## Si PHP no está en PATH
 Utilizar `C:\\xampp\\php\\php.exe scripts\\seed.php`.
 
+## Actualizar una instalación existente
+
+Aplica las migraciones de `database/migrations/` en orden después de actualizar el código. La migración 001 añade el estado Cancelada y conserva los estados existentes.
+
+```powershell
+Get-Content database/migrations/001_cancelled_requests.sql -Raw |
+  & C:/xampp/mysql/bin/mysql.exe -h 127.0.0.1 -u root xchange_portal
+```
+
 ## Comprobaciones
 - Un usuario sin sesión debe ser redirigido al login.
 - Un cliente no debe ver solicitudes de otro proyecto.

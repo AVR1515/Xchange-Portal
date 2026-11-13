@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS requests (
  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, project_id BIGINT UNSIGNED NOT NULL,
  title VARCHAR(240) NOT NULL, description TEXT NULL,
  priority ENUM('normal','high','critical') NOT NULL DEFAULT 'normal',
- status ENUM('open','submitted','returned','accepted') NOT NULL DEFAULT 'open',
+ status ENUM('open','submitted','returned','accepted','cancelled') NOT NULL DEFAULT 'open',
  due_date DATE NULL, created_by BIGINT UNSIGNED NOT NULL,
  assigned_to BIGINT UNSIGNED NULL,
  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
