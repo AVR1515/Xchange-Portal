@@ -11,8 +11,13 @@
 - Descarga segura: archivo nunca es enlazado por ruta de disco; descargar via PHP con check de permisos.
 - Gestión de contraseñas: `password_hash`, `password_verify`.
 
-## Controles de producción aún pendientes
-TLS obligatorio, cabeceras CSP cuidadosamente probadas, rate limiting, bloqueo de intentos de login, gestión de secretos, antivirus de archivos, backups cifrados y política de retención.
+## Validación antes de producción
+
+- Configura HTTPS y sirve exclusivamente `public/` como raíz web. Comprueba que el inicio de sesión solo esté disponible por HTTPS y que la cookie de sesión tenga el atributo Secure.
+- Configura una cuenta de MariaDB exclusiva del portal con permisos sobre sus tablas. Usa una cuenta separada para migraciones y excluye las credenciales de Git.
+- Verifica el límite de intentos de inicio de sesión en el entorno de despliegue. Deshabilita las cuentas de demostración antes de habilitar el acceso externo.
+- Define el escaneo de adjuntos, el cifrado y la retención de respaldos. Prueba la restauración de la base y de los archivos privados juntos.
+- Repite las pruebas de acceso, entrega, revisión y descarga en el servidor de destino. Comprueba las cabeceras de seguridad y confirma que los errores se registren sin exponer detalles al navegador.
 
 ## Registro de incidentes
 
