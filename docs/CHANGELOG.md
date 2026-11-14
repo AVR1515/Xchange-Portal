@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-13 — Ajustes de espacio en el portal
+- Las filas de proyectos ocupan el ancho del directorio y reorganizan sus elementos según el espacio disponible. Los títulos largos de solicitudes se ajustan en la tabla y las acciones del detalle pueden pasar a otra línea.
+- Se comprobaron Proyectos, Solicitudes, Nueva solicitud, Actividad, Equipo, Mi cuenta y el detalle en Chrome a 360, 768, 1024 y 1440 px.
+
 ## 2026-11-13 — Espacio de trabajo adaptable
 - Barra lateral minimizable con preferencia guardada, barra de contexto con proyecto y cuenta, Poppins local y componentes redondeados.
 - Gráficos de estados y prioridades, junto al gráfico de vencimientos.
