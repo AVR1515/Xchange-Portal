@@ -783,11 +783,13 @@ if ($me) {
     <?php if ($flash): ?><p class="message success" role="status"><?=h($flash)?></p><?php endif; ?>
     <?php require dirname(__DIR__).'/app/request-detail.php'; ?>
   </div>
+  <?php $position=array_search((int)$selected['id'],array_map('intval',array_column($filtered,'id')),true); ?>
+  <?php if ($position!==false && count($filtered)>1): ?>
   <footer class="drawer-footer">
-    <?php $position=array_search((int)$selected['id'],array_map('intval',array_column($filtered,'id')),true); ?>
     <?php if ($position!==false && $position>0): ?><a class="btn secondary" href="<?=h($requestUrl((int)$filtered[$position-1]['id'],['page'=>intdiv($position-1,25)+1]+$requestFilters))?>">← Anterior</a><?php endif; ?>
     <?php if ($position!==false && isset($filtered[$position+1])): ?><a class="btn secondary" href="<?=h($requestUrl((int)$filtered[$position+1]['id'],['page'=>intdiv($position+1,25)+1]+$requestFilters))?>">Siguiente →</a><?php endif; ?>
   </footer>
+  <?php endif; ?>
 </dialog>
 <?php endif; ?>
 </main></div><?php endif; ?></body></html>
