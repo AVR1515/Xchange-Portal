@@ -395,3 +395,28 @@ button, .btn, input, textarea, select { border-radius: 11px; }
 .table-wrap td:nth-child(2) { white-space: normal; min-width: 13rem; overflow-wrap: anywhere; }
 .drawer-footer { flex-wrap: wrap; }
 #account > form, #new-request > form { max-width: 68rem; }
+
+.activity-layout { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; align-items: start; }
+.activity-list { list-style: none; margin: 0; padding: 0; }
+.activity-list li { display: flex; align-items: flex-start; gap: 12px; padding: 13px 0; border-top: 1px solid var(--line); }
+.activity-list li:last-child { padding-bottom: 0; }
+.activity-icon, .member-avatar { display: grid; place-items: center; flex: 0 0 auto; font-weight: 700; }
+.activity-icon { width: 34px; height: 34px; border-radius: 10px; background: #fff0d8; color: #805311; }
+.event-icon { background: #eeebfc; color: var(--accent); }
+.activity-copy { display: grid; flex: 1; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.workspace-chip { display: inline-block; border-radius: 12px; padding: 3px 8px; font-size: .75rem; background: #fff0d8; color: #704707; }
+.chip-overdue { background: #fbe7eb; color: #952d45; }
+.workspace-empty { margin: 0; padding: 14px; border-radius: 10px; background: var(--bg); color: var(--muted); }
+.member-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,250px),1fr)); gap: 14px; align-items: start; }
+.member-profile { display: flex; align-items: center; gap: 12px; }
+.member-profile > div { min-width: 0; }
+.member-profile h3 { margin: 0 0 6px; overflow-wrap: anywhere; }
+.member-avatar { width: 46px; height: 46px; border-radius: 14px; }
+.role-admin { background: #eeebfc; color: #4e3e9b; }
+.role-auditor { background: #e0f1fb; color: #225778; }
+.role-client { background: #e2f5ed; color: #235b49; }
+.member-management { margin-top: 14px; padding-top: 8px; border-top: 1px solid var(--line); }
+#team .member-management select { width: 100%; }
+.member-add { margin-top: 16px; }
+.member-add form { max-width: 34rem; }
+@media (max-width: 920px) { .activity-layout { grid-template-columns: 1fr; } }

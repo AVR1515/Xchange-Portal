@@ -680,27 +680,53 @@ if ($me) {
 <?php endif; ?></section>
 <?php elseif ($view==='new'): ?><section class="panel" id="new-request"><?php require dirname(__DIR__).'/app/request-form.php'; ?></section>
 <?php elseif ($view==='updates'): ?>
-<section class="panel" id="updates">
-  <h2>Avisos del proyecto</h2>
-  <h3>Vencidas o por vencer en los próximos 7 días</h3>
-  <?php if (!$deadlines): ?><p class="muted">No hay solicitudes con vencimiento en ese período.</p><?php endif; ?>
+<div class="activity-layout" id="updates">
+<section class="panel activity-panel">
+  <h2>Vencimientos <span class="result-count"><?=count($deadlines)?></span></h2>
+  <p class="muted small">Solicitudes vencidas o con fecha límite en los próximos 7 días.</p>
+  <?php if (!$deadlines): ?><p class="workspace-empty">No hay solicitudes con vencimiento en ese período.</p><?php endif; ?>
+  <ul class="activity-list">
   <?php foreach (array_slice($deadlines,0,10) as $deadline): ?>
-    <p><a href="?request=<?=$deadline['id']?>"><?=h($deadline['title'])?></a> · <?=h($deadline['due_date'])?><?php if ($deadline['due_date']<$today): ?> · Vencida<?php endif; ?></p>
+    <?php $overdue=$deadline['due_date']<$today; ?>
+    <li><span class="activity-icon" aria-hidden="true">◷</span><div class="activity-copy">
+      <a href="?request=<?=$deadline['id']?>"><?=h($deadline['title'])?></a>
+      <time class="small muted" datetime="<?=h($deadline['due_date'])?>"><?=h($deadline['due_date'])?></time>
+    </div><span class="workspace-chip <?=$overdue?'chip-overdue':''?>"><?=$overdue?'Vencida':'Por vencer'?></span></li>
   <?php endforeach; ?>
-  <h3>Actividad de otros miembros</h3>
-  <?php $updateLabels=['request_created'=>'Nueva solicitud','request_updated'=>'Solicitud editada','document_uploaded'=>'Documento recibido','status_changed'=>'Estado actualizado','comment_added'=>'Nuevo comentario']; ?>
-  <?php if (!$updates): ?><p class="muted">Todavía no hay avisos de otros miembros.</p><?php endif; ?>
-  <?php foreach ($updates as $update): ?>
-    <p><?=h($updateLabels[$update['action']])?> · <a href="?request=<?=$update['id']?>"><?=h($update['title'])?></a> <small class="muted"><?=h($update['created_at'])?></small></p>
-  <?php endforeach; ?>
+  </ul>
+  <?php if (count($deadlines)>10): ?><p class="small muted">Se muestran 10 de <?=count($deadlines)?> solicitudes.</p><?php endif; ?>
 </section>
+<section class="panel activity-panel">
+  <h2>Actividad de otros miembros</h2>
+  <?php $updateLabels=['request_created'=>'Nueva solicitud','request_updated'=>'Solicitud editada','document_uploaded'=>'Documento recibido','status_changed'=>'Estado actualizado','comment_added'=>'Nuevo comentario']; ?>
+  <?php $updateIcons=['request_created'=>'+','request_updated'=>'↻','document_uploaded'=>'↑','status_changed'=>'✓','comment_added'=>'…']; ?>
+  <?php if (!$updates): ?><p class="workspace-empty">Todavía no hay avisos de otros miembros.</p><?php endif; ?>
+  <ul class="activity-list">
+  <?php foreach ($updates as $update): ?>
+    <li><span class="activity-icon event-icon" aria-hidden="true"><?=h($updateIcons[$update['action']])?></span><div class="activity-copy">
+      <strong><?=h($updateLabels[$update['action']])?></strong>
+      <a href="?request=<?=$update['id']?>"><?=h($update['title'])?></a>
+      <time class="small muted" datetime="<?=h(str_replace(' ','T',$update['created_at']))?>"><?=h($update['created_at'])?></time>
+    </div></li>
+  <?php endforeach; ?>
+  </ul>
+</section>
+</div>
 <?php elseif ($view==='team'): ?>
-<section class="panel" id="team">
-  <h2>Miembros del proyecto</h2>
+<section id="team">
+  <h2>Miembros del proyecto <span class="result-count"><?=count($members)?></span></h2>
   <?php $roleLabels=['admin'=>'Administrador','auditor'=>'Equipo de la compañía','client'=>'Cliente']; ?>
+  <?php if (!$members): ?><p class="panel workspace-empty">Este proyecto no tiene miembros asignados.</p><?php endif; ?>
+  <div class="member-grid">
   <?php foreach ($members as $member): ?>
-    <p><?=h($member['name'])?> · <?=h($roleLabels[$member['role']])?></p>
+    <article class="panel member-card">
+      <div class="member-profile">
+        <span class="member-avatar role-<?=h($member['role'])?>" aria-hidden="true"><?=h(mb_strtoupper(mb_substr($member['name'],0,1)))?></span>
+        <div><h3><?=h($member['name'])?></h3><span class="workspace-chip role-<?=h($member['role'])?>"><?=h($roleLabels[$member['role']])?></span></div>
+      </div>
     <?php if ($role==='admin' && $member['role']!=='admin'): ?>
+      <details class="member-management" <?php if ($error && (int)($_POST['member_id']??0)===(int)$member['id']): ?>open<?php endif; ?>>
+      <summary>Gestionar miembro</summary>
       <form method="post" class="actions">
         <input type="hidden" name="csrf" value="<?=h(csrf())?>">
         <input type="hidden" name="action" value="edit_member_role">
@@ -718,10 +744,13 @@ if ($me) {
         <input type="hidden" name="member_id" value="<?=$member['id']?>">
         <button class="secondary">Retirar del proyecto</button>
       </form>
+      </details>
     <?php endif; ?>
+    </article>
   <?php endforeach; ?>
+  </div>
   <?php if ($role==='admin'): ?>
-    <details>
+    <details class="panel member-add" <?php if ($error && ($_POST['action']??'')==='add_member'): ?>open<?php endif; ?>>
       <summary>Añadir miembro</summary>
       <p class="muted">Si la cuenta existe, indica su correo y el rol en este proyecto. Para crearla, completa también el nombre y la contraseña.</p>
       <form method="post">
