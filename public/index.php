@@ -561,7 +561,7 @@ if ($me) {
     <?php if ($projectAction==='create_project' ? !$canCreateProject : $role!=='admin') continue; ?>
     <?php $editing=$projectAction==='edit_project'; ?>
     <details class="panel" <?php if (isset($_GET[$editing?'edit':'create']) || ($error && $postAction===$projectAction)): ?>open<?php endif; ?>>
-      <summary><?=h($label)?></summary>
+      <summary class="action-trigger"><span aria-hidden="true"><?=$editing?'✎':'＋'?></span> <?=h($label)?></summary>
       <form method="post">
         <input type="hidden" name="csrf" value="<?=h(csrf())?>">
         <input type="hidden" name="action" value="<?=h($projectAction)?>">
@@ -574,7 +574,7 @@ if ($me) {
   <?php endforeach; ?>
   <?php if ($role==='admin'): ?>
     <details class="panel">
-      <summary>Historial de administración</summary>
+      <summary class="action-trigger"><span aria-hidden="true">◷</span> Historial de administración</summary>
       <?php $projectEventLabels=['project_created'=>'Proyecto creado','project_updated'=>'Proyecto editado','project_member_added'=>'Miembro añadido','project_member_role_changed'=>'Rol actualizado','project_member_removed'=>'Miembro retirado']; ?>
       <?php if (!$projectHistory): ?><p class="muted">Todavía no hay cambios registrados.</p><?php endif; ?>
       <?php foreach ($projectHistory as $event): ?>
@@ -586,7 +586,7 @@ if ($me) {
 </section>
 <?php elseif ($view==='account'): ?>
 <details class="panel" id="account" open>
-  <summary>Cambiar contraseña</summary>
+  <summary class="action-trigger"><span aria-hidden="true">⚿</span> Cambiar contraseña</summary>
   <form method="post">
     <input type="hidden" name="csrf" value="<?=h(csrf())?>">
     <input type="hidden" name="action" value="change_password">
@@ -607,7 +607,7 @@ if ($me) {
 </div>
 <?php require dirname(__DIR__).'/app/due-chart.php'; ?></div>
 <?php $chartRows=[['total'=>$counts['total'],'active'=>$counts['open']+$counts['submitted']+$counts['returned'],'accepted'=>$counts['accepted']]]; ?>
-<details class="panel request-analysis"><summary>Análisis del proyecto</summary>
+<details class="panel request-analysis"><summary class="action-trigger"><span aria-hidden="true">▥</span> Análisis del proyecto</summary>
   <div class="dashboard-charts">
     <?php require dirname(__DIR__).'/app/status-chart.php'; ?>
     <section class="panel status-chart">
@@ -726,7 +726,7 @@ if ($me) {
       </div>
     <?php if ($role==='admin' && $member['role']!=='admin'): ?>
       <details class="member-management" <?php if ($error && (int)($_POST['member_id']??0)===(int)$member['id']): ?>open<?php endif; ?>>
-      <summary>Gestionar miembro</summary>
+      <summary class="action-trigger"><span aria-hidden="true">⚙</span> Gestionar miembro</summary>
       <form method="post" class="actions">
         <input type="hidden" name="csrf" value="<?=h(csrf())?>">
         <input type="hidden" name="action" value="edit_member_role">
@@ -735,14 +735,14 @@ if ($me) {
         <select name="member_role" aria-label="Rol de <?=h($member['name'])?>">
           <?php foreach (['client','auditor'] as $value): ?><option value="<?=$value?>" <?php if ($member['role']===$value): ?>selected<?php endif; ?>><?=h($roleLabels[$value])?></option><?php endforeach; ?>
         </select>
-        <button>Actualizar rol</button>
+        <button><span aria-hidden="true">✓</span> Actualizar rol</button>
       </form>
       <form method="post" data-confirm="¿Retirar a este miembro y quitarle sus asignaciones en el proyecto?">
         <input type="hidden" name="csrf" value="<?=h(csrf())?>">
         <input type="hidden" name="action" value="remove_member">
         <input type="hidden" name="project_id" value="<?=$projectId?>">
         <input type="hidden" name="member_id" value="<?=$member['id']?>">
-        <button class="secondary">Retirar del proyecto</button>
+        <button class="secondary"><span aria-hidden="true">−</span> Retirar del proyecto</button>
       </form>
       </details>
     <?php endif; ?>
@@ -751,7 +751,7 @@ if ($me) {
   </div>
   <?php if ($role==='admin'): ?>
     <details class="panel member-add" <?php if ($error && ($_POST['action']??'')==='add_member'): ?>open<?php endif; ?>>
-      <summary>Añadir miembro</summary>
+      <summary class="action-trigger"><span aria-hidden="true">＋</span> Añadir miembro</summary>
       <p class="muted">Si la cuenta existe, indica su correo y el rol en este proyecto. Para crearla, completa también el nombre y la contraseña.</p>
       <form method="post">
         <input type="hidden" name="csrf" value="<?=h(csrf())?>">

@@ -412,8 +412,19 @@ html:has(.request-drawer[open]) { overflow: hidden; }
   border: 0; border-radius: 8px; background: #eeebfc; color: var(--accent);
   font: inherit; padding: 4px 9px; margin-inline-end: 8px; cursor: pointer;
 }
-.request-review { border-top: 1px solid var(--line); }
-.request-review summary { color: var(--accent); }
+.action-trigger {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 10px; border-radius: 9px; background: #eeebfc;
+  color: var(--accent); font-size: .85rem; font-weight: 600;
+  list-style: none;
+}
+.action-trigger::-webkit-details-marker { display: none; }
+.action-trigger:hover, details[open] > .action-trigger { background: #e1dbf6; }
+.action-trigger > span { font-size: 1rem; line-height: 1; }
+.request-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.request-tools > details[open] { flex-basis: 100%; min-width: 0; }
+.request-review .action-trigger { background: #fbe7eb; color: #952d45; }
+.request-review .action-trigger:hover { background: #f6dce3; }
 .request-review textarea { min-height: 70px; }
 .request-documents .field p { margin: 4px 0 0; }
 .document-empty { margin: 12px 0 0; }
